@@ -1,0 +1,6 @@
+add_subdirectory(ecs)
+# add_subdirectory(components)
+# add_subdirectory(systems/render_system)
+add_subdirectory(app)
+add_executable(renderer_demo main.cpp)
+target_link_libraries(renderer_demo app-lib)
