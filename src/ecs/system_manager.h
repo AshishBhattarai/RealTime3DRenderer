@@ -45,9 +45,9 @@ public:
     checkIsDerived<T>();
     assert(!System<T>::family && "Registering system more than once.");
     SystemFamily family = System<T>::genFamily();
-    if (family >= signatures.size()) {
+    if (family >= systems.size()) {
       // make sure there is enough space for new system
-      size_t newSize = signatures.size() + 20;
+      size_t newSize = signatures.size() + 1;
       signatures.resize(newSize);
       systems.resize(newSize);
       entityAddedSignals.resize(newSize);
@@ -82,11 +82,11 @@ private:
                   "T not derived from System.");
   }
   // System arrays, [index - system id]
-  std::vector<Signature> signatures{20};
-  std::vector<std::shared_ptr<BaseSystem>> systems{20};
+  std::vector<Signature> signatures;
+  std::vector<std::shared_ptr<BaseSystem>> systems;
   std::vector<std::shared_ptr<Simple::Signal<void(Entity, Signature)>>>
-      entityAddedSignals{20};
+      entityAddedSignals;
   std::vector<std::shared_ptr<Simple::Signal<void(Entity)>>>
-      entityRemovedSignals{20};
+      entityRemovedSignals;
 };
 } // namespace ecs

@@ -16,7 +16,6 @@ class BaseComponent {
 protected:
   static ComponentFamily familyCount;
 };
-ComponentFamily BaseComponent::familyCount = 1;
 
 /**
  * Contains a type id for each component type T
@@ -40,7 +39,7 @@ private:
  * @brief The ComponentManager class
  * A class to manage components and their arrays.
  */
-class ComponentManager {
+class ComponentManager : NonCopyable {
 public:
   template <typename T> void registerComponent() {
     asser(!Component<T>::family && "Registering component more than once.");

@@ -2,15 +2,13 @@
 
 #include "component_manager.h"
 #include "entity_manager.h"
+#include "event_manager.h"
 #include "system_manager.h"
 #include <memory>
 
 namespace ecs {
-class Coordinator {
+class Coordinator : NonCopyable {
 public:
-  Coordinator(const Coordinator &) = delete;
-  Coordinator &operator=(const Coordinator &) = delete;
-
   static Coordinator &getInstance() {
     static Coordinator instance;
     return instance;
@@ -44,7 +42,7 @@ private:
   std::unique_ptr<EntityManager> entityManager;
   std::unique_ptr<ComponentManager> componentManager;
   std::unique_ptr<SystemManager> systemManager;
-  // TODO: event manager
+  std::unique_ptr<EventManager> eventManager;
 };
 
 } // namespace ecs

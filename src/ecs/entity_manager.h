@@ -10,7 +10,7 @@ namespace ecs {
  * @brief The EntityManager class
  * Used to create entities and track their components
  */
-class EntityManager {
+class EntityManager : NonCopyable {
 public:
   EntityManager();
   Entity createEntity();

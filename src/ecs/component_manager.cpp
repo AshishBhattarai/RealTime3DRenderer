@@ -2,6 +2,7 @@
 
 namespace ecs {
 
+ComponentFamily BaseComponent::familyCount = 1;
 template <typename T>
 ComponentFamily Component<T>::family = INVALID_COMPONENT_FAMILY;
 

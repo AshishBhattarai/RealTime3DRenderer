@@ -1,5 +1,6 @@
 #include "app.h"
 
+#include "ecs/coordinator.h"
 #include <iostream>
 
 namespace app {

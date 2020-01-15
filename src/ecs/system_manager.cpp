@@ -6,8 +6,10 @@ SystemFamily BaseSystem::familyCount = 1;
 template <typename T> SystemFamily System<T>::family = INVALID_SYSTEM_FAMILY;
 
 void SystemManager::entityDestoryed(Entity entity) {
-  for (auto const &system : systems) {
-    system->entites.erase(entity);
+  for (size_t i = 0; i < systems.size(); ++i) {
+    auto removed = systems[i]->entites.erase(entity);
+    if (removed)
+      entityRemovedSignals[i]->emit(entity);
   }
 }
 

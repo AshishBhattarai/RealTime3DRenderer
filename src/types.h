@@ -19,3 +19,13 @@ typedef uintptr_t uptr;
 
 // will require for custom allocato
 static_assert(sizeof(uint) == sizeof(u32), "Check conversion.");
+
+// NoCopyable class
+class NonCopyable {
+protected:
+  NonCopyable() = default;
+  ~NonCopyable() = default;
+
+  NonCopyable(const NonCopyable &) = delete;
+  NonCopyable &operator=(const NonCopyable &) = delete;
+};

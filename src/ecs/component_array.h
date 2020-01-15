@@ -13,7 +13,7 @@ namespace ecs {
  *
  * To destory all the components of an entity.
  */
-class BaseComponentArray {
+class BaseComponentArray : NonCopyable {
 public:
   virtual ~BaseComponentArray() = default;
   virtual void entityDestoryed(Entity entity) = 0;
