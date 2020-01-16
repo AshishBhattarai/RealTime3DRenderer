@@ -10,6 +10,7 @@ set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib CACHE PATH "")
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
-add_definitions( -DDISABLE_TESTS )
+#options
+option(TEST_ENABLED "build tests" on)
 
 add_subdirectory(src)
