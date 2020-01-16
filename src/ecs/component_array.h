@@ -23,7 +23,7 @@ public:
  * @brief The ComponentArray class
  * Packed array that stores a collection components of type T that exists.
  */
-template <class T> class ComponentArray : public BaseComponentArray {
+template <typename T> class ComponentArray : public BaseComponentArray {
 public:
   ComponentArray() {
     int reserveSize = MAX_ENTITES / 4;
@@ -53,6 +53,7 @@ public:
    * Doesn't check whether the given entity has the component or not
    */
   void removeData(Entity entity) {
+    assert(!componentArray.empty());
     // move remove entity to the end componentArray
     size_t removeIndex = entityToIndexMap[entity];
     size_t lastIndex = componentArray.size() - 1;
@@ -64,7 +65,7 @@ public:
     entityToIndexMap[lastIndexEntity] = removeIndex;
     indexToEntityMap[removeIndex] = lastIndexEntity;
     entityToIndexMap.erase(entity);
-    entityToIndexMap.erase(lastIndex);
+    indexToEntityMap.erase(lastIndex);
   }
 
   /**
@@ -74,7 +75,10 @@ public:
    *
    * Doesn't check whether the given entity has the component or not
    */
-  T &getData(Entity entity) { return componentArray[entityToIndexMap[entity]]; }
+  T &getData(Entity entity) {
+    assert(!componentArray.empty());
+    return componentArray[entityToIndexMap[entity]];
+  }
 
   /**
    * @brief EntityDestoryed
@@ -82,6 +86,8 @@ public:
    * Doesn't check whether the given entity has the component or not
    */
   void entityDestoryed(Entity entity) override { removeData(entity); }
+
+  size_t getSize() const { return componentArray.size(); }
 
 private:
   std::vector<T> componentArray;

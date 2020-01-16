@@ -2,6 +2,7 @@
 
 #include "../types.h"
 #include <bitset>
+#include <cassert>
 
 namespace ecs {
 using Entity = u32;

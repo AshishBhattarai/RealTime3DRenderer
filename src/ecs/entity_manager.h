@@ -16,11 +16,13 @@ public:
   Entity createEntity();
   void destoryEntity(Entity entity);
   void setSignature(Entity entity, Signature signature);
+  Signature updateSignaure(Entity entity, ComponentFamily family, bool enable);
   Signature getSignature(Entity entity) const;
+  Entity getLivingCount() const { return livingEntityCount - 1; }
 
 private:
   std::queue<Entity> availableEntities{};
   std::array<Signature, MAX_ENTITES> signatures{};
-  u32 livingEntityCount = 0;
+  Entity livingEntityCount = 1; // since 0 is invalid entity
 };
 } // namespace ecs

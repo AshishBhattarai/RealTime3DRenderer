@@ -12,7 +12,7 @@ protected:
   static EventFamily familyCount;
 };
 
-template <typename T> class Event : public BaseEvent {
+template <typename E> class Event : public BaseEvent {
 public:
   static EventFamily getFamily() { return family; }
 

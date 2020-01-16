@@ -2,7 +2,6 @@
 
 #include "../third_party/simplesignal.h"
 #include "common.h"
-#include <cassert>
 #include <memory>
 #include <set>
 #include <vector>
@@ -41,7 +40,7 @@ private:
 
 class SystemManager {
 public:
-  template <typename T> std::shared_ptr<T> registerSystem() {
+  template <typename T> std::shared_ptr<T> registerSystem(Signature signature) {
     checkIsDerived<T>();
     assert(!System<T>::family && "Registering system more than once.");
     SystemFamily family = System<T>::genFamily();
@@ -54,7 +53,7 @@ public:
       entityRemovedSignals.resize(newSize);
     }
     // create new system
-    signatures[family] = Signature();
+    signatures[family] = signature;
     auto system = std::make_shared<T>();
     auto entityAddedSignal =
         std::make_shared<Simple::Signal<void(Entity, Signature)>>();

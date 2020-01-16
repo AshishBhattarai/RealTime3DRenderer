@@ -3,7 +3,6 @@
 #include "common.h"
 #include "component_array.h"
 #include <array>
-#include <cassert>
 #include <memory>
 #include <typeinfo>
 
