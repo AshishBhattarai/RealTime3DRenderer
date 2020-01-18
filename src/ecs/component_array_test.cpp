@@ -3,6 +3,8 @@
 #include "third_party/catch.hpp"
 #include <random>
 
+namespace component_array_test {
+
 struct Dummy {
   int a;
   float b;
@@ -11,16 +13,14 @@ struct Dummy {
 
   Dummy(int a, float b, double c, u64 d) : a(a), b(b), c(c), d(d) {}
 
-  friend inline bool operator==(const Dummy &lhs, const Dummy &rhs);
+  friend bool operator==(const Dummy &lhs, const Dummy &rhs) {
+    return lhs.a == rhs.a && lhs.b == rhs.b && lhs.c == rhs.c && lhs.d == rhs.d;
+  }
 };
-
-inline bool operator==(const Dummy &lhs, const Dummy &rhs) {
-  return lhs.a == rhs.a && lhs.b == rhs.b && lhs.c == rhs.c && lhs.d == rhs.d;
-}
 
 TEST_CASE("ComponentArray CURD test", "[COMPONENT_ARRAY]") {
   ecs::ComponentArray<Dummy> componentArray;
-  ecs::EntityManager entityManager;
+  ecs::EntityManager &entityManager = ecs::EntityManager::getInstace();
   ecs::Entity entites[ecs::MAX_ENTITES];
 
   for (u32 i = 0; i < ecs::MAX_ENTITES - 1; ++i) {
@@ -47,4 +47,11 @@ TEST_CASE("ComponentArray CURD test", "[COMPONENT_ARRAY]") {
     componentArray.removeData(entites[i]);
     REQUIRE(componentArray.getSize() == ecs::MAX_ENTITES - 2 - i);
   }
+
+  // remove entites
+  for (u32 i = 0; i < ecs::MAX_ENTITES - 1; ++i) {
+    entityManager.destoryEntity(entites[i]);
+  }
+  REQUIRE(entityManager.getLivingCount() == 0);
 }
+} // namespace component_array_test

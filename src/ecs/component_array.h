@@ -32,28 +32,18 @@ public:
     indexToEntityMap.reserve(reserveSize);
   }
 
-  /**
-   * @brief insertData
-   * @param entity
-   * @param component
-   *
-   * Doesn't check whether the given entity already has the component or not
-   */
   void insertData(Entity entity, T component) {
+    assert(entityToIndexMap.find(entity) == entityToIndexMap.end() &&
+           "Component added to same entity more than once.");
     size_t newIndex = componentArray.size();
     entityToIndexMap[entity] = newIndex;
     indexToEntityMap[newIndex] = entity;
     componentArray.push_back(component);
   }
 
-  /**
-   * @brief removeData
-   * @param entity
-   *
-   * Doesn't check whether the given entity has the component or not
-   */
   void removeData(Entity entity) {
-    assert(!componentArray.empty());
+    assert(entityToIndexMap.find(entity) != entityToIndexMap.end() &&
+           "Removing non-existent component.");
     // move remove entity to the end componentArray
     size_t removeIndex = entityToIndexMap[entity];
     size_t lastIndex = componentArray.size() - 1;
@@ -68,24 +58,20 @@ public:
     indexToEntityMap.erase(lastIndex);
   }
 
-  /**
-   * @brief GetData
-   * @param entity
-   * @return
-   *
-   * Doesn't check whether the given entity has the component or not
-   */
   T &getData(Entity entity) {
-    assert(!componentArray.empty());
+    assert(entityToIndexMap.find(entity) != entityToIndexMap.end() &&
+           "Retrieving non-existent component.");
     return componentArray[entityToIndexMap[entity]];
   }
 
   /**
    * @brief EntityDestoryed
-   *
    * Doesn't check whether the given entity has the component or not
    */
-  void entityDestoryed(Entity entity) override { removeData(entity); }
+  void entityDestoryed(Entity entity) override {
+    assert(entityToIndexMap.find(entity) != entityToIndexMap.end());
+    removeData(entity);
+  }
 
   size_t getSize() const { return componentArray.size(); }
 

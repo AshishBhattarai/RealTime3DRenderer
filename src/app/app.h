@@ -1,12 +1,10 @@
 #pragma once
 
-namespace app {
-class App {
-public:
-  // delete copy constructor & assignment
-  App(const App &) = delete;
-  App &operator=(const App &) = delete;
+#include "types.h"
 
+namespace app {
+class App : NonCopyable {
+public:
   // lazy init instance
   static App &getInstance(int argc, char **argv) {
     static App instance(argc, argv);

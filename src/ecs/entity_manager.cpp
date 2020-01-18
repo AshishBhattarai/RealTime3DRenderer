@@ -21,10 +21,9 @@ void EntityManager::destoryEntity(Entity entity) {
   signatures[entity].reset();
   availableEntities.push(entity);
   --livingEntityCount;
-  entity = INVALID_ENTITY;
 }
 
-void EntityManager::setSignature(Entity entity, Signature signature) {
+void EntityManager::setSignature(Entity entity, const Signature &signature) {
   assert(entity < MAX_ENTITES && "Entity out of range" &&
          entity != INVALID_ENTITY && "Invalid entity.");
   signatures[entity] = signature;

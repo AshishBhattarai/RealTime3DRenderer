@@ -3,66 +3,49 @@
 #include <array>
 #include <random>
 
-TEST_CASE("EntityManager::createEntity test", "[ENTITY_MANAGER]") {
-  ecs::EntityManager entityManager;
-  auto entity = entityManager.createEntity();
-  REQUIRE(entity != ecs::INVALID_ENTITY);
-  REQUIRE(entity < ecs::MAX_ENTITES);
-}
+namespace entity_manager_test {
 
-TEST_CASE("EntityManager::getLivingCount test", "[ENTITY_MANAGER]") {
-  ecs::EntityManager entityManager;
-  std::array<u32, ecs::MAX_ENTITES - 1> entites;
+ecs::EntityManager &entityManager = ecs::EntityManager::getInstace();
+
+TEST_CASE("EntityManager test with setSignature", "[ENTITY_MANAGER]") {
+  ecs::Entity entites[ecs::MAX_ENTITES];
   for (u32 i = 0; i < ecs::MAX_ENTITES - 1; ++i) {
-    entites[i] = entityManager.createEntity();
-    REQUIRE(entites[i] == i + 1);
+    auto e = entityManager.createEntity();
+    entites[i] = e;
+    entityManager.setSignature(e,
+                               std::bitset<ecs::MAX_COMPONENTS>().set(
+                                   1 + (i % (ecs::MAX_COMPONENTS - 1)), true));
+    REQUIRE(entityManager.getSignature(e) ==
+            std::bitset<ecs::MAX_COMPONENTS>().set(
+                1 + (i % (ecs::MAX_COMPONENTS - 1)), true));
     REQUIRE(entityManager.getLivingCount() == i + 1);
+    REQUIRE(entites[i] == i + 1);
   }
-  REQUIRE(entityManager.getLivingCount() == ecs::MAX_ENTITES - 1);
   for (u32 i = 0; i < ecs::MAX_ENTITES - 1; ++i) {
     entityManager.destoryEntity(entites[i]);
   }
   REQUIRE(entityManager.getLivingCount() == 0);
 }
 
-TEST_CASE("EntityManager::getSignature test", "[ENTITY_MANAGER]") {
-  ecs::EntityManager entityManager;
-  auto entity = entityManager.createEntity();
-  auto sig = entityManager.getSignature(entity);
-  REQUIRE(sig == std::bitset<ecs::MAX_COMPONENTS>());
-}
-
-TEST_CASE("EntityManager::setSignature test", "[ENTITY_MANAGER]") {
-  ecs::EntityManager entityManager;
+TEST_CASE("EntityManager test with update signature", "[ENTITY_MANAGER]") {
+  ecs::Entity entites[ecs::MAX_ENTITES];
   for (u32 i = 0; i < ecs::MAX_ENTITES - 1; ++i) {
     auto e = entityManager.createEntity();
-    entityManager.setSignature(
-        e, std::bitset<ecs::MAX_COMPONENTS>().set(1 + (i % 31), true));
-    REQUIRE(entityManager.getSignature(e) ==
-            std::bitset<ecs::MAX_COMPONENTS>().set(1 + (i % 31), true));
-  }
-}
-
-TEST_CASE("EntityManager::updateSignature test", "[ENTITY_MANAGER]") {
-  ecs::EntityManager entityManager;
-  for (u32 i = 0; i < ecs::MAX_ENTITES - 1; ++i) {
-    auto e = entityManager.createEntity();
+    entites[i] = e;
     srand(time(0));
     auto num = rand();
-    entityManager.updateSignaure(e, 1 + (num % 31), num % 2);
-    entityManager.updateSignaure(e, 1 + (i % 31), num % 2 == 0);
+    entityManager.updateSignaure(e, 1 + (num % (ecs::MAX_COMPONENTS - 1)),
+                                 num % 2);
+    entityManager.updateSignaure(e, 1 + (i % (ecs::MAX_COMPONENTS - 1)),
+                                 num % 2 == 0);
     REQUIRE(entityManager.getSignature(e) ==
             std::bitset<ecs::MAX_COMPONENTS>()
-                .set(1 + (num % 31), num % 2)
-                .set(1 + (i % 31), num % 2 == 0));
+                .set(1 + (num % (ecs::MAX_COMPONENTS - 1)), num % 2)
+                .set(1 + (i % (ecs::MAX_COMPONENTS - 1)), num % 2 == 0));
   }
+  for (u32 i = 0; i < ecs::MAX_ENTITES - 1; ++i) {
+    entityManager.destoryEntity(entites[i]);
+  }
+  REQUIRE(entityManager.getLivingCount() == 0);
 }
-
-TEST_CASE("EntityManager::destoryEntity test", "[ENTITY_MANAGER]") {
-  ecs::EntityManager entityManager;
-  auto entity = entityManager.createEntity();
-  entityManager.updateSignaure(entity, 6, true);
-  entityManager.destoryEntity(entity);
-  REQUIRE(entityManager.getSignature(entity) ==
-          std::bitset<ecs::MAX_COMPONENTS>());
-}
+} // namespace entity_manager_test

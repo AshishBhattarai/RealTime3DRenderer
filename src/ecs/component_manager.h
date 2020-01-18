@@ -5,6 +5,7 @@
 #include <array>
 #include <memory>
 #include <typeinfo>
+#include <utility>
 
 namespace ecs {
 /**
@@ -22,8 +23,6 @@ protected:
 template <typename T> class Component : BaseComponent {
 private:
   static ComponentFamily family;
-  friend class ComponentManager;
-
   static ComponentFamily genFamily() {
     if (!family) {
       family = familyCount++;
@@ -32,7 +31,10 @@ private:
     }
     return family;
   }
+  friend class ComponentManager;
 };
+template <typename T>
+ComponentFamily Component<T>::family = INVALID_COMPONENT_FAMILY;
 
 /**
  * @brief The ComponentManager class
@@ -40,48 +42,65 @@ private:
  */
 class ComponentManager : NonCopyable {
 public:
-  template <typename T> void registerComponent() {
-    asser(!Component<T>::family && "Registering component more than once.");
+  static ComponentManager &getInstace() {
+    static ComponentManager instance;
+    return instance;
+  }
+
+  template <typename T> ComponentFamily registerComponent() {
+    assert(!Component<T>::family && "Registering component more than once.");
     ComponentFamily family = Component<T>::genFamily();
-    componentArrays[family] = std::make_unique<ComponentArray<T>>();
+    // since valid component family starts from 1 and arrays start from 0
+    componentArrays[family - 1] = std::make_unique<ComponentArray<T>>();
+    return family;
   }
 
   template <typename T> ComponentFamily getComponentFamily() {
     return Component<T>::family;
   }
 
-  template <typename T>
-  void addComponent(Entity entity, Signature entitySignature, T component) {
-    assert(!entitySignature[Component<T>::family] &&
-           "Entity must have unique components.");
+  template <typename T> void addComponent(Entity entity, const T &component) {
     getComponentArray<T>()->insertData(entity, component);
   }
 
-  template <typename T>
-  void removeComponent(Entity entity, Signature entitySignature) {
-    assert(!entitySignature[Component<T>::family] &&
-           "Entity doesn't have the component.");
+  template <typename T, typename... Args>
+  void addComponent(Entity entity, Args &&... args) {
+    T component(std::forward<Args>(args)...);
+    getComponentArray<T>()->insertData(entity, component);
+  }
+
+  template <typename T> void removeComponent(Entity entity) {
     getComponentArray<T>()->removeData(entity);
   }
 
-  template <typename T>
-  T &getComponent(Entity entity, Signature entitySignature) {
-    assert(!entitySignature[Component<T>::family] &&
-           "Entity doesn't have the component.");
+  template <typename T> T &getComponent(Entity entity) {
     return getComponentArray<T>()->getData(entity);
+  }
+
+  /**
+   * Returns total number of componets of type T
+   */
+  template <typename T> size_t getComponentCount() {
+    assert(Component<T>::family &&
+           "Components must be regiestered before use.");
+    return static_cast<ComponentArray<T> *>(
+               componentArrays[Component<T>::family - 1].get())
+        ->getSize();
   }
 
   void entityDestoryed(Entity entity, Signature entitySignature);
 
+  // get raw pointer to component array of T component
+  template <typename T> ComponentArray<T> *getComponentArray() const {
+    assert(Component<T>::family && "Components must be registered before use.");
+    return static_cast<ComponentArray<T> *>(
+        componentArrays[Component<T>::family - 1].get());
+  }
+
 private:
+  ComponentManager() = default;
+  ~ComponentManager() = default;
   std::array<std::unique_ptr<BaseComponentArray>, MAX_COMPONENTS>
       componentArrays{};
-  // get raw pointer to component array of T component
-  template <typename T> const ComponentArray<T> *getComponentArray() const {
-    ComponentFamily family = getComponentFamily<T>()
-        assert(!family && "Components must be registered before use.");
-    return static_cast<const ComponentArray<T> *>(
-        componentArrays[family].get());
-  }
 };
 } // namespace ecs
