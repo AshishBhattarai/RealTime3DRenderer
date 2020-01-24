@@ -2,7 +2,16 @@
 
 #include "types.h"
 
+namespace ecs {
+class Coordinator;
+}
 namespace app {
+
+class Display;
+/**
+ * Represents the renderer application, handels and manages WINDOW(Context), ECS
+ * & UI
+ */
 class App : NonCopyable {
 public:
   // lazy init instance
@@ -15,5 +24,9 @@ public:
 private:
   App(int argc, char **argv);
   ~App();
+
+private:
+  Display *display;
+  ecs::Coordinator &coordinator;
 };
 } // namespace app

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../types.h"
+#include "../common.h"
+#include "types.h"
 #include <bitset>
-#include <cassert>
 
 namespace ecs {
 using Entity = u32;
