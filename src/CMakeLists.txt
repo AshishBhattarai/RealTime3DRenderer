@@ -32,8 +32,7 @@ include_directories(${GLM_INCLUDE_DIR})
 # modules
 add_subdirectory(third_party)
 add_subdirectory(ecs)
-# add_subdirectory(components)
-# add_subdirectory(systems/render_system)
+add_subdirectory(systems/render_system)
 add_subdirectory(app)
 
 # exec
