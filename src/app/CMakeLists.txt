@@ -7,6 +7,7 @@ add_library(
 target_link_libraries(
     app-lib
     ecs-lib
+    render-system-lib
     ${OPENGL_LIBRARIES}
     ${GLAD_LIBRARIES}
     ${GLFW_LIBRARIES}

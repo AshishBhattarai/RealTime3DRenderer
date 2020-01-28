@@ -3,6 +3,7 @@
 #include "common.h"
 #include "display.h"
 #include "ecs/coordinator.h"
+#include "systems/render_system/render_defaults.h"
 #include <iostream>
 
 namespace app {
@@ -10,6 +11,8 @@ App::App(int, char **)
     : display(new Display("App", 1024, 768)),
       coordinator(ecs::Coordinator::getInstance()) {
   DEBUG_SLOG("App constructed.");
+  auto &renderDefaults = render_system::RenderDefaults::getInstance(
+      "resources/defaults/checker.bmp");
 }
 
 void App::run() {
