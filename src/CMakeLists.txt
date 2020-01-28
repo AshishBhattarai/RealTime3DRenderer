@@ -5,6 +5,9 @@ set(GLFW_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw)
 set(GLM_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm)
 
 # opengl
+if(POLICY CMP0072)
+  cmake_policy(SET CMP0072 NEW)
+endif()
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 
@@ -31,6 +34,7 @@ include_directories(${GLM_INCLUDE_DIR})
 
 # modules
 add_subdirectory(third_party)
+#add_subdirectory(utils)
 add_subdirectory(ecs)
 add_subdirectory(systems/render_system)
 add_subdirectory(app)

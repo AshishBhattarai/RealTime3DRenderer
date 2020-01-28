@@ -14,7 +14,6 @@ App::App(int, char **)
 
 void App::run() {
   DEBUG_SLOG("App running.");
-
   while (!display->shouldClose()) {
     display->update();
   }
