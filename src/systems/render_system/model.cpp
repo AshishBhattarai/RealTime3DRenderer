@@ -1,4 +1,5 @@
 #include "model.h"
+#include "render_defaults.h"
 #include "shader_config.h"
 #include "utils/model_loader.h"
 
@@ -132,33 +133,36 @@ std::unique_ptr<Material>
 Model::processMaterial(const tinygltf::Material &materialData,
                        const tinygltf::Model &modelData) {
   std::unique_ptr<Material> material = std::make_unique<Material>();
+  const RenderDefaults &renderDefault = RenderDefaults::getInstance("");
 
   int baseColorTextureIndex =
       materialData.pbrMetallicRoughness.baseColorTexture.index;
   int normalTextureIndex = materialData.normalTexture.index;
   int emissionTextureIndex = materialData.emissiveTexture.index;
 
+  // TODO: Different material for mesh without texture coords
   if (baseColorTextureIndex != -1) {
-    // TODO check baseColorFactor
     const tinygltf::Image &baseColorImage =
         modelData.images[modelData.textures[baseColorTextureIndex].source];
     material->diffuseMap = processTexture(baseColorImage);
   } else
-    material->diffuseMap = -1;
+    material->diffuseMap = renderDefault.getCheckerTexture();
   if (normalTextureIndex != -1) {
     const tinygltf::Image &normalImage =
         modelData.images[modelData.textures[normalTextureIndex].source];
     material->normalMap = processTexture(normalImage);
   } else
-    material->normalMap = -1; // TODO: Use default 1x1 texture
+    material->normalMap =
+        renderDefault.getBlackTexture(); // TODO: Use default 1x1 texture
   if (emissionTextureIndex != -1) {
     const tinygltf::Image &emissionImage =
         modelData.images[modelData.textures[emissionTextureIndex].source];
     material->emissionMap = processTexture(emissionImage);
   } else
-    material->emissionMap = -1;
+    material->emissionMap = renderDefault.getBlackTexture();
   material->shaderType = ShaderType::FORWARD_SHADER;
-  material->specularMap = -1; // TODO: Use default 1x1 texture
+  material->specularMap =
+      renderDefault.getBlackTexture(); // TODO: Use default 1x1 texture
   return material;
 }
 
