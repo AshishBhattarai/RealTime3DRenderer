@@ -3,6 +3,7 @@
 #include "common.h"
 #include "display.h"
 #include "ecs/coordinator.h"
+#include "systems/render_system/camera.h"
 #include "systems/render_system/render_defaults.h"
 #include <iostream>
 
@@ -13,6 +14,7 @@ App::App(int, char **)
   DEBUG_SLOG("App constructed.");
   auto &renderDefaults = render_system::RenderDefaults::getInstance(
       "resources/defaults/checker.bmp");
+  Camera();
 }
 
 void App::run() {
