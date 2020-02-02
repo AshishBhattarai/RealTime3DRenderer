@@ -3,6 +3,7 @@
 #include "shader_config.h"
 #include <cassert>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <memory>
 #include <string>
 #include <vector>
@@ -11,20 +12,29 @@ namespace render_system {
 
 struct BaseMaterial {
   ShaderType shaderType;
-  GLuint normalMap;
-  GLuint emissionMap;
 };
 
 /**
- * Normal intensity base material
+ * Flat materials contain color values only no textures
  */
-struct Material : BaseMaterial {
-  GLuint diffuseMap;
-  GLuint specularMap;
+struct FlatMaterial : BaseMaterial {
+  glm::vec4 albedo;
+  glm::vec4 emission;
+  float metallic;
+  float roughtness;
+  float ao;
 };
 
-struct PbrMatrial : BaseMaterial {
-  // TODO: Implement PbrMaterial
+/**
+ * Normal texture based materials
+ */
+struct Material : BaseMaterial {
+  GLuint albedo;
+  GLuint metallicRoughness; // R - Metallic, G - Roughtnessj
+  GLuint ao;
+  GLuint normal;
+  GLuint emission;
+  std::unique_ptr<FlatMaterial> flatMaterial;
 };
 
 /**

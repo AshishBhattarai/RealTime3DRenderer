@@ -133,36 +133,66 @@ std::unique_ptr<Material>
 Model::processMaterial(const tinygltf::Material &materialData,
                        const tinygltf::Model &modelData) {
   std::unique_ptr<Material> material = std::make_unique<Material>();
+  std::unique_ptr<FlatMaterial> flatMaterial = std::make_unique<FlatMaterial>();
   const RenderDefaults &renderDefault = RenderDefaults::getInstance("");
 
-  int baseColorTextureIndex =
-      materialData.pbrMetallicRoughness.baseColorTexture.index;
+  bool setFlatMaterial = false;
+  const tinygltf::PbrMetallicRoughness &pbrInfo =
+      materialData.pbrMetallicRoughness;
+  int baseColorTextureIndex = pbrInfo.baseColorTexture.index;
   int normalTextureIndex = materialData.normalTexture.index;
   int emissionTextureIndex = materialData.emissiveTexture.index;
+  int occlusionTextureIndex = materialData.occlusionTexture.index;
+  int metallicRoughnessTextureIndex = pbrInfo.metallicRoughnessTexture.index;
 
   // TODO: Different material for mesh without texture coords
   if (baseColorTextureIndex != -1) {
     const tinygltf::Image &baseColorImage =
         modelData.images[modelData.textures[baseColorTextureIndex].source];
-    material->diffuseMap = processTexture(baseColorImage);
-  } else
-    material->diffuseMap = renderDefault.getCheckerTexture();
+    material->albedo = processTexture(baseColorImage);
+  } else {
+    setFlatMaterial = true;
+    material->albedo = renderDefault.getCheckerTexture();
+    material->flatMaterial->albedo =
+        glm::vec4(pbrInfo.baseColorFactor[0], pbrInfo.baseColorFactor[1],
+                  pbrInfo.baseColorFactor[2], pbrInfo.baseColorFactor[3]);
+    material->flatMaterial->emission = glm::vec4(
+        materialData.emissiveFactor[0], materialData.emissiveFactor[1],
+        materialData.emissiveFactor[2], materialData.emissiveFactor[3]);
+    material->flatMaterial->ao = 1.0f;
+    material->flatMaterial->metallic = pbrInfo.metallicFactor;
+    material->flatMaterial->roughtness = pbrInfo.roughnessFactor;
+  }
   if (normalTextureIndex != -1) {
     const tinygltf::Image &normalImage =
         modelData.images[modelData.textures[normalTextureIndex].source];
-    material->normalMap = processTexture(normalImage);
+    material->normal = processTexture(normalImage);
   } else
-    material->normalMap =
+    material->normal =
         renderDefault.getBlackTexture(); // TODO: Use default 1x1 texture
   if (emissionTextureIndex != -1) {
     const tinygltf::Image &emissionImage =
         modelData.images[modelData.textures[emissionTextureIndex].source];
-    material->emissionMap = processTexture(emissionImage);
+    material->emission = processTexture(emissionImage);
   } else
-    material->emissionMap = renderDefault.getBlackTexture();
+    material->emission = renderDefault.getBlackTexture();
+  if (metallicRoughnessTextureIndex != -1) {
+    const tinygltf::Image &metallicRoughnessImage =
+        modelData
+            .images[modelData.textures[metallicRoughnessTextureIndex].source];
+    material->metallicRoughness = processTexture(metallicRoughnessImage);
+  } else
+    material->metallicRoughness = renderDefault.getBlackTexture();
+  if (occlusionTextureIndex != -1) {
+    const tinygltf::Image &occlusionImage =
+        modelData.images[modelData.textures[occlusionTextureIndex].source];
+    material->ao = processTexture(occlusionImage);
+  } else
+    material->ao = renderDefault.getBlackTexture();
+
   material->shaderType = ShaderType::FORWARD_SHADER;
-  material->specularMap =
-      renderDefault.getBlackTexture(); // TODO: Use default 1x1 texture
+  if (setFlatMaterial)
+    material->flatMaterial = std::move(flatMaterial);
   return material;
 }
 

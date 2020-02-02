@@ -17,7 +17,7 @@ public:
     return instance;
   }
   GLuint getCheckerTexture() const { return checkerTexture; }
-  GLuint getWhiteTexture() const { return whiteTexture; }
+  //  GLuint getWhiteTexture() const { return whiteTexture; }
   GLuint getBlackTexture() const { return blackTexture; }
 
 private:

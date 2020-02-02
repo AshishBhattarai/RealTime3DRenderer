@@ -8,5 +8,5 @@ constexpr int NORMAL_LOC = 1;
 constexpr int TEXCOORD0_LOC = 2;
 } // namespace shader_config
 
-enum class ShaderType { FORWARD_SHADER };
+enum class ShaderType { FORWARD_SHADER, FLAT_FORWARD_SHADER };
 } // namespace render_system
