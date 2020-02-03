@@ -1,11 +1,12 @@
 #pragma once
 
 #define CSLOG(...)                                                             \
-  SLogger::getInstance().printToConsole(__FILE__, __LINE__, __VA_ARGS__)
+  utils::SLogger::getInstance().printToConsole(__FILE__, __LINE__, __VA_ARGS__)
 #define FSLOG(...)                                                             \
-  SLogger::getInstance().printToFile(__FILE__, __LINE__, __VA_ARGS__)
+  utils::SLogger::getInstance().printToFile(__FILE__, __LINE__, __VA_ARGS__)
 #define SLOG(...)                                                              \
-  SLogger::getInstance().printToFileConsole(__FILE__, __LINE__, __VA_ARGS__)
+  utils::SLogger::getInstance().printToFileConsole(__FILE__, __LINE__,         \
+                                                   __VA_ARGS__)
 #ifdef NDEBUG
 #define DEBUG_SLOG(...)
 #define DEBUG_FSLOG(...)
@@ -23,7 +24,7 @@
 
 // Simple Logger
 
-namespace app {
+namespace utils {
 
 /**
  * A singleton class to print errors/warnings to console and file uses varadic
@@ -88,4 +89,4 @@ public:
   }
 };
 
-} // namespace app
+} // namespace utils
