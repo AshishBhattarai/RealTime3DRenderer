@@ -75,6 +75,7 @@ Mesh Model::processMesh(const std::map<int, GLuint> &vbos,
 
   // loop through mesh primitives
   for (size_t i = 0; i < meshData.primitives.size(); ++i) {
+    bool hasTextureCoords = false;
     const tinygltf::Primitive &primitive = meshData.primitives[i];
     // primitive attributes (Position, Normal, TexCoords)
     for (const auto &attrib : primitive.attributes) {
@@ -96,8 +97,10 @@ Mesh Model::processMesh(const std::map<int, GLuint> &vbos,
         vaa = shader_config::POSITION_LOC;
       if (attrib.first.compare("NORMAL") == 0)
         vaa = shader_config::NORMAL_LOC;
-      if (attrib.first.compare("TEXCOORD_0") == 0)
+      if (attrib.first.compare("TEXCOORD_0") == 0) {
         vaa = shader_config::TEXCOORD0_LOC;
+        hasTextureCoords = true;
+      }
 
       if (vaa > -1) {
         // calculate stride
@@ -113,8 +116,8 @@ Mesh Model::processMesh(const std::map<int, GLuint> &vbos,
     // primitive materials
     const tinygltf::Material &materialData =
         modelData.materials[primitive.material];
-    std::unique_ptr<Material> material =
-        processMaterial(materialData, modelData);
+    std::unique_ptr<BaseMaterial> material =
+        processMaterial(materialData, modelData, hasTextureCoords);
 
     // primitive indices
     const tinygltf::Accessor &indexAccessor =
@@ -129,14 +132,14 @@ Mesh Model::processMesh(const std::map<int, GLuint> &vbos,
   return mesh;
 }
 
-std::unique_ptr<Material>
+std::unique_ptr<BaseMaterial>
 Model::processMaterial(const tinygltf::Material &materialData,
-                       const tinygltf::Model &modelData) {
+                       const tinygltf::Model &modelData,
+                       bool hasTextureCoords) {
   std::unique_ptr<Material> material = std::make_unique<Material>();
   std::unique_ptr<FlatMaterial> flatMaterial = std::make_unique<FlatMaterial>();
   const RenderDefaults &renderDefault = RenderDefaults::getInstance("");
 
-  bool setFlatMaterial = false;
   const tinygltf::PbrMetallicRoughness &pbrInfo =
       materialData.pbrMetallicRoughness;
   int baseColorTextureIndex = pbrInfo.baseColorTexture.index;
@@ -151,17 +154,16 @@ Model::processMaterial(const tinygltf::Material &materialData,
         modelData.images[modelData.textures[baseColorTextureIndex].source];
     material->albedo = processTexture(baseColorImage);
   } else {
-    setFlatMaterial = true;
     material->albedo = renderDefault.getCheckerTexture();
-    material->flatMaterial->albedo =
+    flatMaterial->albedo =
         glm::vec4(pbrInfo.baseColorFactor[0], pbrInfo.baseColorFactor[1],
                   pbrInfo.baseColorFactor[2], pbrInfo.baseColorFactor[3]);
-    material->flatMaterial->emission = glm::vec4(
+    flatMaterial->emission = glm::vec4(
         materialData.emissiveFactor[0], materialData.emissiveFactor[1],
         materialData.emissiveFactor[2], materialData.emissiveFactor[3]);
-    material->flatMaterial->ao = 1.0f;
-    material->flatMaterial->metallic = pbrInfo.metallicFactor;
-    material->flatMaterial->roughtness = pbrInfo.roughnessFactor;
+    flatMaterial->ao = 1.0f;
+    flatMaterial->metallic = pbrInfo.metallicFactor;
+    flatMaterial->roughtness = pbrInfo.roughnessFactor;
   }
   if (normalTextureIndex != -1) {
     const tinygltf::Image &normalImage =
@@ -190,10 +192,13 @@ Model::processMaterial(const tinygltf::Material &materialData,
   } else
     material->ao = renderDefault.getBlackTexture();
 
-  material->shaderType = ShaderType::FORWARD_SHADER;
-  if (setFlatMaterial)
-    material->flatMaterial = std::move(flatMaterial);
-  return material;
+  if (hasTextureCoords) {
+    material->shaderType = ShaderType::FORWARD_SHADER;
+    return material;
+  } else {
+    material->shaderType = ShaderType::FLAT_FORWARD_SHADER;
+    return material;
+  }
 }
 
 GLuint Model::processTexture(const tinygltf::Image &image) {

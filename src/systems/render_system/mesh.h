@@ -34,7 +34,7 @@ struct Material : BaseMaterial {
   GLuint ao;
   GLuint normal;
   GLuint emission;
-  std::unique_ptr<FlatMaterial> flatMaterial;
+  //  std::unique_ptr<FlatMaterial> flatMaterial;
 };
 
 /**

@@ -31,9 +31,9 @@ private:
                    const tinygltf::Mesh &meshData,
                    const tinygltf::Model &modelData);
 
-  std::unique_ptr<Material>
+  std::unique_ptr<BaseMaterial>
   processMaterial(const tinygltf::Material &materialData,
-                  const tinygltf::Model &modelData);
+                  const tinygltf::Model &modelData, bool hasTextureCoords);
   GLuint processTexture(const tinygltf::Image &image);
 };
 
