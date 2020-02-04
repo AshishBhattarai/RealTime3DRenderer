@@ -8,6 +8,7 @@ class Coordinator;
 namespace app {
 
 class Display;
+class Input;
 /**
  * Represents the renderer application, handels and manages WINDOW(Context), ECS
  * & UI
@@ -25,8 +26,11 @@ private:
   App(int argc, char **argv);
   ~App();
 
+  void processInput();
+
 private:
   Display *display;
+  Input *input;
   ecs::Coordinator &coordinator;
 };
 } // namespace app

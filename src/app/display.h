@@ -15,6 +15,8 @@ private:
   int height;
   GLFWwindow *window;
 
+  friend class Input;
+
 public:
   Display(std::string_view title, int width, int height);
   ~Display();

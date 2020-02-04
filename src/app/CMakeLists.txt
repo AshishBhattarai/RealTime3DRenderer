@@ -2,6 +2,7 @@ add_library(
     app-lib
     app.cpp
     display.cpp
+    input.cpp
     app_model.qmodel
 )
 target_link_libraries(
