@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <type_traits>
 
 typedef unsigned char uchar;
 typedef unsigned int uint;
@@ -29,3 +30,8 @@ protected:
   NonCopyable(const NonCopyable &) = delete;
   NonCopyable &operator=(const NonCopyable &) = delete;
 };
+
+// cast to enums underlying type
+template <typename T> constexpr auto toUnderlying(T e) noexcept {
+  return static_cast<std::underlying_type<T>>(e);
+}

@@ -1,17 +1,6 @@
-set(SHADER_OUTPUT_DIR ${CMAKE_BINARY_DIR}/shaders)
+ 
+add_subdirectory(glsl)
 
-function(add_spirv_shader INPUT_FILE OUTPUT_FILE)
-    add_custom_command(
-        OUTPUT ${SHADER_OUTPUT_DIR}/${OUTPUT_FILE}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMAND glslangValidator -e main -o ${SHADER_OUTPUT_DIR}/${OUTPUT_FILE} -V -G ${INPUT_FILE}
-        MAIN_DEPENDENCY ${INPUT_FILE}
-        COMMENT "Compile glsl shaders to spv"
-    )
-endfunction()
-
-add_spirv_shader(flat_forward.vert flat_forward.spv)
-
-add_custom_target(shaders ALL DEPENDS
-    ${SHADER_OUTPUT_DIR}/flat_forward.spv
+add_library(shaders-lib
+    program.cpp
 )

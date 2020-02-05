@@ -9,5 +9,6 @@ add_library(render-system-lib
 
     #non cpp files
     render_system_model.qmodel
-    shaders
 )
+
+target_link_libraries(render-system-lib shaders-lib)

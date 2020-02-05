@@ -1,6 +1,6 @@
 #include "model.h"
 #include "render_defaults.h"
-#include "shader_config.h"
+#include "shaders/config.h"
 #include "utils/model_loader.h"
 
 namespace render_system {
@@ -94,11 +94,11 @@ Mesh Model::processMesh(const std::map<int, GLuint> &vbos,
 
       int vaa = -1;
       if (attrib.first.compare("POSITION") == 0)
-        vaa = shader_config::POSITION_LOC;
+        vaa = shader::vertex::attribute::POSITION_LOC;
       if (attrib.first.compare("NORMAL") == 0)
-        vaa = shader_config::NORMAL_LOC;
+        vaa = shader::vertex::attribute::NORMAL_LOC;
       if (attrib.first.compare("TEXCOORD_0") == 0) {
-        vaa = shader_config::TEXCOORD0_LOC;
+        vaa = shader::vertex::attribute::TEXCOORD0_LOC;
         hasTextureCoords = true;
       }
 

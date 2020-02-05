@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shader_config.h"
+#include "shaders/config.h"
 #include <cassert>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
