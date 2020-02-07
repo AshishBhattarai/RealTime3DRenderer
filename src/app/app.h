@@ -1,14 +1,17 @@
 #pragma once
 
+#include "display.h"
+#include "input.h"
 #include "types.h"
 
 namespace ecs {
 class Coordinator;
 }
+namespace render_system {
+class Camera;
+class RenderSystem;
+} // namespace render_system
 namespace app {
-
-class Display;
-class Input;
 /**
  * Represents the renderer application, handels and manages WINDOW(Context), ECS
  * & UI
@@ -29,8 +32,10 @@ private:
   void processInput();
 
 private:
-  Display *display;
-  Input *input;
+  Display display;
+  Input input;
   ecs::Coordinator &coordinator;
+  render_system::RenderSystem *renderSystem;
+  render_system::Camera *camera;
 };
 } // namespace app

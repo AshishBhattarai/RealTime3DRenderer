@@ -6,6 +6,7 @@ add_library(render-system-lib
     model.cpp
     render_defaults.cpp
     camera.cpp
+    renderer.cpp
 
     #non cpp files
     render_system_model.qmodel

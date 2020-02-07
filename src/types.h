@@ -18,6 +18,8 @@ typedef int64_t s64;
 
 typedef uintptr_t uptr;
 
+typedef u32 EntityId;
+
 // will require for custom allocato
 static_assert(sizeof(uint) == sizeof(u32), "Check conversion.");
 

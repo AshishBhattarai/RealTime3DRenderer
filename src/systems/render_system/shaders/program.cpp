@@ -27,6 +27,18 @@ GLuint Program::createShader(std::string_view path, GLenum type) {
 
   GLuint shader = glCreateShader(type);
   glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, source, size);
+  // set shade entry point, with argc & argv
+  glSpecializeShader(shader, "main", 0, 0, 0);
+
+  int success = 0;
+  char infoLog[1024];
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+  if (!success) {
+    glGetShaderInfoLog(shader, 1024, NULL, infoLog);
+    SLOG("Failed to compile", type, infoLog);
+    glDeleteShader(shader);
+    shader = 0;
+  }
   delete[] source;
   return shader;
 }
@@ -46,12 +58,8 @@ Program::Program(std::map<ShaderStage, std::string_view> shaderPaths)
   for (const GLuint &shader : shaders) {
     glAttachShader(program, shader);
   }
-  glLinkProgram(program);
 
-  // cleanup
-  for (const GLuint &shader : shaders) {
-    glDeleteShader(shader);
-  }
+  glLinkProgram(program);
 
   // check for link errors
   int success = 0;
@@ -63,6 +71,11 @@ Program::Program(std::map<ShaderStage, std::string_view> shaderPaths)
     glDeleteProgram(program);
     program = 0;
     assert(false && "Link program failed.");
+  }
+
+  // cleanup
+  for (const GLuint &shader : shaders) {
+    glDeleteShader(shader);
   }
 }
 } // namespace render_system::shader

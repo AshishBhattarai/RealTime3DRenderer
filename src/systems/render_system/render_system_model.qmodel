@@ -53,8 +53,8 @@
                            <item>render_system</item>
                           </qlist>
                          </stereotypes>
-                         <name>RenderSystem</name>
-                         <pos>x:305;y:120</pos>
+                         <name>Renderer</name>
+                         <pos>x:265;y:335</pos>
                          <rect>x:-135;y:-85;w:270;h:170</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -76,7 +76,7 @@
                          </base-DElement>
                          <object>{79c85de5-b786-4698-a7cd-a152c191dee1}</object>
                          <name>Mesh</name>
-                         <pos>x:20;y:225</pos>
+                         <pos>x:-15;y:430</pos>
                          <rect>x:-75;y:-65;w:150;h:130</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -99,7 +99,7 @@
                          </base-DElement>
                          <object>{df9fcf35-bb3c-460c-aff2-c46b5760a41b}</object>
                          <name>Primitive</name>
-                         <pos>x:-175;y:300</pos>
+                         <pos>x:-210;y:505</pos>
                          <rect>x:-65;y:-65;w:130;h:130</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -122,7 +122,7 @@
                          </base-DElement>
                          <object>{1401dea6-6499-492c-b560-fa9ae649f7e5}</object>
                          <name>Material</name>
-                         <pos>x:-350;y:625</pos>
+                         <pos>x:-385;y:830</pos>
                          <rect>x:-65;y:-90;w:130;h:180</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -145,7 +145,7 @@
                          </base-DElement>
                          <object>{430bda86-e5db-47be-a647-962789531f0c}</object>
                          <name>ShaderManager</name>
-                         <pos>x:360;y:325</pos>
+                         <pos>x:325;y:530</pos>
                          <rect>x:-95;y:-65;w:190;h:130</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -242,7 +242,7 @@
                          </base-DElement>
                          <object>{6b77b368-ffa9-4577-959c-660627311cf5}</object>
                          <name>BaseMaterial</name>
-                         <pos>x:-290;y:450</pos>
+                         <pos>x:-325;y:655</pos>
                          <rect>x:-45;y:-45;w:90;h:90</rect>
                          <visual-role>0</visual-role>
                          <stereotype-display>1</stereotype-display>
@@ -265,7 +265,7 @@
                          </base-DElement>
                          <object>{373fe361-2411-44c4-9c3c-296edae7fe74}</object>
                          <name>RenderableEntity</name>
-                         <pos>x:-165;y:55</pos>
+                         <pos>x:-200;y:260</pos>
                          <rect>x:-85;y:-50;w:170;h:100</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -312,7 +312,7 @@
                          </base-DElement>
                          <object>{805ad1ce-d8ef-4fdd-a059-0a3f2b3c6b49}</object>
                          <name>ShaderProgram</name>
-                         <pos>x:630;y:625</pos>
+                         <pos>x:640;y:865</pos>
                          <rect>x:-50;y:-30;w:100;h:60</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -332,7 +332,7 @@
                          </base-DElement>
                          <object>{08f0d8ab-fb12-48b4-8c4e-e6f75debf610}</object>
                          <name>PBRForwardShader</name>
-                         <pos>x:460;y:505</pos>
+                         <pos>x:425;y:710</pos>
                          <rect>x:-60;y:-30;w:120;h:60</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -352,7 +352,7 @@
                          </base-DElement>
                          <object>{292232b6-cc26-4703-9f75-0f5dd1de73b2}</object>
                          <name>PBRDiffuseShader</name>
-                         <pos>x:590;y:400</pos>
+                         <pos>x:555;y:605</pos>
                          <rect>x:-80;y:-35;w:160;h:70</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -428,7 +428,7 @@
                          </base-DElement>
                          <object>{3342240b-0509-404a-9072-4578dc9502a5}</object>
                          <name>UnformBuffer</name>
-                         <pos>x:730;y:205</pos>
+                         <pos>x:695;y:410</pos>
                          <rect>x:-45;y:-30;w:90;h:60</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -448,7 +448,7 @@
                          </base-DElement>
                          <object>{7be8152d-77f2-40b5-ae4d-c4b27ebc1f78}</object>
                          <name>GlobalFSBuffer</name>
-                         <pos>x:555;y:255</pos>
+                         <pos>x:520;y:460</pos>
                          <rect>x:-50;y:-30;w:100;h:60</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -468,7 +468,7 @@
                          </base-DElement>
                          <object>{3e0bbd16-63d1-4e07-afe0-fb91ca2a415e}</object>
                          <name>GlobaVSBuffer</name>
-                         <pos>x:565;y:110</pos>
+                         <pos>x:530;y:315</pos>
                          <rect>x:-50;y:-30;w:100;h:60</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -649,7 +649,7 @@
                          </base-DElement>
                          <object>{4d3a717f-f7c3-45c8-a0f7-408c934d8de8}</object>
                          <name>Model</name>
-                         <pos>x:65;y:460</pos>
+                         <pos>x:30;y:665</pos>
                          <rect>x:-75;y:-65;w:150;h:130</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -697,7 +697,7 @@
                          </base-DElement>
                          <object>{0d530141-d381-42d4-951b-11513962014c}</object>
                          <name>tinygltf</name>
-                         <pos>x:85;y:695</pos>
+                         <pos>x:50;y:900</pos>
                          <rect>x:-30;y:-20;w:60;h:40</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -736,7 +736,7 @@
                          </base-DElement>
                          <object>{456ef019-1385-420f-9ec7-698ee57571c2}</object>
                          <name>FlatMaterial</name>
-                         <pos>x:-170;y:625</pos>
+                         <pos>x:-205;y:830</pos>
                          <rect>x:-55;y:-70;w:110;h:140</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -801,7 +801,7 @@
                          </base-DElement>
                          <object>{8acb2c10-0ab7-42b3-9f09-14c166bea25c}</object>
                          <name>PBRFlatForwardShader</name>
-                         <pos>x:315;y:580</pos>
+                         <pos>x:280;y:785</pos>
                          <rect>x:-70;y:-30;w:140;h:60</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -852,9 +852,57 @@
                       </DInheritance>
                      </instance>
                     </item>
+                    <item>
+                     <instance type="DClass">
+                      <DClass>
+                       <base-DObject>
+                        <DObject>
+                         <base-DElement>
+                          <DElement>
+                           <uid>{88e2d7a7-0e8d-4e91-b51f-a0e627e66afd}</uid>
+                          </DElement>
+                         </base-DElement>
+                         <object>{8b2bd1a5-e9b9-4a86-880a-68ace5274e93}</object>
+                         <name>RenderSystem</name>
+                         <pos>x:280;y:105</pos>
+                         <rect>x:-120;y:-55;w:240;h:110</rect>
+                         <auto-sized>false</auto-sized>
+                         <visual-role>0</visual-role>
+                        </DObject>
+                       </base-DObject>
+                       <namespace>render_system</namespace>
+                       <show-all-members>true</show-all-members>
+                      </DClass>
+                     </instance>
+                    </item>
+                    <item>
+                     <instance type="DAssociation">
+                      <DAssociation>
+                       <base-DRelation>
+                        <DRelation>
+                         <base-DElement>
+                          <DElement>
+                           <uid>{f798f1b5-06fa-44c4-b414-e98671666066}</uid>
+                          </DElement>
+                         </base-DElement>
+                         <object>{7e731998-2b61-486f-8fc5-a391f713b029}</object>
+                         <a>{88e2d7a7-0e8d-4e91-b51f-a0e627e66afd}</a>
+                         <b>{d7b75348-d7f7-4d74-8846-fdaf1206e560}</b>
+                        </DRelation>
+                       </base-DRelation>
+                       <a>
+                        <DAssociationEnd>
+                         <cradinality>1</cradinality>
+                         <navigable>true</navigable>
+                         <kind>2</kind>
+                        </DAssociationEnd>
+                       </a>
+                      </DAssociation>
+                     </instance>
+                    </item>
                    </qlist>
                   </elements>
-                  <last-modified>1580659085872</last-modified>
+                  <last-modified>1581093621233</last-modified>
                   <toolbarid>General</toolbarid>
                  </MDiagram>
                 </base-MDiagram>
@@ -881,7 +929,7 @@
                     </stereotypes>
                    </MElement>
                   </base-MElement>
-                  <name>RenderSystem</name>
+                  <name>Renderer</name>
                   <relations>
                    <handles>
                     <handles>
@@ -1099,9 +1147,23 @@
                  <qlist>
                   <item>
                    <MClassMember>
-                    <uid>{5aac57f8-b692-4250-bd78-9ce2510573a2}</uid>
+                    <uid>{a0ab9808-aac2-43a8-b786-34a127803d9c}</uid>
                     <type>1</type>
-                    <declaration>Map&lt;Mesh, List&lt;RenderableEntity&gt;</declaration>
+                    <declaration>List&lt;Mesh&gt;&amp;</declaration>
+                   </MClassMember>
+                  </item>
+                  <item>
+                   <MClassMember>
+                    <uid>{5fc5b7f5-e938-4dfc-8bee-4af5905b36f5}</uid>
+                    <type>1</type>
+                    <declaration>Map&lt;MeshName, List&lt;RenderableEntity&gt;&amp;</declaration>
+                   </MClassMember>
+                  </item>
+                  <item>
+                   <MClassMember>
+                    <uid>{b88bd1d9-89c7-47d9-b00a-8a1c94e89b57}</uid>
+                    <type>1</type>
+                    <declaration>Set&lt;EntityId&gt; removeables</declaration>
                    </MClassMember>
                   </item>
                  </qlist>
@@ -2812,6 +2874,83 @@
                   </relations>
                  </MObject>
                 </base-MObject>
+               </MClass>
+              </instance>
+             </target>
+            </handle>
+           </item>
+           <item>
+            <handle>
+             <uid>{8b2bd1a5-e9b9-4a86-880a-68ace5274e93}</uid>
+             <target>
+              <instance type="MClass">
+               <MClass>
+                <base-MObject>
+                 <MObject>
+                  <base-MElement>
+                   <MElement>
+                    <uid>{8b2bd1a5-e9b9-4a86-880a-68ace5274e93}</uid>
+                   </MElement>
+                  </base-MElement>
+                  <name>RenderSystem</name>
+                  <relations>
+                   <handles>
+                    <handles>
+                     <qlist>
+                      <item>
+                       <handle>
+                        <uid>{7e731998-2b61-486f-8fc5-a391f713b029}</uid>
+                        <target>
+                         <instance type="MAssociation">
+                          <MAssociation>
+                           <base-MRelation>
+                            <MRelation>
+                             <base-MElement>
+                              <MElement>
+                               <uid>{7e731998-2b61-486f-8fc5-a391f713b029}</uid>
+                              </MElement>
+                             </base-MElement>
+                             <a>{8b2bd1a5-e9b9-4a86-880a-68ace5274e93}</a>
+                             <b>{ff27e998-eae4-4e5c-b9f8-4b4a2ff31481}</b>
+                            </MRelation>
+                           </base-MRelation>
+                           <a>
+                            <MAssociationEnd>
+                             <cardinality>1</cardinality>
+                             <navigable>true</navigable>
+                             <kind>2</kind>
+                            </MAssociationEnd>
+                           </a>
+                          </MAssociation>
+                         </instance>
+                        </target>
+                       </handle>
+                      </item>
+                     </qlist>
+                    </handles>
+                   </handles>
+                  </relations>
+                 </MObject>
+                </base-MObject>
+                <namespace>render_system</namespace>
+                <members>
+                 <qlist>
+                  <item>
+                   <MClassMember>
+                    <uid>{7f973652-b2af-4b08-9a38-cba90646116f}</uid>
+                    <type>1</type>
+                    <declaration>List&lt;Mesh&gt;</declaration>
+                   </MClassMember>
+                  </item>
+                  <item>
+                   <MClassMember>
+                    <uid>{930eb387-dae9-4775-88b1-d27d552b8658}</uid>
+                    <type>1</type>
+                    <declaration>Map&lt;MeshName, List&lt;RenderableEntity&gt;</declaration>
+                   </MClassMember>
+                  </item>
+                 </qlist>
+                </members>
                </MClass>
               </instance>
              </target>

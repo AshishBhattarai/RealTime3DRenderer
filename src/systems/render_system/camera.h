@@ -11,6 +11,7 @@ enum class CameraMovement {
   STRAFE_LEFT
 };
 
+namespace render_system {
 /**
  * @brief The Camera class
  *
@@ -44,5 +45,6 @@ public:
   void processRotation(float xoffset, float yoffset);
   void update();
 
-  const glm::mat4 &getViewMatrix() { return viewMat; }
+  const glm::mat4 &getViewMatrix() const { return viewMat; }
 };
+} // namespace render_system

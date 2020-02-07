@@ -1,7 +1,13 @@
 #include "model.h"
 #include "render_defaults.h"
 #include "shaders/config.h"
-#include "utils/model_loader.h"
+
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define TINYGLTF_NOEXCEPTION
+#define JSON_NOEXCEPTION
+#include <third_party/tinygltf/tiny_gltf.h>
 
 namespace render_system {
 
@@ -122,6 +128,8 @@ Mesh Model::processMesh(const std::map<int, GLuint> &vbos,
     // primitive indices
     const tinygltf::Accessor &indexAccessor =
         modelData.accessors[primitive.indices];
+
+    assert(indexAccessor.type == GL_UNSIGNED_INT && "Invalid mesh index type.");
 
     // register primitives to our mesh
     mesh.primitives.emplace_back(

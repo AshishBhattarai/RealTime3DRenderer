@@ -1,5 +1,6 @@
 #pragma once
 
+#include "camera.h"
 #include "types.h"
 #include <glad/glad.h>
 #include <string_view>
@@ -12,13 +13,14 @@ namespace render_system {
 class RenderDefaults : NonCopyable {
 
 public:
-  static RenderDefaults &getInstance(std::string_view checkerTexture) {
+  static RenderDefaults &getInstance(std::string_view checkerTexture = "") {
     static RenderDefaults instance(checkerTexture);
     return instance;
   }
   GLuint getCheckerTexture() const { return checkerTexture; }
   //  GLuint getWhiteTexture() const { return whiteTexture; }
   GLuint getBlackTexture() const { return blackTexture; }
+  const Camera &getCamera() const { return camera; }
 
 private:
   // 4x4 chekerboard texture
@@ -26,6 +28,8 @@ private:
   // 1x1 black & white textures;
   GLuint blackTexture;
   GLuint whiteTexture;
+
+  Camera camera;
 
   RenderDefaults(std::string_view checkerTexture);
   ~RenderDefaults();

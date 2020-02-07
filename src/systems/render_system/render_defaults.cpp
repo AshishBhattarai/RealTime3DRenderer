@@ -6,7 +6,7 @@
 
 namespace render_system {
 RenderDefaults::RenderDefaults(std::string_view checkerTexture)
-    : checkerTexture(0), blackTexture(0), whiteTexture(0) {
+    : checkerTexture(0), blackTexture(0), whiteTexture(0), camera() {
   int width = 0;
   int height = 0;
   int numChannels = 0;

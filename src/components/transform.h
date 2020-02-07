@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 
+namespace component {
 struct Transform {
   glm::vec3 position;
   glm::vec3 rotation;
@@ -11,3 +12,4 @@ struct Transform {
             const glm::vec3 &scale = glm::vec3(1.0f, 1.0f, 1.0f))
       : position(position), rotation(rotation), scale(scale) {}
 };
+} // namespace component

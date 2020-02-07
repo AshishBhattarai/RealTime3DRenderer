@@ -1,6 +1,7 @@
 #include "camera.h"
 #include <glm/gtc/quaternion.hpp>
 
+namespace render_system {
 Camera::Camera(const glm::vec3 &position, const glm::vec3 &rotation)
     : front(0.0f, 0.0f, 1.0f), right(1.0f, 0.0f, 0.0f), up(0.0f, 1.0f, 0.0f),
       position(position), rotation(rotation) {}
@@ -56,3 +57,4 @@ void Camera::processRotation(float xoffset, float yoffset) {
   if (rotation.x < -89.0f)
     rotation.x = -89.0f;
 }
+} // namespace render_system

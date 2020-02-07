@@ -46,12 +46,12 @@ struct Primitive {
   std::unique_ptr<BaseMaterial> material;
   GLenum mode; // Render mode
   GLsizei count;
-  const GLvoid *indexOffset; // Index buffer offset;
+  const GLvoid *offset; // Index buffer offset;
 
   Primitive(std::unique_ptr<BaseMaterial> material, GLenum mode, GLsizei count,
-            const GLvoid *indexOffset)
+            const GLvoid *offset)
       : material(std::move(material)), mode(mode), count(count),
-        indexOffset(indexOffset) {
+        offset(offset) {
     assert(material != nullptr && "Material must be valid.");
     assert(mode >= GL_POINT && mode <= GL_TRIANGLE_FAN &&
            "Invalid primitive mode.");
@@ -60,11 +60,17 @@ struct Primitive {
 };
 
 struct Mesh {
-  // name ust be unique
+  // name must be unique
   std::string name;
   GLuint vao;
   std::vector<Primitive> primitives;
 
   bool isValid() { return vao && !primitives.empty(); }
+
+  Mesh() = default;
+  Mesh(Mesh &&mesh) noexcept = default;
+  Mesh &operator=(Mesh &&) noexcept = default;
+  Mesh(const Mesh &) = delete;
+  const Mesh &operator=(const Mesh &) = delete;
 };
 } // namespace render_system

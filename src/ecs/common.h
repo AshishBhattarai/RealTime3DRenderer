@@ -5,7 +5,7 @@
 #include <bitset>
 
 namespace ecs {
-using Entity = u32;
+using Entity = EntityId;
 using ComponentFamily = size_t;
 using SystemFamily = size_t;
 using EventFamily = size_t;
