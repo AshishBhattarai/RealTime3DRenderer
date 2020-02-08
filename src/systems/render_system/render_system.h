@@ -2,7 +2,6 @@
 
 #include "ecs/common.h"
 #include "ecs/system_manager.h"
-#include "mesh.h"
 #include "renderable_entity.h"
 #include "renderer.h"
 
@@ -12,6 +11,7 @@ struct Model;
 
 namespace render_system {
 class Camera;
+class Model;
 
 class RenderSystem : ecs::System<RenderSystem> {
 private:
@@ -27,10 +27,15 @@ private:
 public:
   RenderSystem();
 
-  void registerMesh(Mesh &&mesh) {
-    meshes.emplace_back(std::move(mesh));
-    renderables.emplace(std::pair(mesh.vao, std::vector<RenderableEntity>{}));
-  }
+  /**
+   * Moves all the meshes in give model to the render system.
+   *
+   * retunrs valid id(no-zero) on success.
+   * 				 zero on failure.
+   */
+  uint registerMesh(Mesh &&mesh);
+  // returns map of mesh name to id
+  std::map<std::string, uint> registerMeshes(tinygltf::Model &modelData);
 
   // TODO: Delete mesh and set all existing entites to default mesh
   bool unregisterMesh(std::string_view name);

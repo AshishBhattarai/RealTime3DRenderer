@@ -13,22 +13,26 @@ Renderer::Renderer(const std::vector<Mesh> &meshes,
     : meshes(meshes), renderables(renderables), projectionMatrix(1.0f),
       camera(camera), flatForwardShader() {
   if (!camera) {
-    camera = &RenderDefaults::getInstance().getCamera();
+    this->camera = &RenderDefaults::getInstance().getCamera();
   }
+  glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+  glEnable(GL_DEPTH_TEST);
 }
 
 void Renderer::render(float dt) {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  flatForwardShader.bind();
+  flatForwardShader.loadViewMatrix(camera->getViewMatrix());
   for (const Mesh &mesh : meshes) {
-    const auto &entites = renderables.find(mesh.vao)->second;
-    glBindVertexArray(mesh.vao);
-    flatForwardShader.bind();
-    flatForwardShader.loadViewMatrix(camera->getViewMatrix());
+    const auto &entites =
+        renderables.find(mesh.primitives[0].vao + MODEL_ID_OFFSET)->second;
     for (const Primitive &primitive : mesh.primitives) {
+      glBindVertexArray(primitive.vao);
       for (const RenderableEntity &entity : entites) {
         const auto &transform = entity.transform;
         // create transformation matrix
         glm::mat4 transformMat =
-            glm::translate(glm::mat4(), entity.transform.position);
+            glm::translate(glm::mat4(1.0f), entity.transform.position);
         transformMat =
             glm::rotate(transformMat, glm::radians(transform.rotation.x),
                         glm::vec3(1.0f, 0.0f, 0.0f));
@@ -41,8 +45,8 @@ void Renderer::render(float dt) {
         transformMat = glm::scale(transformMat, transform.scale);
 
         flatForwardShader.loadTransformMatrix(transformMat);
-        glDrawElements(primitive.mode, primitive.count, GL_UNSIGNED_INT,
-                       primitive.offset);
+        glDrawElements(primitive.mode, primitive.indexCount,
+                       primitive.indexType, primitive.indexOffset);
       }
     }
   }

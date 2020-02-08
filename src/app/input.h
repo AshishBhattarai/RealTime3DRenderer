@@ -190,19 +190,32 @@ public:
           time(time) {}
   };
   struct CursorPos {
-    double xPos;
-    double yPos;
-    CursorPos(double xPos, double yPos) : xPos(xPos), yPos(yPos) {}
+    float xPos;
+    float yPos;
+    CursorPos(float xPos, float yPos) : xPos(xPos), yPos(yPos) {}
+
+    friend CursorPos operator-(const CursorPos &lhs, const CursorPos &rhs);
+    bool operator!=(const CursorPos &rhs) {
+      return (xPos != rhs.xPos || yPos != rhs.yPos);
+    }
   };
 
+  friend CursorPos operator-(const CursorPos &lhs, const CursorPos &rhs) {
+    return CursorPos(lhs.xPos - rhs.xPos, lhs.yPos - rhs.yPos);
+  }
+
   using KeyCallback = std::function<void(const KeyEvent &keyEvent)>;
+  using CursorCallback = std::function<void(const CursorPos &offset)>;
 
 private:
   const Display &display;
 
   CursorPos cursorPos;
+  CursorPos lastCursorPos;
+  CursorPos cursorOffset;
   std::map<int, bool> keys;
   std::map<int, KeyCallback> keyCallbacks;
+  CursorCallback cursorCallback;
   std::queue<KeyEvent> unhandledKeys;
 
 public:
@@ -210,7 +223,11 @@ public:
   void addKeyCallback(int key, const KeyCallback &callback) {
     keyCallbacks[key] = callback;
   }
+  void addCursorCallback(const CursorCallback &callback) {
+    cursorCallback = callback;
+  }
   const CursorPos &getCursorPos() const { return cursorPos; }
+  CursorPos getCursorOffset() const { return cursorOffset; }
   bool getKey(int key) { return keys[key]; }
   void update();
 };

@@ -6,10 +6,16 @@
 #include "display.h"
 #include "ecs/coordinator.h"
 #include "input.h"
+#include "loaders.h"
 #include "systems/render_system/camera.h"
+#include "systems/render_system/model.h"
 #include "systems/render_system/render_defaults.h"
 #include "systems/render_system/render_system.h"
+#include "utils/image.h"
+#include "utils/slogger.h"
 #include <iostream>
+#include <map>
+#include <third_party/tinygltf/tiny_gltf.h>
 
 using namespace render_system;
 
@@ -19,7 +25,10 @@ App::App(int, char **)
       coordinator(ecs::Coordinator::getInstance()) {
   DEBUG_SLOG("App constructed.");
   /* Render System classes should not be constructed before loading defauls*/
-  render_system::RenderDefaults::getInstance("resources/defaults/checker.bmp");
+  Image checkerImage;
+  bool status =
+      Loaders::loadImage(checkerImage, "resources/defaults/checker.bmp");
+  render_system::RenderDefaults::getInstance(&checkerImage);
 
   auto transformFamily =
       coordinator.componentManager.registerComponent<component::Transform>();
@@ -31,19 +40,42 @@ App::App(int, char **)
   coordinator.systemManager.registerSystem<RenderSystem>(renderSig);
   renderSystem = new RenderSystem();
   camera = new Camera();
-}
+  renderSystem->setCamera(camera);
 
-void App::processInput() {
+  // load model
+
+  tinygltf::Model model;
+  status = Loaders::loadModel(model, "resources/meshes/sphere_cube.gltf");
+  std::map<std::string, uint> ids = renderSystem->registerMeshes(model);
+  DEBUG_CSLOG("LOADED MESHES: ", ids.size());
+  ecs::Entity temp = coordinator.createEntity();
+  coordinator.addComponent<component::Transform>(
+      temp, component::Transform(glm::vec3(0.0f, 0.0f, -10.0f),
+                                 glm::vec3(0.0f, 0.0f, 0.0f)));
+  component::Mesh mesh;
+  mesh.name = model.meshes[0].name;
+  mesh.modelId = ids.begin()->second;
+  coordinator.addComponent<component::Mesh>(temp, mesh);
+
   input.addKeyCallback(INPUT_KEY_ESCAPE, [](const Input::KeyEvent &event) {
     DEBUG_SLOG("KEY PRESSED: ", event.key, "TIME: ", event.time);
   });
+
+  renderSystem->updateProjectionMatrix(display.getAspectRatio());
+
+  input.addCursorCallback([&camera = camera](const Input::CursorPos &offset) {
+    camera->processRotation(offset.xPos, offset.yPos);
+  });
 }
+
+void App::processInput() { camera->update(); }
 
 void App::run() {
   DEBUG_SLOG("App running.");
   while (!display.shouldClose()) {
     input.update();
     processInput();
+    renderSystem->update(0.0f);
     display.update();
   }
 }

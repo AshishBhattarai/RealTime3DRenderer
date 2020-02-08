@@ -9,8 +9,8 @@
 #define VERT_A_TEXTCOORD0_LOC 2
 // uniform locations
 #define VERT_U_PROJECTION_LOC 0
-#define VERT_U_VIEW_LOC 1
-#define VERT_U_TRANSFORMATION_LOC 2
+#define VERT_U_TRANSFORMATION_LOC 1
+#define VERT_U_VIEW_LOC 2
 #endif
 
 #ifdef FRAGMENT_SHADER

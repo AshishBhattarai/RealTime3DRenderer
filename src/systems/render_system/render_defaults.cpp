@@ -1,51 +1,44 @@
 #include "render_defaults.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "third_party/tinygltf/stb_image.h"
+#include "texture.h"
 #include "types.h"
+#include "utils/image.h"
 #include <string>
 
 namespace render_system {
-RenderDefaults::RenderDefaults(std::string_view checkerTexture)
-    : checkerTexture(0), blackTexture(0), whiteTexture(0), camera() {
-  int width = 0;
-  int height = 0;
-  int numChannels = 0;
+RenderDefaults::RenderDefaults(Image *checkerImage)
+    : checkerTexture(0), blackTexture(0), whiteTexture(0),
+      camera(glm::vec3(0, 0, -10.0f)) {
 
-  uchar *data = stbi_load(std::string(checkerTexture).c_str(), &width, &height,
-                          &numChannels, 0);
-  assert(data && "failed to load the checker texture.");
-  if (data) {
-    GLenum format = GL_RGBA;
-    if (numChannels == 1)
-      format = GL_RED;
-    else if (numChannels == 2)
-      format = GL_RG;
-    else if (numChannels == 3)
-      format = GL_RGB;
-    this->checkerTexture = loadTexture(data, width, height, format);
-  }
-  this->blackTexture = loadTexture((const uchar[]){0, 0, 0, 0}, 1, 1, GL_RGBA);
-  this->whiteTexture =
-      loadTexture((const uchar[]){255, 255, 255, 255}, 1, 1, GL_RGBA);
+  Texture texture = Texture(*checkerImage);
+  this->checkerTexture = texture.moveId();
+  texture.loadTexture((const uchar[]){255, 255, 255, 255}, 1, 1, 4);
+  this->blackTexture = texture.moveId();
+  texture.loadTexture((const uchar[]){0, 0, 0, 0}, 1, 1, 4);
+  this->whiteTexture = texture.moveId();
+
+  // default flat material
+  flatMaterial.ao = 1.0f;
+  flatMaterial.albedo = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+  flatMaterial.emission = glm::vec3(0.0f, 0.0f, 0.0f);
+  flatMaterial.metallic = 1.0f;
+  flatMaterial.roughtness = 0.0f;
+  flatMaterial.shaderType = ShaderType::FLAT_FORWARD_SHADER;
+
+  // default material
+  material.albedo = checkerTexture;
+  material.normal = blackTexture;
+  material.emission = blackTexture;
+  material.metallicRoughness = blackTexture;
+  material.ao = whiteTexture;
+  material.shaderType = ShaderType::FORWARD_SHADER;
 }
 
-GLuint RenderDefaults::loadTexture(const uchar *data, int width, int height,
-                                   GLenum format) {
-  GLuint texId;
-  glGenTextures(1, &texId);
-  glBindTexture(GL_TEXTURE_2D, texId);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, format,
-               GL_UNSIGNED_BYTE, data);
-  glGenerateMipmap(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  return texId;
+RenderDefaults::~RenderDefaults() {
+  glDeleteTextures(1, &checkerTexture);
+  glDeleteTextures(1, &blackTexture);
+  glDeleteTextures(1, &whiteTexture);
+  checkerTexture = 0;
+  blackTexture = 0;
+  whiteTexture = 0;
 }
-
-RenderDefaults::~RenderDefaults() {}
 } // namespace render_system

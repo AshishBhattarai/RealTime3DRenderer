@@ -1,10 +1,12 @@
 #pragma once
 
 #include "camera.h"
+#include "mesh.h"
 #include "types.h"
 #include <glad/glad.h>
 #include <string_view>
 
+class Image;
 namespace render_system {
 /**
  * @brief The RenderDefaults class
@@ -13,14 +15,16 @@ namespace render_system {
 class RenderDefaults : NonCopyable {
 
 public:
-  static RenderDefaults &getInstance(std::string_view checkerTexture = "") {
-    static RenderDefaults instance(checkerTexture);
+  static RenderDefaults &getInstance(Image *checkerImage = nullptr) {
+    static RenderDefaults instance(checkerImage);
     return instance;
   }
   GLuint getCheckerTexture() const { return checkerTexture; }
-  //  GLuint getWhiteTexture() const { return whiteTexture; }
+  GLuint getWhiteTexture() const { return whiteTexture; }
   GLuint getBlackTexture() const { return blackTexture; }
   const Camera &getCamera() const { return camera; }
+  const FlatMaterial &getFlatMaterial() const { return flatMaterial; }
+  const Material &getMaterial() const { return material; }
 
 private:
   // 4x4 chekerboard texture
@@ -29,9 +33,12 @@ private:
   GLuint blackTexture;
   GLuint whiteTexture;
 
+  FlatMaterial flatMaterial;
+  Material material;
+
   Camera camera;
 
-  RenderDefaults(std::string_view checkerTexture);
+  RenderDefaults(Image *checkerImage);
   ~RenderDefaults();
 
   GLuint loadTexture(const uchar *data, int width, int height, GLenum format);

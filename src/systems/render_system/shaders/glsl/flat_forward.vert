@@ -6,6 +6,7 @@
 
 layout(location = VERT_A_POSITION_LOC) in vec3 position;
 layout(location = VERT_A_NORMAL_LOC) in vec3 normal;
+layout(location = VERT_A_TEXTCOORD0_LOC) in vec2 texCoord;
 
 struct Matrices {
     mat4 projection;
