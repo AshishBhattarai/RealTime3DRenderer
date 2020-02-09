@@ -29,7 +29,7 @@ private:
   App(int argc, char **argv);
   ~App();
 
-  void processInput();
+  void processInput(float dt);
 
 private:
   Display display;

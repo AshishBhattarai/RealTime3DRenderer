@@ -34,7 +34,7 @@ public:
   int getAspectRatio() const { return (float)width / height; }
 
   // time since the window was initialize usually in nano or micro seconds
-  double getTime() const;
+  float getTime() const;
   bool shouldClose() const;
   bool isFocused() const;
 };

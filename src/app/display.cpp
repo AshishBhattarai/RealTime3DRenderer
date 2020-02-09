@@ -68,7 +68,7 @@ void Display::setShouldClose(bool close) {
 
 void Display::setSwapInterval(int value) { glfwSwapInterval(value); }
 
-double Display::getTime() const { return glfwGetTime(); }
+float Display::getTime() const { return (float)glfwGetTime(); }
 bool Display::shouldClose() const { return glfwWindowShouldClose(window); }
 bool Display::isFocused() const {
   return glfwGetWindowAttrib(window, GLFW_FOCUSED);

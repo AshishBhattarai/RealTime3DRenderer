@@ -57,9 +57,11 @@ App::App(int, char **)
   mesh.modelId = ids.begin()->second;
   coordinator.addComponent<component::Mesh>(temp, mesh);
 
-  input.addKeyCallback(INPUT_KEY_ESCAPE, [](const Input::KeyEvent &event) {
-    DEBUG_SLOG("KEY PRESSED: ", event.key, "TIME: ", event.time);
-  });
+  input.addKeyCallback(
+      INPUT_KEY_ESCAPE, [&display = display](const Input::KeyEvent &event) {
+        DEBUG_SLOG("KEY PRESSED: ", event.key, "TIME: ", event.time);
+        display.setShouldClose(true);
+      });
 
   renderSystem->setCamera(camera);
   renderSystem->updateProjectionMatrix(display.getAspectRatio());
@@ -69,7 +71,7 @@ App::App(int, char **)
   });
 }
 
-void App::processInput() {
+void App::processInput(float dt) {
 
   bool keyW = input.getKey(INPUT_KEY_W);
   bool keyA = input.getKey(INPUT_KEY_A);
@@ -77,17 +79,17 @@ void App::processInput() {
   bool keyS = input.getKey(INPUT_KEY_S);
 
   if (keyW && keyA) {
-    camera->processMovement(CameraMovement::STRAFE_LEFT, 0.15f);
+    camera->processMovement(CameraMovement::STRAFE_LEFT, dt);
   } else if (keyW && keyD) {
-    camera->processMovement(CameraMovement::STRAFE_RIGHT, 0.15f);
+    camera->processMovement(CameraMovement::STRAFE_RIGHT, dt);
   } else if (keyW) {
-    camera->processMovement(CameraMovement::FORWARD, 0.15f);
+    camera->processMovement(CameraMovement::FORWARD, dt);
   } else if (keyA) {
-    camera->processMovement(CameraMovement::LEFT, 0.15f);
+    camera->processMovement(CameraMovement::LEFT, dt);
   } else if (keyD) {
-    camera->processMovement(CameraMovement::RIGHT, 0.15f);
+    camera->processMovement(CameraMovement::RIGHT, dt);
   } else if (keyS) {
-    camera->processMovement(CameraMovement::BACKWARD, 0.15f);
+    camera->processMovement(CameraMovement::BACKWARD, dt);
   }
 
   camera->update();
@@ -95,9 +97,16 @@ void App::processInput() {
 
 void App::run() {
   DEBUG_SLOG("App running.");
+  float lt, ct, dt = 0.0f;
+  lt = ct = display.getTime();
   while (!display.shouldClose()) {
-    processInput();
-    renderSystem->update(0.0f);
+    // calculate delta time
+    ct = display.getTime();
+    dt = ct - lt;
+    lt = display.getTime();
+
+    processInput(dt);
+    renderSystem->update(dt);
     display.update();
     input.update();
   }

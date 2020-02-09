@@ -13,6 +13,7 @@ void Camera::update() {
       glm::angleAxis(glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
   orientation *=
       glm::angleAxis(glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+
   orientation = glm::normalize(orientation);
   viewMat = glm::translate(glm::mat4_cast(orientation), -position);
 
