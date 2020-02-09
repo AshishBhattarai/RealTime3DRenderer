@@ -5,8 +5,7 @@
 namespace app {
 Input::Input(const Display &display)
     : display(display),
-      cursorPos(display.getWidth() / 2.0f, display.getHeight() / 2.0f),
-      lastCursorPos(cursorPos.xPos, cursorPos.xPos), cursorOffset(0.0f, 0.0f) {
+      lastCursorPos(display.getWidth() / 2.0f, display.getHeight() / 2.0f) {
   GLFWwindow *window = display.window;
   //  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetWindowUserPointer(window, this);
@@ -20,16 +19,22 @@ Input::Input(const Display &display)
   glfwSetCursorPosCallback(
       window, [](GLFWwindow *window, double xPos, double yPos) {
         Input *self = static_cast<Input *>(glfwGetWindowUserPointer(window));
-        self->lastCursorPos = self->cursorPos;
-        self->cursorPos = CursorPos((float)xPos, (float)yPos);
+        self->unhandledCursorPos.push(CursorPos((float)xPos, (float)yPos));
       });
 }
 
+void Input::setCursorStatus(int mode) {
+  glfwSetInputMode(display.window, GLFW_CURSOR, mode);
+}
+
 void Input::update() {
-  CursorPos newOffset = cursorPos - lastCursorPos;
-  if (newOffset != cursorOffset) {
-    cursorCallback(newOffset);
-    cursorOffset = newOffset;
+
+  while (!unhandledCursorPos.empty()) {
+    const CursorPos &pos = unhandledCursorPos.front();
+    unhandledCursorPos.pop();
+    CursorPos dt = pos - lastCursorPos;
+    lastCursorPos = pos;
+    cursorCallback(dt);
   }
   while (!unhandledKeys.empty()) {
     const KeyEvent &event = unhandledKeys.front();

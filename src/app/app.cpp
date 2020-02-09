@@ -21,9 +21,10 @@ using namespace render_system;
 
 namespace app {
 App::App(int, char **)
-    : display("App", 1024, 768), input(display),
+    : display("App", 1024, 700), input(display),
       coordinator(ecs::Coordinator::getInstance()) {
   DEBUG_SLOG("App constructed.");
+  input.setCursorStatus(INPUT_CURSOR_DISABLED);
   /* Render System classes should not be constructed before loading defauls*/
   Image checkerImage;
   bool status =
@@ -39,13 +40,12 @@ App::App(int, char **)
   renderSig.set(meshFamily, true);
   coordinator.systemManager.registerSystem<RenderSystem>(renderSig);
   renderSystem = new RenderSystem();
-  camera = new Camera();
-  renderSystem->setCamera(camera);
+  camera = new Camera(glm::vec3(0.0f, 0.0f, -5.0f));
 
   // load model
 
   tinygltf::Model model;
-  status = Loaders::loadModel(model, "resources/meshes/sphere_cube.gltf");
+  status = Loaders::loadModel(model, "resources/meshes/sphere.gltf");
   std::map<std::string, uint> ids = renderSystem->registerMeshes(model);
   DEBUG_CSLOG("LOADED MESHES: ", ids.size());
   ecs::Entity temp = coordinator.createEntity();
@@ -61,22 +61,45 @@ App::App(int, char **)
     DEBUG_SLOG("KEY PRESSED: ", event.key, "TIME: ", event.time);
   });
 
+  renderSystem->setCamera(camera);
   renderSystem->updateProjectionMatrix(display.getAspectRatio());
 
-  input.addCursorCallback([&camera = camera](const Input::CursorPos &offset) {
-    camera->processRotation(offset.xPos, offset.yPos);
+  input.addCursorCallback([&camera = camera](const Input::CursorPos &dt) {
+    camera->processRotation(dt.xPos, dt.yPos);
   });
 }
 
-void App::processInput() { camera->update(); }
+void App::processInput() {
+
+  bool keyW = input.getKey(INPUT_KEY_W);
+  bool keyA = input.getKey(INPUT_KEY_A);
+  bool keyD = input.getKey(INPUT_KEY_D);
+  bool keyS = input.getKey(INPUT_KEY_S);
+
+  if (keyW && keyA) {
+    camera->processMovement(CameraMovement::STRAFE_LEFT, 0.15f);
+  } else if (keyW && keyD) {
+    camera->processMovement(CameraMovement::STRAFE_RIGHT, 0.15f);
+  } else if (keyW) {
+    camera->processMovement(CameraMovement::FORWARD, 0.15f);
+  } else if (keyA) {
+    camera->processMovement(CameraMovement::LEFT, 0.15f);
+  } else if (keyD) {
+    camera->processMovement(CameraMovement::RIGHT, 0.15f);
+  } else if (keyS) {
+    camera->processMovement(CameraMovement::BACKWARD, 0.15f);
+  }
+
+  camera->update();
+}
 
 void App::run() {
   DEBUG_SLOG("App running.");
   while (!display.shouldClose()) {
-    input.update();
     processInput();
     renderSystem->update(0.0f);
     display.update();
+    input.update();
   }
 }
 

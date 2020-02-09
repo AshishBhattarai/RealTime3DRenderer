@@ -4,7 +4,8 @@
 namespace render_system {
 Camera::Camera(const glm::vec3 &position, const glm::vec3 &rotation)
     : front(0.0f, 0.0f, 1.0f), right(1.0f, 0.0f, 0.0f), up(0.0f, 1.0f, 0.0f),
-      position(position), rotation(rotation) {}
+      position(position), rotation(rotation), movementSpeed(SPEED),
+      mouseSensitivity(SENSITIVITY) {}
 
 void Camera::update() {
   // update view matrix and directional vectors
@@ -26,10 +27,10 @@ void Camera::processMovement(CameraMovement movement, float dt) {
 
   switch (movement) {
   case CameraMovement::FORWARD:
-    direction = front;
+    direction = -front;
     break;
   case CameraMovement::BACKWARD:
-    direction = -front;
+    direction = +front;
     break;
   case CameraMovement::RIGHT:
     direction = right;
@@ -38,10 +39,10 @@ void Camera::processMovement(CameraMovement movement, float dt) {
     direction = -right;
     break;
   case CameraMovement::STRAFE_RIGHT:
-    direction = front + right;
+    direction = -front + right;
     break;
   case CameraMovement::STRAFE_LEFT:
-    direction = front - right;
+    direction = -front - right;
     break;
   }
   position += glm::normalize(direction) * speed;

@@ -23,8 +23,8 @@ private:
   static constexpr float YAW = 0.0f;
   static constexpr float PITCH = 0.0f;
   static constexpr float ROLL = 0.0f;
-  static constexpr float SPEED = 5.5f;
-  static constexpr float SENSITIVITY = 1.2f;
+  static constexpr float SPEED = 2.5f;
+  static constexpr float SENSITIVITY = 0.2f;
   static constexpr float ZOOM = 45.0f;
 
   glm::mat4 viewMat;

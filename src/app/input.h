@@ -177,6 +177,11 @@
 #define INPUT_MOUSE_BUTTON_RIGHT INPUT_MOUSE_BUTTON_2
 #define INPUT_MOUSE_BUTTON_MIDDLE INPUT_MOUSE_BUTTON_3
 
+// cursor status
+#define INPUT_CURSOR_NORMAL 0x00034001
+#define INPUT_CURSOR_HIDDEN 0x00034002
+#define INPUT_CURSOR_DISABLED 0x00034003
+
 namespace app {
 class Display;
 class Input {
@@ -205,18 +210,18 @@ public:
   }
 
   using KeyCallback = std::function<void(const KeyEvent &keyEvent)>;
-  using CursorCallback = std::function<void(const CursorPos &offset)>;
+  using CursorCallback =
+      std::function<void(const CursorPos &dt)>; // dt - cursor pos delta
 
 private:
   const Display &display;
 
-  CursorPos cursorPos;
   CursorPos lastCursorPos;
-  CursorPos cursorOffset;
   std::map<int, bool> keys;
   std::map<int, KeyCallback> keyCallbacks;
   CursorCallback cursorCallback;
   std::queue<KeyEvent> unhandledKeys;
+  std::queue<CursorPos> unhandledCursorPos;
 
 public:
   Input(const Display &display);
@@ -226,9 +231,9 @@ public:
   void addCursorCallback(const CursorCallback &callback) {
     cursorCallback = callback;
   }
-  const CursorPos &getCursorPos() const { return cursorPos; }
-  CursorPos getCursorOffset() const { return cursorOffset; }
+  const CursorPos &getLastCursorPos() const { return lastCursorPos; }
   bool getKey(int key) { return keys[key]; }
+  void setCursorStatus(int mode);
   void update();
 };
 } // namespace app
