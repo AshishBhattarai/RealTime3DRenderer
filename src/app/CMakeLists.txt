@@ -10,6 +10,7 @@ target_link_libraries(
     app-lib
     ecs-lib
     render-system-lib
+    world-system-lib
     ${OPENGL_LIBRARIES}
     ${GLAD_LIBRARIES}
     ${GLFW_LIBRARIES}

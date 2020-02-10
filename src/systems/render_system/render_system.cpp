@@ -23,7 +23,7 @@ RenderSystem::RenderSystem() : renderer(meshes, renderables, nullptr) {
     assert(modelId && it != renderables.end() && "Entity with invalid mesh");
     if (it != renderables.end()) {
       size_t idx = it->second.size();
-      it->second.emplace_back(RenderableEntity(transfrom, entity));
+      it->second.emplace_back(RenderableEntity(transfrom.transformMat, entity));
       entityToIndex.emplace(std::pair(entity, idx));
     } else {
       SLOG("Error entity with invalid mesh:", modelId, entity);

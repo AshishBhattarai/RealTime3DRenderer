@@ -11,6 +11,7 @@
 #include "systems/render_system/model.h"
 #include "systems/render_system/render_defaults.h"
 #include "systems/render_system/render_system.h"
+#include "systems/world_system/world_system.h"
 #include "utils/image.h"
 #include "utils/slogger.h"
 #include <iostream>
@@ -24,13 +25,16 @@ App::App(int, char **)
     : display("App", 1024, 700), input(display),
       coordinator(ecs::Coordinator::getInstance()) {
   DEBUG_SLOG("App constructed.");
-  input.setCursorStatus(INPUT_CURSOR_DISABLED);
+  worldSystem = new world_system::WorldSystem();
+
+  //  input.setCursorStatus(INPUT_CURSOR_DISABLED);
   /* Render System classes should not be constructed before loading defauls*/
   Image checkerImage;
   bool status =
       Loaders::loadImage(checkerImage, "resources/defaults/checker.bmp");
   render_system::RenderDefaults::getInstance(&checkerImage);
 
+  // Do this in coordinator
   auto transformFamily =
       coordinator.componentManager.registerComponent<component::Transform>();
   auto meshFamily =
@@ -43,19 +47,11 @@ App::App(int, char **)
   camera = new Camera(glm::vec3(0.0f, 0.0f, -5.0f));
 
   // load model
-
   tinygltf::Model model;
   status = Loaders::loadModel(model, "resources/meshes/sphere.gltf");
   std::map<std::string, uint> ids = renderSystem->registerMeshes(model);
   DEBUG_CSLOG("LOADED MESHES: ", ids.size());
-  ecs::Entity temp = coordinator.createEntity();
-  coordinator.addComponent<component::Transform>(
-      temp, component::Transform(glm::vec3(0.0f, 0.0f, -10.0f),
-                                 glm::vec3(0.0f, 0.0f, 0.0f)));
-  component::Mesh mesh;
-  mesh.name = model.meshes[0].name;
-  mesh.modelId = ids.begin()->second;
-  coordinator.addComponent<component::Mesh>(temp, mesh);
+  component::Mesh mesh(*ids.begin());
 
   input.addKeyCallback(
       INPUT_KEY_ESCAPE, [&display = display](const Input::KeyEvent &event) {
@@ -69,6 +65,12 @@ App::App(int, char **)
   input.addCursorCallback([&camera = camera](const Input::CursorPos &dt) {
     camera->processRotation(dt.xPos, dt.yPos);
   });
+
+  // Add world object
+  world_system::WorldObject &worldObject = worldSystem->createWorldObject(
+      component::Transform(glm::vec3(0.0f, 0.0f, -10.0f)));
+  worldObject.addComponent<component::Mesh>(mesh);
+  worldSystem->getWorldObject(worldObject.getId());
 }
 
 void App::processInput(float dt) {
@@ -106,6 +108,8 @@ void App::run() {
     lt = display.getTime();
 
     processInput(dt);
+
+    worldSystem->update(dt);
     renderSystem->update(dt);
     display.update();
     input.update();
@@ -116,6 +120,7 @@ App::~App() {
   DEBUG_SLOG("App destroyed.");
   delete renderSystem;
   delete camera;
+  delete worldSystem;
 }
 
 } // namespace app

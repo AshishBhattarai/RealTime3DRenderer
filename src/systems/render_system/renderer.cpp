@@ -29,22 +29,7 @@ void Renderer::render(float dt) {
     for (const Primitive &primitive : mesh.primitives) {
       glBindVertexArray(primitive.vao);
       for (const RenderableEntity &entity : entites) {
-        const auto &transform = entity.transform;
-        // create transformation matrix
-        glm::mat4 transformMat =
-            glm::translate(glm::mat4(1.0f), entity.transform.position);
-        transformMat =
-            glm::rotate(transformMat, glm::radians(transform.rotation.x),
-                        glm::vec3(1.0f, 0.0f, 0.0f));
-        transformMat =
-            glm::rotate(transformMat, glm::radians(transform.rotation.y),
-                        glm::vec3(0.0f, 1.0f, 0.0f));
-        transformMat =
-            glm::rotate(transformMat, glm::radians(transform.rotation.z),
-                        glm::vec3(1.0f, 0.0f, 1.0f));
-        transformMat = glm::scale(transformMat, transform.scale);
-
-        flatForwardShader.loadTransformMatrix(transformMat);
+        flatForwardShader.loadTransformMatrix(entity.transform);
         glDrawElements(primitive.mode, primitive.indexCount,
                        primitive.indexType, primitive.indexOffset);
       }
