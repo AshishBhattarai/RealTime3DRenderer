@@ -1,5 +1,6 @@
 #pragma once
 
+#include "construct.h"
 #include "display.h"
 #include "input.h"
 #include "types.h"
@@ -33,6 +34,7 @@ private:
 private:
   Display display;
   Input input;
+  Construct construct;
   ecs::Coordinator &coordinator;
   world_system::WorldSystem *worldSystem;
   render_system::RenderSystem *renderSystem;

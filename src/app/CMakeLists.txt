@@ -5,6 +5,7 @@ add_library(
     input.cpp
     loaders.cpp
     app_config.cpp
+    construct.cpp
     app_model.qmodel
 )
 target_link_libraries(

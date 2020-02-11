@@ -23,11 +23,10 @@ using namespace render_system;
 
 namespace app {
 App::App(int, char **)
-    : display("App", 1024, 700), input(display),
+    : display("App", 1024, 700), input(display), construct(),
       coordinator(ecs::Coordinator::getInstance()),
       worldSystem(new world_system::WorldSystem()),
-      renderSystem(
-          AppConfig::getInstance().newRenderSystem(display.getAspectRatio())),
+      renderSystem(construct.newRenderSystem(display.getAspectRatio())),
       camera(new Camera(glm::vec3(0.0f, 0.0f, -5.0f))) {
   DEBUG_SLOG("App constructed.");
   //  input.setCursorStatus(INPUT_CURSOR_DISABLED);

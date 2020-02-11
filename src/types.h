@@ -35,5 +35,5 @@ protected:
 
 // cast to enums underlying type
 template <typename T> constexpr auto toUnderlying(T e) noexcept {
-  return static_cast<std::underlying_type<T>>(e);
+  return static_cast<std::underlying_type_t<T>>(e);
 }

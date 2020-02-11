@@ -34,6 +34,7 @@ Program::Program(const StageCodeMap &codeMap)
   for (const auto &pair : codeMap) {
     GLenum shaderType = stageToGLenum(pair.first);
     shaders.emplace_back(createShader(pair.second, shaderType));
+    shaderStageFlags = shaderStageFlags | toUnderlying<ShaderStage>(pair.first);
   }
 
   // create, attach & link program

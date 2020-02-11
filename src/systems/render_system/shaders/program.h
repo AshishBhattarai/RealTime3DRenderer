@@ -3,7 +3,6 @@
 #include <cassert>
 #include <glad/glad.h>
 #include <map>
-#include <string_view>
 
 class Buffer;
 namespace render_system::shader {

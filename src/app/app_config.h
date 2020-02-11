@@ -2,10 +2,6 @@
 
 #include "types.h"
 
-namespace render_system {
-class RenderSystem;
-}
-
 namespace app {
 
 /**
@@ -19,8 +15,6 @@ public:
     static AppConfig instance;
     return instance;
   }
-
-  render_system::RenderSystem *newRenderSystem(float ar);
 
 private:
   AppConfig();
