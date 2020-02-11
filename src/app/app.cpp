@@ -1,5 +1,6 @@
 #include "app.h"
 
+#include "app_config.h"
 #include "common.h"
 #include "components/mesh.h"
 #include "components/transform.h"
@@ -11,6 +12,7 @@
 #include "systems/render_system/model.h"
 #include "systems/render_system/render_system.h"
 #include "systems/world_system/world_system.h"
+#include "utils/buffer.h"
 #include "utils/image.h"
 #include "utils/slogger.h"
 #include <iostream>
@@ -21,24 +23,21 @@ using namespace render_system;
 
 namespace app {
 App::App(int, char **)
-    : display("App", 1024, 700), input(display), config(),
+    : display("App", 1024, 700), input(display),
       coordinator(ecs::Coordinator::getInstance()),
       worldSystem(new world_system::WorldSystem()),
+      renderSystem(
+          AppConfig::getInstance().newRenderSystem(display.getAspectRatio())),
       camera(new Camera(glm::vec3(0.0f, 0.0f, -5.0f))) {
   DEBUG_SLOG("App constructed.");
   //  input.setCursorStatus(INPUT_CURSOR_DISABLED);
 
-  /* Init RenderSystem */
-  Image checkerImage;
-  bool status =
-      app::Loaders::loadImage(checkerImage, "resources/defaults/checker.bmp");
-  renderSystem = new RenderSystem(RenderSystemConfig(&checkerImage));
   renderSystem->setCamera(camera);
   renderSystem->updateProjectionMatrix(display.getAspectRatio());
 
   // load model
   tinygltf::Model model;
-  status = Loaders::loadModel(model, "resources/meshes/sphere.gltf");
+  Loaders::loadModel(model, "resources/meshes/sphere.gltf");
   std::map<std::string, uint> ids = renderSystem->registerMeshes(model);
   DEBUG_CSLOG("LOADED MESHES: ", ids.size());
   component::Mesh mesh(*ids.begin());

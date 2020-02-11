@@ -5,7 +5,7 @@
 #include <string>
 
 namespace render_system {
-RenderDefaults::RenderDefaults(Image *checkerImage)
+RenderDefaults::RenderDefaults(const Image *checkerImage)
     : checkerTexture(0), blackTexture(0), whiteTexture(0),
       camera(glm::vec3(0, 0, -10.0f)) {
 

@@ -9,9 +9,10 @@
 namespace render_system {
 
 Renderer::Renderer(const std::vector<Mesh> &meshes,
-                   const RenderableMap &renderables, const Camera *camera)
+                   const RenderableMap &renderables, const Camera *camera,
+                   const shader::StageCodeMap &flatForwardShader)
     : meshes(meshes), renderables(renderables), projectionMatrix(1.0f),
-      camera(camera), flatForwardShader() {
+      camera(camera), flatForwardShader(flatForwardShader) {
   glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
 }

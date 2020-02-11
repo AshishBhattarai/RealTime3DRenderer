@@ -5,6 +5,7 @@
 #include <map>
 #include <string_view>
 
+class Buffer;
 namespace render_system::shader {
 
 enum class ShaderStage : short {
@@ -16,14 +17,16 @@ enum class ShaderStage : short {
   COMPUTE_SHADER = 0x0032
 }; // namespace ShaderStage
 
+using StageCodeMap = std::map<ShaderStage, const Buffer &>;
+
 class Program {
 private:
   GLuint program;
   short shaderStageFlags;
-  GLuint createShader(std::string_view path, GLenum type);
+  GLuint createShader(const Buffer &data, GLenum type);
 
 public:
-  Program(std::map<ShaderStage, std::string_view> shaderPaths);
+  Program(const StageCodeMap &codeMap);
 
   void bind() { glUseProgram(program); }
   static void unBind() { glUseProgram(0); }

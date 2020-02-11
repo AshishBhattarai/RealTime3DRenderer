@@ -10,14 +10,20 @@ struct Model;
 }
 
 class Image;
+class Buffer;
 namespace render_system {
 class Camera;
 class Model;
 
 struct RenderSystemConfig {
-  Image *checkerImage; // can be removed after RenderSystem construction
+  const Image &checkerImage; // can be removed after RenderSystem construction
+  const shader::StageCodeMap &flatForwardShader;
+  float ar;
 
-  RenderSystemConfig(Image *checkerImage) : checkerImage(checkerImage) {}
+  RenderSystemConfig(const Image &checkerImage,
+                     const shader::StageCodeMap &flatForwardShader, float ar)
+      : checkerImage(checkerImage), flatForwardShader(flatForwardShader),
+        ar(ar) {}
 };
 
 class RenderSystem : ecs::System<RenderSystem> {

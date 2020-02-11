@@ -16,6 +16,27 @@ public:
   }
   Image() = default;
 
+  Image(Image &&image) {
+    this->buffer = image.buffer;
+    this->width = image.width;
+    this->height = image.height;
+    this->numChannels = image.numChannels;
+    image.buffer = nullptr;
+    image.width = image.height = image.numChannels = 0;
+  }
+  Image &operator=(Image &&image) {
+    this->buffer = image.buffer;
+    this->width = image.width;
+    this->height = image.height;
+    this->numChannels = image.numChannels;
+    image.buffer = nullptr;
+    image.width = image.height = image.numChannels = 0;
+    return *this;
+  }
+
+  Image(Image &) = delete;
+  Image &operator=(Image &) = delete;
+
   ~Image() {
     if (buffer) {
       free(buffer);

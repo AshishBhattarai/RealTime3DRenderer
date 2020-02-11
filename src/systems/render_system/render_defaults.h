@@ -15,7 +15,7 @@ namespace render_system {
 class RenderDefaults : NonCopyable {
 
 public:
-  static RenderDefaults &getInstance(Image *checkerImage = nullptr) {
+  static RenderDefaults &getInstance(const Image *checkerImage = nullptr) {
     static RenderDefaults instance(checkerImage);
     return instance;
   }
@@ -38,7 +38,7 @@ private:
 
   Camera camera;
 
-  RenderDefaults(Image *checkerImage);
+  RenderDefaults(const Image *checkerImage);
   ~RenderDefaults();
 
   GLuint loadTexture(const uchar *data, int width, int height, GLenum format);

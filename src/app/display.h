@@ -31,7 +31,7 @@ public:
   // getters
   int getWidth() const { return width; }
   int getHeight() const { return height; }
-  int getAspectRatio() const { return (float)width / height; }
+  float getAspectRatio() const { return (float)width / height; }
 
   // time since the window was initialize usually in nano or micro seconds
   float getTime() const;

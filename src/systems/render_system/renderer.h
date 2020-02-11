@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <vector>
 
+class Buffer;
 namespace render_system {
 struct Mesh;
 struct RenderableEntity;
@@ -30,7 +31,7 @@ private:
 
 public:
   Renderer(const std::vector<Mesh> &meshes, const RenderableMap &renderables,
-           const Camera *camera);
+           const Camera *camera, const shader::StageCodeMap &flatForwardShader);
 
   void render(float dt);
   void updateProjectionMatrix(float ar, float fov, float near, float far);

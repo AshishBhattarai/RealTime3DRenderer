@@ -1,5 +1,6 @@
 #include "loaders.h"
 #include "types.h"
+#include "utils/buffer.h"
 #include "utils/image.h"
 #include "utils/slogger.h"
 
@@ -25,7 +26,7 @@ bool loadModel(tinygltf::Model &model, const char *fileName) {
   if (!res)
     SLOG("Failed to load glTF:", fileName);
   else {
-    SLOG("Loaded glTF:", fileName);
+    DEBUG_SLOG("Loaded glTF:", fileName);
   }
   return res;
 }
@@ -38,9 +39,36 @@ bool loadImage(Image &image, const char *fileName) {
   uchar *buffer = stbi_load(std::string(fileName).c_str(), &width, &height,
                             &numChannels, 0);
   assert(buffer && "failed to load the checker texture.");
-  if (!buffer)
+  if (!buffer) {
+    SLOG("Failed to load image:", fileName);
     return false;
-  image = Image(buffer, width, height, numChannels);
-  return true;
+  } else {
+    DEBUG_SLOG("Loaded image: ", fileName);
+    image = Image(buffer, width, height, numChannels);
+    return true;
+  }
+}
+
+bool loadBinaryFile(Buffer &buffer, const char *fileName) {
+  char *content = nullptr;
+  size_t size = 0;
+  // read from file
+  std::ifstream file(fileName, std::ios::binary | std::ios::ate);
+  if (file.is_open()) {
+    size = file.tellg();
+    content = new char[size];
+    file.seekg(0, std::ios::beg);
+    file.read(content, size);
+    file.close();
+  }
+  // check for errors
+  if (file.fail()) {
+    SLOG("Failed to read form binary file:", fileName);
+    return false;
+  } else {
+    DEBUG_SLOG("Loaded binary file:", fileName);
+    buffer = Buffer(content, size);
+    return true;
+  }
 }
 } // namespace app::Loaders

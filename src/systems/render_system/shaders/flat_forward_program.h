@@ -8,7 +8,7 @@
 namespace render_system::shader {
 class FlatForwardProgram : public Program {
 public:
-  FlatForwardProgram();
+  FlatForwardProgram(const StageCodeMap &codeMap);
 
   void loadProjectionMatrix(const glm::mat4 &matrix) {
     glUniformMatrix4fv(vertex::uniform::PROJECTION_LOC, 1, GL_FALSE,

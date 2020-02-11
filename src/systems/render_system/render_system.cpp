@@ -11,7 +11,9 @@
 namespace render_system {
 RenderSystem::RenderSystem(const RenderSystemConfig &config)
     : renderer(meshes, renderables,
-               &RenderDefaults::getInstance(config.checkerImage).getCamera()) {
+               &RenderDefaults::getInstance(&config.checkerImage).getCamera(),
+               config.flatForwardShader) {
+  updateProjectionMatrix(config.ar);
   auto &coordinator = ecs::Coordinator::getInstance();
 
   /* Handle new entity that matches render system signature */
