@@ -4,6 +4,6 @@
 #include "ecs/system_manager.h"
 
 int main(int argc, char **argv) {
-  app::App &app = app::App::getInstance(argc, argv);
+  app::App app(argc, argv);
   app.run();
 }

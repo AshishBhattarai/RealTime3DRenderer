@@ -22,16 +22,12 @@ namespace app {
 class App : NonCopyable {
 public:
   // lazy init instance
-  static App &getInstance(int argc, char **argv) {
-    static App instance(argc, argv);
-    return instance;
-  }
-  void run();
-
-private:
   App(int argc, char **argv);
   ~App();
 
+  void run();
+
+private:
   void processInput(float dt);
 
 private:
