@@ -1,5 +1,6 @@
 #pragma once
 
+#include "app_config.h"
 #include "display.h"
 #include "input.h"
 #include "types.h"
@@ -33,9 +34,10 @@ private:
 private:
   Display display;
   Input input;
+  AppConfig config;
   ecs::Coordinator &coordinator;
-  render_system::RenderSystem *renderSystem;
   world_system::WorldSystem *worldSystem;
+  render_system::RenderSystem *renderSystem;
   render_system::Camera *camera;
 };
 } // namespace app

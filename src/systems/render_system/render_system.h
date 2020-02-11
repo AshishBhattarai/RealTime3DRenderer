@@ -9,9 +9,16 @@ namespace tinygltf {
 struct Model;
 }
 
+class Image;
 namespace render_system {
 class Camera;
 class Model;
+
+struct RenderSystemConfig {
+  Image *checkerImage; // can be removed after RenderSystem construction
+
+  RenderSystemConfig(Image *checkerImage) : checkerImage(checkerImage) {}
+};
 
 class RenderSystem : ecs::System<RenderSystem> {
 private:
@@ -25,7 +32,7 @@ private:
   std::unordered_map<ecs::Entity, size_t> entityToIndex;
 
 public:
-  RenderSystem();
+  RenderSystem(const RenderSystemConfig &config);
 
   /**
    * Moves all the meshes in give model to the render system.

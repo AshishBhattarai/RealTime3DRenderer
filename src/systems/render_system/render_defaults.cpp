@@ -9,6 +9,8 @@ RenderDefaults::RenderDefaults(Image *checkerImage)
     : checkerTexture(0), blackTexture(0), whiteTexture(0),
       camera(glm::vec3(0, 0, -10.0f)) {
 
+  assert(checkerImage && "Invalid checker image received.");
+
   Texture texture = Texture(*checkerImage);
   this->checkerTexture = texture.moveId();
   texture.loadTexture((const uchar[]){255, 255, 255, 255}, 1, 1, 4);

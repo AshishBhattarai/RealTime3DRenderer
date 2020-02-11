@@ -9,7 +9,6 @@
 #include "loaders.h"
 #include "systems/render_system/camera.h"
 #include "systems/render_system/model.h"
-#include "systems/render_system/render_defaults.h"
 #include "systems/render_system/render_system.h"
 #include "systems/world_system/world_system.h"
 #include "utils/image.h"
@@ -22,29 +21,20 @@ using namespace render_system;
 
 namespace app {
 App::App(int, char **)
-    : display("App", 1024, 700), input(display),
-      coordinator(ecs::Coordinator::getInstance()) {
+    : display("App", 1024, 700), input(display), config(),
+      coordinator(ecs::Coordinator::getInstance()),
+      worldSystem(new world_system::WorldSystem()),
+      camera(new Camera(glm::vec3(0.0f, 0.0f, -5.0f))) {
   DEBUG_SLOG("App constructed.");
-  worldSystem = new world_system::WorldSystem();
-
   //  input.setCursorStatus(INPUT_CURSOR_DISABLED);
-  /* Render System classes should not be constructed before loading defauls*/
+
+  /* Init RenderSystem */
   Image checkerImage;
   bool status =
-      Loaders::loadImage(checkerImage, "resources/defaults/checker.bmp");
-  render_system::RenderDefaults::getInstance(&checkerImage);
-
-  // Do this in coordinator
-  auto transformFamily =
-      coordinator.componentManager.registerComponent<component::Transform>();
-  auto meshFamily =
-      coordinator.componentManager.registerComponent<component::Mesh>();
-  ecs::Signature renderSig;
-  renderSig.set(transformFamily, true);
-  renderSig.set(meshFamily, true);
-  coordinator.systemManager.registerSystem<RenderSystem>(renderSig);
-  renderSystem = new RenderSystem();
-  camera = new Camera(glm::vec3(0.0f, 0.0f, -5.0f));
+      app::Loaders::loadImage(checkerImage, "resources/defaults/checker.bmp");
+  renderSystem = new RenderSystem(RenderSystemConfig(&checkerImage));
+  renderSystem->setCamera(camera);
+  renderSystem->updateProjectionMatrix(display.getAspectRatio());
 
   // load model
   tinygltf::Model model;
@@ -59,9 +49,6 @@ App::App(int, char **)
         display.setShouldClose(true);
       });
 
-  renderSystem->setCamera(camera);
-  renderSystem->updateProjectionMatrix(display.getAspectRatio());
-
   input.addCursorCallback([&camera = camera](const Input::CursorPos &dt) {
     camera->processRotation(dt.xPos, dt.yPos);
   });
@@ -74,7 +61,6 @@ App::App(int, char **)
 }
 
 void App::processInput(float dt) {
-
   bool keyW = input.getKey(INPUT_KEY_W);
   bool keyA = input.getKey(INPUT_KEY_A);
   bool keyD = input.getKey(INPUT_KEY_D);

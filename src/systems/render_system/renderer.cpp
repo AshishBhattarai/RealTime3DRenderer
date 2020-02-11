@@ -12,9 +12,6 @@ Renderer::Renderer(const std::vector<Mesh> &meshes,
                    const RenderableMap &renderables, const Camera *camera)
     : meshes(meshes), renderables(renderables), projectionMatrix(1.0f),
       camera(camera), flatForwardShader() {
-  if (!camera) {
-    this->camera = &RenderDefaults::getInstance().getCamera();
-  }
   glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
 }

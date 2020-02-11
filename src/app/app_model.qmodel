@@ -441,9 +441,55 @@
                       </DAssociation>
                      </instance>
                     </item>
+                    <item>
+                     <instance type="DClass">
+                      <DClass>
+                       <base-DObject>
+                        <DObject>
+                         <base-DElement>
+                          <DElement>
+                           <uid>{0acf2e25-20ff-4496-8a2b-e079d06f3b42}</uid>
+                          </DElement>
+                         </base-DElement>
+                         <object>{3d127cd8-c3aa-4fa4-ad4d-da8e7add85f0}</object>
+                         <name>AppConfig</name>
+                         <pos>x:730;y:70</pos>
+                         <rect>x:-40;y:-35;w:80;h:70</rect>
+                         <visual-role>0</visual-role>
+                        </DObject>
+                       </base-DObject>
+                       <namespace>app</namespace>
+                      </DClass>
+                     </instance>
+                    </item>
+                    <item>
+                     <instance type="DAssociation">
+                      <DAssociation>
+                       <base-DRelation>
+                        <DRelation>
+                         <base-DElement>
+                          <DElement>
+                           <uid>{ec64b697-1f76-4ef3-ac43-f64f7b52a704}</uid>
+                          </DElement>
+                         </base-DElement>
+                         <object>{a0f198c8-4088-4183-8015-83ce7ebc47cb}</object>
+                         <a>{0acf2e25-20ff-4496-8a2b-e079d06f3b42}</a>
+                         <b>{828675d7-e206-4095-b9dc-6ea2d7b8f952}</b>
+                        </DRelation>
+                       </base-DRelation>
+                       <a>
+                        <DAssociationEnd>
+                         <cradinality>1</cradinality>
+                         <navigable>true</navigable>
+                         <kind>2</kind>
+                        </DAssociationEnd>
+                       </a>
+                      </DAssociation>
+                     </instance>
+                    </item>
                    </qlist>
                   </elements>
-                  <last-modified>1581363535173</last-modified>
+                  <last-modified>1581435261821</last-modified>
                   <toolbarid>General</toolbarid>
                  </MDiagram>
                 </base-MDiagram>
@@ -776,14 +822,14 @@
                  <qlist>
                   <item>
                    <MClassMember>
-                    <uid>{c4db0b08-9bc5-4828-b533-38b97154e6ca}</uid>
+                    <uid>{0581cd88-d97e-4500-b0a9-081d24e3f862}</uid>
                     <type>1</type>
                     <declaration>display: Display</declaration>
                    </MClassMember>
                   </item>
                   <item>
                    <MClassMember>
-                    <uid>{9466389c-aa21-40e9-9936-22308b5daabd}</uid>
+                    <uid>{408dea54-b1b9-4a60-bb36-65bb3ad997b7}</uid>
                     <type>1</type>
                     <declaration>coordinator: ecs::Coordinator</declaration>
                    </MClassMember>
@@ -4093,6 +4139,65 @@
                   <name>Renderer</name>
                  </MObject>
                 </base-MObject>
+               </MClass>
+              </instance>
+             </target>
+            </handle>
+           </item>
+           <item>
+            <handle>
+             <uid>{3d127cd8-c3aa-4fa4-ad4d-da8e7add85f0}</uid>
+             <target>
+              <instance type="MClass">
+               <MClass>
+                <base-MObject>
+                 <MObject>
+                  <base-MElement>
+                   <MElement>
+                    <uid>{3d127cd8-c3aa-4fa4-ad4d-da8e7add85f0}</uid>
+                   </MElement>
+                  </base-MElement>
+                  <name>AppConfig</name>
+                  <relations>
+                   <handles>
+                    <handles>
+                     <qlist>
+                      <item>
+                       <handle>
+                        <uid>{a0f198c8-4088-4183-8015-83ce7ebc47cb}</uid>
+                        <target>
+                         <instance type="MAssociation">
+                          <MAssociation>
+                           <base-MRelation>
+                            <MRelation>
+                             <base-MElement>
+                              <MElement>
+                               <uid>{a0f198c8-4088-4183-8015-83ce7ebc47cb}</uid>
+                              </MElement>
+                             </base-MElement>
+                             <a>{3d127cd8-c3aa-4fa4-ad4d-da8e7add85f0}</a>
+                             <b>{a40f5094-0d41-4ff9-969c-b4027fac36eb}</b>
+                            </MRelation>
+                           </base-MRelation>
+                           <a>
+                            <MAssociationEnd>
+                             <cardinality>1</cardinality>
+                             <navigable>true</navigable>
+                             <kind>2</kind>
+                            </MAssociationEnd>
+                           </a>
+                          </MAssociation>
+                         </instance>
+                        </target>
+                       </handle>
+                      </item>
+                     </qlist>
+                    </handles>
+                   </handles>
+                  </relations>
+                 </MObject>
+                </base-MObject>
+                <namespace>app</namespace>
                </MClass>
               </instance>
              </target>

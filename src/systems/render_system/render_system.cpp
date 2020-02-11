@@ -4,19 +4,23 @@
 #include "components/transform.h"
 #include "ecs/coordinator.h"
 #include "model.h"
+#include "render_defaults.h"
+#include "utils/image.h"
 #include "utils/slogger.h"
 
 namespace render_system {
-RenderSystem::RenderSystem() : renderer(meshes, renderables, nullptr) {
+RenderSystem::RenderSystem(const RenderSystemConfig &config)
+    : renderer(meshes, renderables,
+               &RenderDefaults::getInstance(config.checkerImage).getCamera()) {
   auto &coordinator = ecs::Coordinator::getInstance();
-  using namespace component;
 
   /* Handle new entity that matches render system signature */
   connectEntityAddedSignal([&coordinator, &renderables = renderables,
                             &entityToIndex =
                                 entityToIndex](const ecs::Entity &entity,
                                                const ecs::Signature &) {
-    const auto &transfrom = coordinator.getComponent<Transform>(entity);
+    const auto &transfrom =
+        coordinator.getComponent<component::Transform>(entity);
     unsigned int modelId =
         coordinator.getComponent<component::Mesh>(entity).modelId;
     auto it = renderables.find(modelId);
