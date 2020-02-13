@@ -182,6 +182,11 @@
 #define INPUT_CURSOR_HIDDEN 0x00034002
 #define INPUT_CURSOR_DISABLED 0x00034003
 
+// keyboard keys + mouse button
+#define INPUT_RELEASE 0
+#define INPUT_PRESS 1
+#define INPUT_REPEAT 2
+
 namespace app {
 class Display;
 class Input {
@@ -215,6 +220,7 @@ public:
 
 private:
   const Display &display;
+  int cursorMode;
 
   CursorPos lastCursorPos;
   std::map<int, bool> keys;
@@ -233,7 +239,14 @@ public:
   }
   const CursorPos &getLastCursorPos() const { return lastCursorPos; }
   bool getKey(int key) { return keys[key]; }
-  void setCursorStatus(int mode);
+  void setCursorMode(int mode);
+  void toggleCursorMode() {
+    if (cursorMode == INPUT_CURSOR_NORMAL)
+      cursorMode = INPUT_CURSOR_DISABLED;
+    else
+      cursorMode = INPUT_CURSOR_NORMAL;
+    setCursorMode(cursorMode);
+  }
   void update();
 };
 } // namespace app

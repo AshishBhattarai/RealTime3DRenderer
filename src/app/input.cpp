@@ -4,7 +4,7 @@
 
 namespace app {
 Input::Input(const Display &display)
-    : display(display),
+    : display(display), cursorMode(GLFW_CURSOR_NORMAL),
       lastCursorPos(display.getWidth() / 2.0f, display.getHeight() / 2.0f) {
   GLFWwindow *window = display.window;
   //  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -23,7 +23,7 @@ Input::Input(const Display &display)
       });
 }
 
-void Input::setCursorStatus(int mode) {
+void Input::setCursorMode(int mode) {
   glfwSetInputMode(display.window, GLFW_CURSOR, mode);
 }
 

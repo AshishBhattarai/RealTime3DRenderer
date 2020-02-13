@@ -43,8 +43,16 @@ App::App(int, char **)
 
   input.addKeyCallback(
       INPUT_KEY_ESCAPE, [&display = display](const Input::KeyEvent &event) {
+        if (event.action) {
+          DEBUG_SLOG("KEY PRESSED: ", event.key, "TIME: ", event.time);
+          display.setShouldClose(true);
+        }
+      });
+  input.addKeyCallback(
+      INPUT_KEY_Q, [&input = input](const Input::KeyEvent &event) {
         DEBUG_SLOG("KEY PRESSED: ", event.key, "TIME: ", event.time);
-        display.setShouldClose(true);
+        if (event.action)
+          input.toggleCursorMode();
       });
 
   input.addCursorCallback([&camera = camera](const Input::CursorPos &dt) {
