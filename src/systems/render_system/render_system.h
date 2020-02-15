@@ -2,7 +2,7 @@
 
 #include "ecs/common.h"
 #include "ecs/system_manager.h"
-#include "renderable_entity.h"
+#include "point_light.h"
 #include "renderer.h"
 
 namespace tinygltf {
@@ -37,6 +37,7 @@ private:
 
   Renderer renderer;
   std::vector<Mesh> meshes;
+  std::vector<PointLight> pointLights;
   RenderableMap renderables;
   std::unordered_map<ecs::Entity, size_t> entityToIndex;
   std::unordered_map<MeshId, size_t> meshToIndex;

@@ -14,6 +14,7 @@ class Buffer;
 namespace render_system {
 struct Mesh;
 struct RenderableEntity;
+struct PointLight;
 class Camera;
 
 using RenderableMap = std::unordered_map<GLuint, std::vector<RenderableEntity>>;
@@ -22,7 +23,8 @@ class Renderer {
 private:
   const std::vector<Mesh> &meshes;
   const RenderableMap &renderables;
-  std::unordered_set<EntityId> removeables;
+  const std::vector<PointLight> &pointLights;
+  //  std::unordered_set<EntityId> removeables;
   glm::mat4 projectionMatrix;
 
   const Camera *camera;
@@ -31,7 +33,8 @@ private:
 
 public:
   Renderer(const std::vector<Mesh> &meshes, const RenderableMap &renderables,
-           const Camera *camera, const shader::StageCodeMap &flatForwardShader);
+           const std::vector<PointLight> &pointLights, const Camera *camera,
+           const shader::StageCodeMap &flatForwardShader);
 
   void render(float dt);
   void updateProjectionMatrix(float ar, float fov, float near, float far);

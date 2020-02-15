@@ -12,7 +12,6 @@ layout (location = VERT_INTERFACE_BLOCK_LOC) out VertexData {
    vec2 texCoord;
    vec3 worldPos;
    vec3 normal;
-   vec3 viewDir;
 } vs_out;
 
 struct Matrices {
@@ -31,6 +30,5 @@ void main() {
     gl_Position = matrices.projection * matrices.view * worldPos;
     vs_out.texCoord = texCoord;
     vs_out.worldPos = worldPos.xyz;
-    vs_out.normal = normal;
-    vs_out.viewDir= matrices.view[3].xyz - worldPos.xyz;
+    vs_out.normal = mat3(matrices.transformation) * normal;
 }

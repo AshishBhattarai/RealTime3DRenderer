@@ -6,6 +6,7 @@
 #include "ecs/coordinator.h"
 #include "model.h"
 #include "render_defaults.h"
+#include "renderable_entity.h"
 #include "utils/image.h"
 #include "utils/slogger.h"
 
@@ -33,9 +34,10 @@ void RenderSystem::initSubSystems(ecs::Coordinator &coordinator) {
 }
 
 RenderSystem::RenderSystem(const RenderSystemConfig &config)
-    : renderer(meshes, renderables,
+    : renderer(meshes, renderables, pointLights,
                &RenderDefaults::getInstance(&config.checkerImage).getCamera(),
                config.flatForwardShader) {
+  pointLights.reserve(shader::fragment::PointLight::MAX);
   updateProjectionMatrix(config.ar);
   auto &coordinator = ecs::Coordinator::getInstance();
   /* Register & init helper systems(sub-systems) */
@@ -69,8 +71,20 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
    * Handle Lights(Entities with light component)
    */
   lightingSystem->connectEntityAddedSignal(
-      [&coordinator](const ecs::Entity &entity, const ecs::Signature &) {
-
+      [&coordinator, &pointLights = pointLights,
+       &entityToIndex = entityToIndex](const ecs::Entity &entity,
+                                       const ecs::Signature &) {
+        if (pointLights.size() >= shader::fragment::PointLight::MAX) {
+          CSLOG("Error: Maximum point lights reached.");
+          return;
+        }
+        const auto &transfrom =
+            coordinator.getComponent<component::Transform>(entity);
+        const auto &light = coordinator.getComponent<component::Light>(entity);
+        PointLight pointLight(transfrom.transformMat[3], light.color,
+                              light.range, entity);
+        pointLights.push_back(pointLight);
+        entityToIndex.emplace(std::pair(entity, pointLights.size()));
       });
 
   lightingSystem->connectEntityRemovedSignal([](const ecs::Entity &) {

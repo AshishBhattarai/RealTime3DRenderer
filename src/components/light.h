@@ -8,6 +8,9 @@ struct Light {
   glm::vec3 color;
   float range;
   LightType type;
+
+  Light(const glm::vec3 &color, const float &range, const LightType &type)
+      : color(color), range(range), type(type) {}
 };
 
 } // namespace component

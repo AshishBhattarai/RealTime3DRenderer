@@ -2,6 +2,7 @@
 
 #include "app_config.h"
 #include "common.h"
+#include "components/light.h"
 #include "components/mesh.h"
 #include "components/transform.h"
 #include "display.h"
@@ -27,7 +28,7 @@ App::App(int, char **)
       coordinator(ecs::Coordinator::getInstance()),
       worldSystem(new world_system::WorldSystem()),
       renderSystem(construct.newRenderSystem(display.getAspectRatio())),
-      camera(new Camera(glm::vec3(0.0f, 0.0f, -5.0f))) {
+      camera(new Camera(glm::vec3(0.0f, 0.0f, 0.0f))) {
   DEBUG_SLOG("App constructed.");
   //  input.setCursorStatus(INPUT_CURSOR_DISABLED);
 
@@ -63,6 +64,10 @@ App::App(int, char **)
   // Add world object
   world_system::WorldObject &worldObject = worldSystem->createWorldObject(
       component::Transform(glm::vec3(0.0f, 0.0f, -10.0f)));
+  world_system::WorldObject &testLight = worldSystem->createWorldObject(
+      component::Transform(glm::vec3(5.0f, 0.0f, 0.0f)));
+  testLight.addComponent<component::Light>(component::Light(
+      glm::vec3(200.0f, 200.0f, 200.0f), 50.0f, LightType::POINT_LIGHT));
   worldObject.addComponent<component::Mesh>(mesh);
   worldSystem->getWorldObject(worldObject.getId());
 }
@@ -104,6 +109,9 @@ void App::run() {
 
     worldSystem->update(dt);
     renderSystem->update(dt);
+    auto err = glGetError();
+    if (err != GL_NO_ERROR)
+      CSLOG("OpenGL ERROR:", err);
     display.update();
     input.update();
   }

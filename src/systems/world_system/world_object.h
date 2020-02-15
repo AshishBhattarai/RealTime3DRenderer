@@ -26,7 +26,7 @@ private:
   WorldObjectId id;
   EntityId entityId;
   //  std::vector<WorldObject*> childerns;
-  const component::Transform *transform;
+  component::Transform *transform;
 
 public:
   std::unique_ptr<OnUpdateSignal> onUpdate;
@@ -34,7 +34,7 @@ public:
   WorldObject();
   virtual ~WorldObject();
 
-  const component::Transform *getTransform() const { return transform; }
+  component::Transform *const getTransform() { return transform; }
   WorldObjectId getId() const { return id; }
   EntityId getEntityId() const { return entityId; }
 

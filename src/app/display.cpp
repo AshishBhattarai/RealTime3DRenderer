@@ -24,7 +24,7 @@ Display::Display(std::string_view title, int width, int height)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, MINOR_VERSION);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-  //  glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
+  glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 
   // create window
   window = glfwCreateWindow(

@@ -20,9 +20,9 @@ RenderDefaults::RenderDefaults(const Image *checkerImage)
 
   // default flat material
   flatMaterial.ao = 1.0f;
-  flatMaterial.albedo = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+  flatMaterial.albedo = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
   flatMaterial.emission = glm::vec3(0.0f, 0.0f, 0.0f);
-  flatMaterial.metallic = 1.0f;
+  flatMaterial.metallic = 0.0f;
   flatMaterial.roughtness = 0.0f;
   flatMaterial.shaderType = ShaderType::FLAT_FORWARD_SHADER;
 
