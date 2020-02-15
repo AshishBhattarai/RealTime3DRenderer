@@ -65,6 +65,7 @@ void Model::loadModel(tinygltf::Model &modelData) {
   // load meshes
   for (const tinygltf::Mesh &meshData : modelData.meshes) {
     this->meshes.push_back(processMesh(vbos, meshData, modelData));
+    this->names.push_back(meshData.name);
   }
 
   // cleanup vbos
@@ -76,7 +77,6 @@ Mesh Model::processMesh(const std::map<int, GLuint> &vbos,
                         const tinygltf::Mesh &meshData,
                         const tinygltf::Model &modelData) {
   Mesh mesh;
-  mesh.name = meshData.name;
 
   // loop through mesh primitives
   for (size_t i = 0; i < meshData.primitives.size(); ++i) {

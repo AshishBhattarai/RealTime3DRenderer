@@ -17,13 +17,13 @@ Renderer::Renderer(const std::vector<Mesh> &meshes,
   glEnable(GL_DEPTH_TEST);
 }
 
-void Renderer::render(float dt) {
+void Renderer::render(float) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   flatForwardShader.bind();
   flatForwardShader.loadViewMatrix(camera->getViewMatrix());
   for (const Mesh &mesh : meshes) {
     const auto &entites =
-        renderables.find(mesh.primitives[0].vao + MODEL_ID_OFFSET)->second;
+        renderables.find(mesh.primitives[0].vao + MESH_ID_OFFSET)->second;
     for (const Primitive &primitive : mesh.primitives) {
       glBindVertexArray(primitive.vao);
       for (const RenderableEntity &entity : entites) {

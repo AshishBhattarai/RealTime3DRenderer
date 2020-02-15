@@ -6,5 +6,9 @@
 #include <vector>
 
 namespace render_system {
-constexpr uint MODEL_ID_OFFSET = 1000;
-}
+using MeshId = uint;
+
+constexpr MeshId MESH_ID_OFFSET = 1000;
+constexpr MeshId INVALID_MESH_ID = 0;
+
+} // namespace render_system

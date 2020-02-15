@@ -31,6 +31,7 @@ private:
 
   std::string name;
   std::vector<Mesh> meshes;
+  std::vector<std::string> names; // mesh names
 
   Mesh processMesh(const std::map<int, GLuint> &vbos,
                    const tinygltf::Mesh &meshData,

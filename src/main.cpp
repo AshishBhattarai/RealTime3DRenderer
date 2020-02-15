@@ -2,6 +2,7 @@
 
 #include "app/app.h"
 #include "app/loaders.h"
+#include "components/light.h"
 #include "components/mesh.h"
 #include "components/transform.h"
 #include "ecs/coordinator.h"
@@ -18,12 +19,18 @@ int main(int argc, char **argv) {
       coordinator.registerComponent<component::Mesh>();
   ComponentFamily meshFamily =
       coordinator.registerComponent<component::Transform>();
+  coordinator.registerComponent<component::Light>();
 
   ecs::Signature sig;
   sig.set(transformFamily, true);
   sig.set(meshFamily, true);
   coordinator.registerSystem<render_system::RenderSystem>(sig);
   sig.reset();
+
+  /**
+   * Note:
+   * Helper systems or sub-systems are registered from their parent systems.
+   */
 
   app::App app(argc, argv);
   app.run();

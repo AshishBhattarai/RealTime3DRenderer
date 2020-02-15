@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common.h"
 #include "shaders/config.h"
 #include <cassert>
 #include <glad/glad.h>
@@ -64,11 +65,15 @@ struct Primitive {
 };
 
 struct Mesh {
-  // name must be unique
-  std::string name;
   std::vector<Primitive> primitives;
 
   bool isValid() { return !primitives.empty(); }
+  MeshId getId() {
+    if (isValid())
+      return INVALID_MESH_ID;
+    else
+      return primitives.front().vao + MESH_ID_OFFSET;
+  }
 
   Mesh() = default;
   Mesh(Mesh &&mesh) noexcept = default;

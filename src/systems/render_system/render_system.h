@@ -8,7 +8,9 @@
 namespace tinygltf {
 struct Model;
 }
-
+namespace ecs {
+class Coordinator;
+}
 class Image;
 class Buffer;
 namespace render_system {
@@ -28,6 +30,7 @@ struct RenderSystemConfig {
 
 class RenderSystem : ecs::System<RenderSystem> {
 private:
+  class LightingSystem;
   static constexpr float DEFAULT_FOV = 75.0f;
   static constexpr float DEFAULT_NEAR = 0.1f;
   static constexpr float DEFAULT_FAR = 1000.0f;
@@ -36,9 +39,15 @@ private:
   std::vector<Mesh> meshes;
   RenderableMap renderables;
   std::unordered_map<ecs::Entity, size_t> entityToIndex;
+  std::unordered_map<MeshId, size_t> meshToIndex;
+
+  LightingSystem *lightingSystem;
+
+  void initSubSystems(ecs::Coordinator &coordinator);
 
 public:
   RenderSystem(const RenderSystemConfig &config);
+  ~RenderSystem();
 
   /**
    * Moves all the meshes in give model to the render system.
