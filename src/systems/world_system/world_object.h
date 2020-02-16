@@ -34,7 +34,7 @@ public:
   WorldObject();
   virtual ~WorldObject();
 
-  component::Transform *const getTransform() { return transform; }
+  component::Transform &getTransform() { return *transform; }
   WorldObjectId getId() const { return id; }
   EntityId getEntityId() const { return entityId; }
 

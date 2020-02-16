@@ -61,16 +61,34 @@ App::App(int, char **)
     camera->processRotation(dt.xPos, dt.yPos);
   });
 
-  // Add world object
-  world_system::WorldObject &worldObject = worldSystem->createWorldObject(
-      component::Transform(glm::vec3(0.0f, 0.0f, -10.0f)));
-  world_system::WorldObject &testLight = worldSystem->createWorldObject(
-      component::Transform(glm::vec3(5.0f, 0.0f, 0.0f)));
-  testLight.addComponent<component::Light>(component::Light(
-      glm::vec3(1.0f, 1.0f, 1.0f), 200.0f, 50.0f, LightType::POINT_LIGHT));
-  worldObject.addComponent<component::Mesh>(mesh);
-  worldSystem->getWorldObject(worldObject.getId());
-}
+  int nrRow = 7;
+  int nrCOl = 7;
+  float spacing = 2.5f;
+
+  // Add world objects
+  for (int i = 0; i < nrRow; ++i) {
+    for (int j = 0; j < nrCOl; ++j) {
+      world_system::WorldObject &worldObject =
+          worldSystem->createWorldObject(component::Transform(
+              glm::vec3((j - (nrCOl / 2.0f)) * spacing,
+                        (i - (nrRow / 2.0f)) * spacing, -10.0f)));
+      worldObject.addComponent<component::Mesh>(mesh);
+    }
+  }
+
+  glm::vec3 lightPositions[] = {
+      glm::vec3(-10.0f, 21.0f, 10.0f), glm::vec3(10.0f, 21.0f, 10.0f),
+      glm::vec3(-10.0f, -21.0f, 10.0f), glm::vec3(10.0f, -21.0f, 10.0f)};
+
+  for (uint i = 0; i < render_system::shader::fragment::PointLight::MAX; ++i) {
+    glm::vec3 lightPosition = lightPositions[i];
+    lightPosition += glm::vec3(sin(display.getTime() * 5.0) * 5.0, 0.0, 0.0);
+    world_system::WorldObject &testLight =
+        worldSystem->createWorldObject(component::Transform(lightPosition));
+    testLight.addComponent<component::Light>(component::Light(
+        glm::vec3(1.0f, 1.0f, 1.0f), 200.0f, 100.0f, LightType::POINT_LIGHT));
+  }
+} // namespace app
 
 void App::processInput(float dt) {
   bool keyW = input.getKey(INPUT_KEY_W);

@@ -5,7 +5,9 @@ namespace render_system {
 Camera::Camera(const glm::vec3 &position, const glm::vec3 &rotation)
     : front(0.0f, 0.0f, 1.0f), right(1.0f, 0.0f, 0.0f), up(0.0f, 1.0f, 0.0f),
       position(position), rotation(rotation), movementSpeed(SPEED),
-      mouseSensitivity(SENSITIVITY) {}
+      mouseSensitivity(SENSITIVITY) {
+  update();
+}
 
 void Camera::update() {
   // update view matrix and directional vectors
