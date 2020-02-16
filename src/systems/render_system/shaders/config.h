@@ -38,6 +38,7 @@ constexpr uint MAX = MAX_POINT_LIGHTS;
 constexpr uint POSITION = 0;
 constexpr uint COLOR = 1;
 constexpr uint RADIUS = 2;
+constexpr uint INTENSITY = 3;
 } // namespace PointLight
 } // namespace fragment
 } // namespace shader

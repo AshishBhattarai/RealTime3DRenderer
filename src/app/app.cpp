@@ -67,7 +67,7 @@ App::App(int, char **)
   world_system::WorldObject &testLight = worldSystem->createWorldObject(
       component::Transform(glm::vec3(5.0f, 0.0f, 0.0f)));
   testLight.addComponent<component::Light>(component::Light(
-      glm::vec3(200.0f, 200.0f, 200.0f), 50.0f, LightType::POINT_LIGHT));
+      glm::vec3(1.0f, 1.0f, 1.0f), 200.0f, 50.0f, LightType::POINT_LIGHT));
   worldObject.addComponent<component::Mesh>(mesh);
   worldSystem->getWorldObject(worldObject.getId());
 }

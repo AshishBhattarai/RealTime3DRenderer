@@ -38,6 +38,9 @@ public:
     glUniform1f(fragment::uniform::POINT_LIGHT_LOC[idx] +
                     fragment::PointLight::RADIUS,
                 pointLight.radius);
+    glUniform1f(fragment::uniform::POINT_LIGHT_LOC[idx] +
+                    fragment::PointLight::INTENSITY,
+                pointLight.intensity);
   }
 
   void loadCameraPosition(const glm::vec3 &pos) {

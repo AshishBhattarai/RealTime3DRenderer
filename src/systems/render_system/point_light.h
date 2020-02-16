@@ -9,10 +9,13 @@ struct PointLight {
   const glm::vec4 &position;
   const glm::vec3 &color;
   const float &radius;
+  const float &intensity;
 
   PointLight(const glm::vec4 &position, const glm::vec3 &color,
-             const float &radius, const EntityId &entityId)
-      : entityId(entityId), position(position), color(color), radius(radius) {}
+             const float &radius, const float &intensity,
+             const EntityId &entityId)
+      : entityId(entityId), position(position), color(color), radius(radius),
+        intensity(intensity) {}
 };
 
 } // namespace render_system

@@ -82,7 +82,7 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
             coordinator.getComponent<component::Transform>(entity);
         const auto &light = coordinator.getComponent<component::Light>(entity);
         PointLight pointLight(transfrom.transformMat[3], light.color,
-                              light.range, entity);
+                              light.range, light.intensity, entity);
         pointLights.push_back(pointLight);
         entityToIndex.emplace(std::pair(entity, pointLights.size()));
       });

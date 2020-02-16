@@ -24,6 +24,7 @@ struct PointLight {
     vec3 position;
     vec3 color;
     float radius;
+    float intensity;  // lumen
 };
 
 layout(location = FRAG_U_MATERIAL_ALBEDO_LOC) uniform Material material;
@@ -70,7 +71,7 @@ void main() {
     vec3 F0 = vec3(0.04f);
     F0 = mix(F0, material.albedo, material.metallic);
 
-    // calculate total reflected irradiance reflectance equation
+    // calculate total reflected irradiance using reflectance equation
     vec3 Lo = vec3(0.0f);
     for(int i = 0; i < pointLightSize; ++i) {
         // fragment radiance per pixel
@@ -79,7 +80,7 @@ void main() {
         vec3 halfway = normalize(lightDir + viewDir);
         float distance = length(lwSub);
         float attenuation = invSqureAttenuation(distance, pointLights[i].radius);
-        vec3 radiance = pointLights[i].color * attenuation;
+        vec3 radiance = pointLights[i].color * pointLights[i].intensity * attenuation;
 
         // apply cook-torrance brdf (D*F*G)/(4(Wo.n)*(Wi*n)
         float NoV = max(dot(normal, viewDir), 0.0f);
