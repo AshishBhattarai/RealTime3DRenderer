@@ -59,8 +59,8 @@ public:
     return Component<T>::family;
   }
 
-  template <typename T> void addComponent(Entity entity, const T &component) {
-    getComponentArray<T>()->insertData(entity, component);
+  template <typename T> bool addComponent(Entity entity, const T &component) {
+    return getComponentArray<T>()->insertData(entity, component);
   }
 
   template <typename T, typename... Args>

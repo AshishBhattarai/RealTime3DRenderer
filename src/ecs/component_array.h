@@ -25,20 +25,28 @@ public:
  */
 template <typename T> class ComponentArray : public BaseComponentArray {
 public:
-  ComponentArray() {
-    int reserveSize = MAX_ENTITES / 4;
-    componentArray.reserve(reserveSize);
-    entityToIndexMap.reserve(reserveSize);
-    indexToEntityMap.reserve(reserveSize);
-  }
+  ComponentArray() { reserve(); }
 
-  void insertData(Entity entity, T component) {
+  /**
+   * @brief insertData
+   * @param entity
+   * @param component
+   * @return true if vector reallocation(component cache invalid)
+   */
+  bool insertData(Entity entity, T component) {
     assert(entityToIndexMap.find(entity) == entityToIndexMap.end() &&
            "Component added to same entity more than once.");
     size_t newIndex = componentArray.size();
     entityToIndexMap[entity] = newIndex;
     indexToEntityMap[newIndex] = entity;
     componentArray.push_back(component);
+    if (newIndex >= reserveSize) {
+      reserveSize += RESERVE_BLOCK;
+      reserve();
+      return true;
+    } else {
+      return false;
+    }
   }
 
   void removeData(Entity entity) {
@@ -76,10 +84,18 @@ public:
   size_t getSize() const { return componentArray.size(); }
 
 private:
+  static constexpr size_t RESERVE_BLOCK = MAX_ENTITES / 4;
+  size_t reserveSize = RESERVE_BLOCK;
   std::vector<T> componentArray;
   // entity id to componentArrayIndex map
   std::unordered_map<Entity, size_t> entityToIndexMap;
   // entity componentArrayIndex to entity id map
   std::unordered_map<size_t, Entity> indexToEntityMap;
+
+  void reserve() {
+    componentArray.reserve(reserveSize);
+    entityToIndexMap.reserve(reserveSize);
+    indexToEntityMap.reserve(reserveSize);
+  }
 };
 } // namespace ecs

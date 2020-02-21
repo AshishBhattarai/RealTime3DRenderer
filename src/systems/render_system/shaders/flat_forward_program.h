@@ -31,16 +31,16 @@ public:
     assert(idx < fragment::PointLight::MAX && "Invalid point light index");
     glUniform3fv(fragment::uniform::POINT_LIGHT_LOC[idx] +
                      fragment::PointLight::POSITION,
-                 1, glm::value_ptr(pointLight.position));
+                 1, glm::value_ptr(*pointLight.position));
     glUniform3fv(fragment::uniform::POINT_LIGHT_LOC[idx] +
                      fragment::PointLight::COLOR,
-                 1, glm::value_ptr(pointLight.color));
+                 1, glm::value_ptr(*pointLight.color));
     glUniform1f(fragment::uniform::POINT_LIGHT_LOC[idx] +
                     fragment::PointLight::RADIUS,
-                pointLight.radius);
+                *pointLight.radius);
     glUniform1f(fragment::uniform::POINT_LIGHT_LOC[idx] +
                     fragment::PointLight::INTENSITY,
-                pointLight.intensity);
+                *pointLight.intensity);
   }
 
   void loadCameraPosition(const glm::vec3 &pos) {

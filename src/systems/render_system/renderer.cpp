@@ -39,7 +39,7 @@ void Renderer::render(float) {
             *static_cast<FlatMaterial *>(primitive.material.get()));
       glBindVertexArray(primitive.vao);
       for (const RenderableEntity &entity : entites) {
-        flatForwardShader.loadTransformMatrix(entity.transform);
+        flatForwardShader.loadTransformMatrix(*entity.transform);
         glDrawElements(primitive.mode, primitive.indexCount,
                        primitive.indexType, primitive.indexOffset);
       }

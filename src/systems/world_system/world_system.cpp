@@ -2,12 +2,12 @@
 
 namespace world_system {
 
-WorldSystem::WorldSystem() { worldObjects.reserve(1000); }
+WorldSystem::WorldSystem() { worldObjects.reserve(5000); }
 
 bool WorldSystem::deleteWorldObject(WorldObjectId id) {
   assert(id > 0 && id <= worldObjects.size());
   int objectId = id - 1;
-  if (isWorldObject(objectId)) {
+  if (isWorldObject(id)) {
     nullIndices.insert(objectId);
     ecs::Coordinator::getInstance().destoryEntity(
         worldObjects[objectId]->entityId);

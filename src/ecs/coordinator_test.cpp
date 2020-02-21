@@ -63,4 +63,21 @@ TEST_CASE("Coordinator entity & component test.", "[COORDINATOR") {
   coordiantor.addComponent<Position>(entity, Position(22, 2, 2));
   coordiantor.destoryEntity(entity);
 }
+
+TEST_CASE("Add data and check") {
+  ecs::Entity entites[ecs::MAX_ENTITES];
+  for (u32 i = 0; i < ecs::MAX_ENTITES - 1; ++i) {
+    entites[i] = coordiantor.createEntity();
+    coordiantor.addComponent<Position>(entites[i],
+                                       Position(i + 1.0f, i + 2.0f, i + 3.0f));
+  }
+  for (u32 i = 0; i < ecs::MAX_ENTITES - 1; ++i) {
+    auto position = coordiantor.getComponent<Position>(entites[i]);
+    REQUIRE(position == Position(i + 1.0f, i + 2.0f, i + 3.0f));
+  }
+
+  for (u32 i = 0; i < ecs::MAX_ENTITES - 1; ++i) {
+    coordiantor.destoryEntity(entites[i]);
+  }
+}
 } // namespace coordinator_test

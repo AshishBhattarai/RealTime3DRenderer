@@ -4,6 +4,7 @@
 #include "components/mesh.h"
 #include "components/transform.h"
 #include "ecs/coordinator.h"
+#include "events/component_cache_invalid.h"
 #include "model.h"
 #include "render_defaults.h"
 #include "renderable_entity.h"
@@ -17,6 +18,29 @@ namespace render_system {
  */
 class RenderSystem::LightingSystem : ecs::System<LightingSystem> {
   friend class RenderSystem;
+};
+
+class RenderSystem::EventListener
+    : public ecs::Receiver<event::ComponentCacheInvalid<component::Transform>> {
+private:
+  std::function<void()> transformCacheInvalidCallback;
+  std::function<void()> lightCacheInvalidCallback;
+
+public:
+  using TrasformCacheInvalidEvent =
+      event::ComponentCacheInvalid<component::Transform>;
+  using LightCacheInvalidEvent = event::ComponentCacheInvalid<component::Light>;
+
+  EventListener(const std::function<void()> &transformCacheInvalidCallback,
+                const std::function<void()> &lightCacheInvalidCallback)
+      : transformCacheInvalidCallback(transformCacheInvalidCallback),
+        lightCacheInvalidCallback(lightCacheInvalidCallback) {}
+
+  void receive(const TrasformCacheInvalidEvent &) {
+    transformCacheInvalidCallback();
+  }
+
+  void receive(const LightCacheInvalidEvent &) { lightCacheInvalidCallback(); }
 };
 
 void RenderSystem::initSubSystems(ecs::Coordinator &coordinator) {
@@ -56,7 +80,8 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
     assert(modelId && it != renderables.end() && "Entity with invalid mesh");
     if (it != renderables.end()) {
       size_t idx = it->second.size();
-      it->second.emplace_back(RenderableEntity(transfrom.transformMat, entity));
+      it->second.emplace_back(
+          RenderableEntity(&transfrom.transformMat, entity));
       entityToIndex.emplace(std::pair(entity, idx));
     } else {
       SLOG("Error entity with invalid mesh:", modelId, entity);
@@ -81,8 +106,8 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
         const auto &transfrom =
             coordinator.getComponent<component::Transform>(entity);
         const auto &light = coordinator.getComponent<component::Light>(entity);
-        PointLight pointLight(transfrom.transformMat[3], light.color,
-                              light.range, light.intensity, entity);
+        PointLight pointLight(&transfrom.transformMat[3], &light.color,
+                              &light.range, &light.intensity, entity);
         pointLights.push_back(pointLight);
         entityToIndex.emplace(std::pair(entity, pointLights.size()));
       });
@@ -90,9 +115,43 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
   lightingSystem->connectEntityRemovedSignal([](const ecs::Entity &) {
     // TODO
   });
+
+  eventListener = new EventListener(
+      // Transform cache invalid
+      [&renderables = renderables, &coordinator] {
+        for (auto it = renderables.begin(); it != renderables.end(); ++it) {
+          for (auto &renderableEntity : it->second) {
+            renderableEntity.transform =
+                &coordinator
+                     .getComponent<component::Transform>(
+                         renderableEntity.entityId)
+                     .transformMat;
+          }
+        }
+      },
+      [&poinLights = pointLights, &coordinator] {
+        // light cache invalid
+        for (auto &pointLight : poinLights) {
+          const auto &transfrom =
+              coordinator.getComponent<component::Transform>(
+                  pointLight.entityId);
+          const auto &light =
+              coordinator.getComponent<component::Light>(pointLight.entityId);
+          pointLight.position = &transfrom.transformMat[3];
+          pointLight.color = &light.color;
+          pointLight.radius = &light.range;
+          pointLight.intensity = &light.intensity;
+        }
+      });
+
+  coordinator.subscribeToEvent<EventListener::TrasformCacheInvalidEvent>(
+      *eventListener);
 }
 
-RenderSystem::~RenderSystem() { delete lightingSystem; }
+RenderSystem::~RenderSystem() {
+  delete lightingSystem;
+  delete eventListener;
+}
 
 std::map<std::string, uint>
 RenderSystem::registerMeshes(tinygltf::Model &modelData) {

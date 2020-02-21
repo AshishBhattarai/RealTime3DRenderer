@@ -61,8 +61,8 @@ App::App(int, char **)
     camera->processRotation(dt.xPos, dt.yPos);
   });
 
-  int nrRow = 7;
-  int nrCOl = 7;
+  int nrRow = 70;
+  int nrCOl = 70;
   float spacing = 2.5f;
 
   // Add world objects
@@ -115,16 +115,24 @@ void App::processInput(float dt) {
 
 void App::run() {
   DEBUG_SLOG("App running.");
-  float lt, ct, dt = 0.0f;
-  lt = ct = display.getTime();
+  float ltf, lt, ct, dt = 0.0f;
+  int frameCnt = 0;
+  lt = ct = display.getTime(); // time in seconds
   while (!display.shouldClose()) {
     // calculate delta time
     ct = display.getTime();
     dt = ct - lt;
     lt = display.getTime();
 
-    processInput(dt);
+    // calculate FPS
+    if (ct - ltf >= 1) {
+      CSLOG("FPS:", frameCnt);
+      frameCnt = 1;
+      ltf = ct;
+    } else
+      frameCnt++;
 
+    processInput(dt);
     worldSystem->update(dt);
     renderSystem->update(dt);
     auto err = glGetError();

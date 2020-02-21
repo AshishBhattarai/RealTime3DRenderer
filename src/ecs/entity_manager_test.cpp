@@ -48,4 +48,13 @@ TEST_CASE("EntityManager test with update signature", "[ENTITY_MANAGER]") {
   }
   REQUIRE(entityManager.getLivingCount() == 0);
 }
+
+TEST_CASE("Valid entity ids", "[ENTITY_MANAGER") {
+  for (u32 i = 0; i < ecs::MAX_ENTITES - 1; ++i) {
+    REQUIRE(entityManager.createEntity() == i + 1);
+  }
+  for (u32 i = 0; i < ecs::MAX_ENTITES - 1; ++i) {
+    entityManager.destoryEntity(i + 1);
+  }
+}
 } // namespace entity_manager_test

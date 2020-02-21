@@ -26,7 +26,6 @@ private:
   WorldObjectId id;
   EntityId entityId;
   //  std::vector<WorldObject*> childerns;
-  component::Transform *transform;
 
 public:
   std::unique_ptr<OnUpdateSignal> onUpdate;
@@ -34,18 +33,20 @@ public:
   WorldObject();
   virtual ~WorldObject();
 
-  component::Transform &getTransform() { return *transform; }
+  component::Transform &getTransform() {
+    return getComponent<component::Transform>();
+  }
   WorldObjectId getId() const { return id; }
   EntityId getEntityId() const { return entityId; }
 
   template <typename T> void addComponent(const T &component) {
-    assert(id && entityId && transform &&
+    assert(id && entityId &&
            "Must be constructed with WorldSystem before use.");
     ecs::Coordinator::getInstance().addComponent<T>(entityId, component);
   }
 
   template <typename T, typename... Args> void addComponent(Args &&... args) {
-    assert(id && entityId && transform &&
+    assert(id && entityId &&
            "Must be constructed with WorldSystem before use.");
     ecs::Coordinator::getInstance().addComponent<T>(
         entityId, std::forward<Args>(args)...);
@@ -57,7 +58,7 @@ public:
   //  }
 
   template <typename T> T &getComponent() {
-    assert(id && entityId && transform &&
+    assert(id && entityId &&
            "Must be constructed with WorldSystem before use.");
     return ecs::Coordinator::getInstance().getComponent<T>(entityId);
   }

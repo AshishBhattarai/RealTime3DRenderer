@@ -69,7 +69,7 @@ struct Mesh {
 
   bool isValid() { return !primitives.empty(); }
   MeshId getId() {
-    if (isValid())
+    if (!isValid())
       return INVALID_MESH_ID;
     else
       return primitives.front().vao + MESH_ID_OFFSET;

@@ -6,6 +6,7 @@
 #include "components/mesh.h"
 #include "components/transform.h"
 #include "ecs/coordinator.h"
+#include "events/component_cache_invalid.h"
 #include "systems/render_system/render_defaults.h"
 #include "systems/render_system/render_system.h"
 #include "utils/image.h"

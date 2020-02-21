@@ -31,6 +31,7 @@ struct RenderSystemConfig {
 class RenderSystem : ecs::System<RenderSystem> {
 private:
   class LightingSystem;
+  class EventListener;
   static constexpr float DEFAULT_FOV = 75.0f;
   static constexpr float DEFAULT_NEAR = 0.1f;
   static constexpr float DEFAULT_FAR = 1000.0f;
@@ -43,6 +44,7 @@ private:
   std::unordered_map<MeshId, size_t> meshToIndex;
 
   LightingSystem *lightingSystem;
+  EventListener *eventListener;
 
   void initSubSystems(ecs::Coordinator &coordinator);
 

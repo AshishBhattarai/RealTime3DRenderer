@@ -1,5 +1,6 @@
 #include "entity_manager.h"
 #include <cassert>
+#include <iostream>
 
 namespace ecs {
 EntityManager::EntityManager() {

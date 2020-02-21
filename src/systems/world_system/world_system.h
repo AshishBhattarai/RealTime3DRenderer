@@ -38,18 +38,18 @@ public:
       nullIndices.erase(it);
     }
     ecs::Coordinator &coordinator = ecs::Coordinator::getInstance();
+    auto entityId = coordinator.createEntity();
+
     worldObject->id = worldId + 1;
-    worldObject->entityId = coordinator.createEntity();
-    coordinator.addComponent<component::Transform>(worldObject->entityId,
-                                                   transform);
-    worldObject->transform =
-        &coordinator.getComponent<component::Transform>(worldObject->entityId);
+    worldObject->entityId = entityId;
+    coordinator.addComponent<component::Transform>(entityId, transform);
+
     if (worldId == worldObjects.size()) {
       worldObjects.emplace_back(std::move(worldObject));
     } else {
       worldObjects[worldId] = std::move(worldObject);
     }
-    return *worldObjects[worldId];
+    return *worldObjects[worldId].get();
   }
 
   /**
@@ -59,7 +59,7 @@ public:
    */
   bool isWorldObject(WorldObjectId id) const {
     assert(id > 0 && id <= worldObjects.size());
-    return nullIndices.find(id - 1) != nullIndices.end();
+    return nullIndices.find(id - 1) == nullIndices.end();
   }
 
   /**
@@ -91,6 +91,10 @@ public:
       if (worldObject)
         worldObject->onUpdate->emit(dt);
     }
+  }
+
+  uint numValidWorldObjects() const {
+    return worldObjects.size() - nullIndices.size();
   }
 };
 

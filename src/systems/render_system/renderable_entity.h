@@ -13,9 +13,9 @@ namespace render_system {
  */
 struct RenderableEntity {
   const EntityId entityId;
-  const glm::mat4 &transform;
+  const glm::mat4 *transform;
 
-  RenderableEntity(const glm::mat4 &transform, const EntityId &entityId)
+  RenderableEntity(const glm::mat4 *transform, const EntityId &entityId)
       : entityId(entityId), transform(transform) {}
 };
 } // namespace render_system

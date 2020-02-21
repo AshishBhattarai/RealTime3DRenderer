@@ -1,3 +1,5 @@
+#pragma once
+
 #include "common.h"
 #include "third_party/simplesignal.h"
 #include <memory>
