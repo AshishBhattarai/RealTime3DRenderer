@@ -14,7 +14,7 @@ struct Transform {
             const glm::vec3 &rotate = glm::vec3(0.0f),
             const glm::vec3 &scale = glm::vec3(1.0f)) {
     transformMat = glm::translate(glm::mat4(1.0f), translate) *
-                   glm::yawPitchRoll(rotate.x, rotate.y, rotate.z) *
+                   glm::eulerAngleXYZ(rotate.x, rotate.y, rotate.z) *
                    glm::scale(scale);
   }
 
