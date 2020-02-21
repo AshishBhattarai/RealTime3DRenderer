@@ -61,6 +61,8 @@ public:
   uint registerMesh(Mesh &&mesh);
   // returns map of mesh name to id
   std::map<std::string, uint> registerMeshes(tinygltf::Model &modelData);
+  /** Temp (TODO: Probably remove this) */
+  void relaceAllMaterial(uint meshId, const BaseMaterial *material);
 
   // TODO: Delete mesh and set all existing entites to default mesh
   bool unregisterMesh(std::string_view name);

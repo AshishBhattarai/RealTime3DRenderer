@@ -79,7 +79,7 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
     auto it = renderables.find(modelId);
     assert(modelId && it != renderables.end() && "Entity with invalid mesh");
     if (it != renderables.end()) {
-      size_t idx = it->second.size();
+      size_t idx = it->second.size() - 1;
       it->second.emplace_back(
           RenderableEntity(&transfrom.transformMat, entity));
       entityToIndex.emplace(std::pair(entity, idx));
@@ -171,8 +171,29 @@ uint RenderSystem::registerMesh(Mesh &&mesh) {
   uint id = 0;
   meshes.emplace_back(std::move(mesh));
   id = meshes.back().primitives[0].vao + MESH_ID_OFFSET;
-  meshToIndex.emplace(std::pair(id, meshes.size()));
+  meshToIndex.emplace(std::pair(id, meshes.size() - 1));
   renderables.emplace(std::pair(id, std::vector<RenderableEntity>{}));
   return id;
+}
+
+void RenderSystem::relaceAllMaterial(uint meshId,
+                                     const BaseMaterial *material) {
+  size_t idx = meshToIndex[meshId];
+  for (auto &primitive : meshes[idx].primitives) {
+    if (material->shaderType == ShaderType::FLAT_FORWARD_SHADER) {
+      auto *mat = static_cast<const FlatMaterial *>(material);
+      std::unique_ptr<FlatMaterial> newMaterial =
+          std::make_unique<FlatMaterial>();
+      newMaterial->shaderType = ShaderType::FLAT_FORWARD_SHADER;
+      newMaterial->ao = mat->ao;
+      newMaterial->albedo = mat->albedo;
+      newMaterial->emission = mat->emission;
+      newMaterial->roughtness = mat->roughtness;
+      newMaterial->metallic = mat->metallic;
+      primitive.material = std::move(newMaterial);
+    } else {
+      assert(false && "TODO");
+    }
+  }
 }
 } // namespace render_system

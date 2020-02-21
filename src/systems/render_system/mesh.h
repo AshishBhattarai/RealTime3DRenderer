@@ -50,6 +50,7 @@ struct Primitive {
   GLenum indexType;
   GLsizei indexCount;
   const GLvoid *indexOffset; // Index buffer offset;
+  /* primitive_id VAO + SOME OFFEST ?*/
 
   Primitive(std::unique_ptr<BaseMaterial> material, GLuint vao, GLenum mode,
             GLenum indexType, GLsizei indexCount, const GLvoid *indexOffset)

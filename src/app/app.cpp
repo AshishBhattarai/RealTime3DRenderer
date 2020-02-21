@@ -16,6 +16,7 @@
 #include "utils/buffer.h"
 #include "utils/image.h"
 #include "utils/slogger.h"
+#include <glm/vec3.hpp>
 #include <iostream>
 #include <map>
 #include <third_party/tinygltf/tiny_gltf.h>
@@ -38,9 +39,6 @@ App::App(int, char **)
   // load model
   tinygltf::Model model;
   Loaders::loadModel(model, "resources/meshes/sphere.gltf");
-  std::map<std::string, uint> ids = renderSystem->registerMeshes(model);
-  DEBUG_CSLOG("LOADED MESHES: ", ids.size());
-  component::Mesh mesh(*ids.begin());
 
   input.addKeyCallback(
       INPUT_KEY_ESCAPE, [&display = display](const Input::KeyEvent &event) {
@@ -61,13 +59,26 @@ App::App(int, char **)
     camera->processRotation(dt.xPos, dt.yPos);
   });
 
-  int nrRow = 70;
-  int nrCOl = 70;
+  int nrRow = 7;
+  int nrCOl = 7;
   float spacing = 2.5f;
 
   // Add world objects
   for (int i = 0; i < nrRow; ++i) {
+    float metallic = i / (float)nrRow;
     for (int j = 0; j < nrCOl; ++j) {
+      float roughness = j / (float)nrCOl;
+      std::map<std::string, uint> ids = renderSystem->registerMeshes(model);
+      FlatMaterial newMat;
+      newMat.ao = 1.0f;
+      newMat.albedo = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+      newMat.emission = glm::vec3(0.0f, 0.0f, 0.0f);
+      newMat.metallic = metallic;
+      newMat.roughtness = roughness;
+      newMat.shaderType = ShaderType::FLAT_FORWARD_SHADER;
+      renderSystem->relaceAllMaterial(ids.begin()->second, &newMat);
+      component::Mesh mesh(*ids.begin());
+
       world_system::WorldObject &worldObject =
           worldSystem->createWorldObject(component::Transform(
               glm::vec3((j - (nrCOl / 2.0f)) * spacing,
@@ -77,8 +88,8 @@ App::App(int, char **)
   }
 
   glm::vec3 lightPositions[] = {
-      glm::vec3(-10.0f, 21.0f, 10.0f), glm::vec3(10.0f, 21.0f, 10.0f),
-      glm::vec3(-10.0f, -21.0f, 10.0f), glm::vec3(10.0f, -21.0f, 10.0f)};
+      glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(10.0f, 10.0f, 10.0f),
+      glm::vec3(-10.0f, -10.0f, 10.0f), glm::vec3(10.0f, -10.0f, 10.0f)};
 
   for (uint i = 0; i < render_system::shader::fragment::PointLight::MAX; ++i) {
     glm::vec3 lightPosition = lightPositions[i];
@@ -86,7 +97,7 @@ App::App(int, char **)
     world_system::WorldObject &testLight =
         worldSystem->createWorldObject(component::Transform(lightPosition));
     testLight.addComponent<component::Light>(component::Light(
-        glm::vec3(1.0f, 1.0f, 1.0f), 200.0f, 100.0f, LightType::POINT_LIGHT));
+        glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
   }
 } // namespace app
 

@@ -43,7 +43,8 @@ vec3 fresnelSchlick(float VoH, vec3 F0) {
 
 // NDF for microfactes oriented toward halfway
 float distributionGGX(float NoH, float roughness) {
-    float r2 = roughness * roughness; // gives better result based on observation by disney and epic games.
+    float r = roughness * roughness;
+    float r2 = r * r; // gives better result based on observation by disney and epic games.
     float NoH2 = NoH*NoH;
     float d = (NoH2 * (r2 - 1.0f) + 1.0f);
     return r2 / (d * d * PI);
@@ -59,7 +60,7 @@ float geometrySchlickGGX(float NoV, float roughness) {
 float geometrySmith(float NoV, float NoL, float roughness) {
     float r2 = roughness * roughness;
     float ggxL = geometrySchlickGGX(NoL, roughness);
-    float ggxV = geometrySchlickGGX(NoL, roughness);
+    float ggxV = geometrySchlickGGX(NoV, roughness);
     return ggxL * ggxV;
 }
 
@@ -86,13 +87,13 @@ void main() {
         float NoV = max(dot(normal, viewDir), 0.0f);
         float NoL = max(dot(normal, lightDir), 0.0f);
 
-        float roughness = max(material.roughness, 0.005f);
+        float roughness = max(material.roughness, 0.05f);
         float NDF = distributionGGX(max(dot(normal, halfway), 0.0f), roughness);
         float G = geometrySmith(NoV, NoL, roughness);
         vec3 F = fresnelSchlick(clamp(dot(viewDir, halfway), 0.0f, 1.0f), F0);
 
         vec3 num = NDF * G * F;
-        float denom = 4.0 * NoV * NoL;
+        float denom = 4.0f * NoV * NoL;
         vec3 specular = num / max(denom, 0.001f); // to prevent denom from being zero
 
         vec3 kD = vec3(1.0f) - F; // F is specular ratio
