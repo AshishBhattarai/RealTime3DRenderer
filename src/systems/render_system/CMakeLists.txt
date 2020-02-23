@@ -8,6 +8,8 @@ add_library(render-system-lib
     camera.cpp
     renderer.cpp
     texture.cpp
+    frame_buffer.cpp
+    postprocess.cpp
 
     #non cpp files
     render_system_model.qmodel
