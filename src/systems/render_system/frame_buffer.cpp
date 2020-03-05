@@ -185,4 +185,21 @@ void FrameBuffer::setDepthStencilAttachment(AttachType type,
   }
   depthAttachType = type;
 }
+
+bool FrameBuffer::readPixels(char *buffer, int &nrChannels, int &width,
+                             int &height) {
+  if (!isComplete())
+    return false;
+  height = this->height;
+  width = this->width;
+  nrChannels = 3;
+  int stride = nrChannels * width;
+  stride = (stride + 3) & -stride; // add padding, to create 4-byte alignment
+  int bufferSize = stride * height;
+  buffer = (char *)malloc(bufferSize);
+  glNamedFramebufferReadBuffer(fbo, GL_FRONT);
+  glPixelStorei(GL_PACK_ALIGNMENT, 4); // alignment for each pixel in memory
+  glReadPixels(0, height, width, 0, GL_RGB, GL_UNSIGNED_BYTE, &buffer);
+  return true;
+}
 } // namespace render_system

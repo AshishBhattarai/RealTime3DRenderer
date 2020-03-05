@@ -2,6 +2,7 @@
 
 #include "ecs/common.h"
 #include "ecs/system_manager.h"
+#include "frame_buffer.h"
 #include "point_light.h"
 #include "renderer.h"
 
@@ -21,11 +22,14 @@ struct RenderSystemConfig {
   const Image &checkerImage; // can be removed after RenderSystem construction
   const shader::StageCodeMap &flatForwardShader;
   float ar;
+  int width;
+  int height;
 
   RenderSystemConfig(const Image &checkerImage,
-                     const shader::StageCodeMap &flatForwardShader, float ar)
+                     const shader::StageCodeMap &flatForwardShader, float width,
+                     float height)
       : checkerImage(checkerImage), flatForwardShader(flatForwardShader),
-        ar(ar) {}
+        ar(width / (float)height), width(width), height(height) {}
 };
 
 class RenderSystem : ecs::System<RenderSystem> {
@@ -37,6 +41,7 @@ private:
   static constexpr float DEFAULT_FAR = 1000.0f;
 
   Renderer renderer;
+  FrameBuffer frameBuffer;
   std::vector<Mesh> meshes;
   std::vector<PointLight> pointLights;
   RenderableMap renderables;
@@ -79,7 +84,6 @@ public:
       renderer.setCamera(camera);
   }
 
-  void update(float dt) { renderer.render(dt); }
+  Image &&update(float dt);
 };
-
 } // namespace render_system

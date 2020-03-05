@@ -60,7 +60,8 @@ void RenderSystem::initSubSystems(ecs::Coordinator &coordinator) {
 RenderSystem::RenderSystem(const RenderSystemConfig &config)
     : renderer(meshes, renderables, pointLights,
                &RenderDefaults::getInstance(&config.checkerImage).getCamera(),
-               config.flatForwardShader) {
+               config.flatForwardShader),
+      frameBuffer(config.width, config.height) {
   pointLights.reserve(shader::fragment::PointLight::MAX);
   updateProjectionMatrix(config.ar);
   auto &coordinator = ecs::Coordinator::getInstance();
@@ -196,4 +197,7 @@ void RenderSystem::relaceAllMaterial(uint meshId,
     }
   }
 }
+
+void RenderSystem::update(float dt) { renderer.render(dt); }
+
 } // namespace render_system

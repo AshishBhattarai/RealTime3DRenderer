@@ -118,6 +118,15 @@ public:
     return depthStencilAttachType;
   }
 
+  /**
+   * @brief readPixels
+   * @param buffer -> output buffer
+   * @param width -> output image width
+   * @param height -> output image height
+   * @return
+   */
+  bool readPixels(char *buffer, int &nrChannels, int &width, int &height);
+
 private:
   uint fbo;
   std::array<uint, MAX_COLOR_ATTACHMENTS>
