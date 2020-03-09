@@ -72,7 +72,7 @@ bool loadBinaryFile(Buffer &buffer, const char *fileName) {
   }
 }
 
-bool writeImage(Image &image, const char *fileName) {
+bool writeImage(const Image &image, const char *fileName) {
   int nrChannels = image.getNumChannels();
   int width = image.getWidth();
   int height = image.getHeight();

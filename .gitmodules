@@ -7,3 +7,6 @@
 [submodule "src/third_party/tinygltf"]
 	path = src/third_party/tinygltf
 	url = https://github.com/syoyo/tinygltf
+[submodule "src/third_party/asio"]
+	path = src/third_party/asio
+	url = https://github.com/chriskohlhoff/asio

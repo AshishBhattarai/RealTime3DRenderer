@@ -16,6 +16,7 @@
 #include "utils/buffer.h"
 #include "utils/image.h"
 #include "utils/slogger.h"
+#include <asio.hpp>
 #include <glm/vec3.hpp>
 #include <iostream>
 #include <map>
@@ -25,8 +26,8 @@ using namespace render_system;
 
 namespace app {
 App::App(int, char **)
-    : display("App", 1024, 700), input(display), construct(),
-      coordinator(ecs::Coordinator::getInstance()),
+    : threadPool(NUM_THREADS), display("App", 1024, 700), input(display),
+      construct(), coordinator(ecs::Coordinator::getInstance()),
       worldSystem(new world_system::WorldSystem()),
       renderSystem(construct.newRenderSystem(1024, 700)),
       camera(new Camera(glm::vec3(0.0f, 0.0f, 0.0f))) {
@@ -148,7 +149,13 @@ void App::run() {
     Image img = renderSystem->update(dt);
     if (input.getKey(INPUT_KEY_H)) {
       // screenshot
-      Loaders::writeImage(img, "test.png");
+      asio::post(threadPool, [image = std::move(img),
+                              time = display.getTime()]() {
+        Loaders::writeImage(
+            image,
+            (std::string("test.png") + std::to_string(time * 1000)).c_str());
+        CSLOG("END");
+      });
     }
     auto err = glGetError();
     if (err != GL_NO_ERROR)

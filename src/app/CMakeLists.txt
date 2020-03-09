@@ -17,5 +17,6 @@ target_link_libraries(
     ${GLAD_LIBRARIES}
     ${GLFW_LIBRARIES}
     dl
+    pthread
 )
 #target_include_directories(app-lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

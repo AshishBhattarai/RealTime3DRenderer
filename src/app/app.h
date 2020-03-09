@@ -4,6 +4,7 @@
 #include "display.h"
 #include "input.h"
 #include "types.h"
+#include <asio/thread_pool.hpp>
 
 namespace ecs {
 class Coordinator;
@@ -22,6 +23,7 @@ namespace app {
  */
 class App : NonCopyable {
 public:
+  static constexpr uint NUM_THREADS = 2;
   // lazy init instance
   App(int argc, char **argv);
   ~App();
@@ -29,9 +31,7 @@ public:
   void run();
 
 private:
-  void processInput(float dt);
-
-private:
+  asio::thread_pool threadPool;
   Display display;
   Input input;
   Construct construct;
@@ -39,5 +39,7 @@ private:
   world_system::WorldSystem *worldSystem;
   render_system::RenderSystem *renderSystem;
   render_system::Camera *camera;
+
+  void processInput(float dt);
 };
 } // namespace app

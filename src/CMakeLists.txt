@@ -3,6 +3,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set(GLAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad)
 set(GLFW_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw)
 set(GLM_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm)
+set(ASIO_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/asio/asio)
 
 # opengl
 if(POLICY CMP0072)
@@ -31,6 +32,19 @@ else()
     set(GLM_INCLUDE_DIR ${GLM_DIR})
 endif()
 include_directories(${GLM_INCLUDE_DIR})
+
+#asio
+if(USE_SHARED_ASIO)
+    find_path(ASIO_INCLUDE_DIR asio.hpp HINTS 
+        "/usr/include"
+        "/usr/local/include"
+        "/opt/local/include"
+    )
+else()
+    set(ASIO_INCLUDE_DIR ${ASIO_DIR}/include)
+endif()
+include_directories(${ASIO_INCLUDE_DIR})
+    
 
 # modules
 add_subdirectory(third_party)
