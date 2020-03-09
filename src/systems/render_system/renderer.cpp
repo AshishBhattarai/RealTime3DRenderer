@@ -4,25 +4,34 @@
 #include "mesh.h"
 #include "render_defaults.h"
 #include "renderable_entity.h"
+#include "utils/image.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace render_system {
 
-Renderer::Renderer(const std::vector<Mesh> &meshes,
+Renderer::Renderer(int width, int height, const std::vector<Mesh> &meshes,
                    const RenderableMap &renderables,
                    const std::vector<PointLight> &pointLights,
                    const Camera *camera,
                    const shader::StageCodeMap &flatForwardShader)
-    : meshes(meshes), renderables(renderables), pointLights(pointLights),
-      projectionMatrix(1.0f), camera(camera),
+    : frameBuffer(width, height), meshes(meshes), renderables(renderables),
+      pointLights(pointLights), projectionMatrix(1.0f), camera(camera),
       flatForwardShader(flatForwardShader) {
+
+  // Setup framebuffer
+  frameBuffer.use();
+  frameBuffer.setColorAttachment(GL_RGB);
+  frameBuffer.setDepthAttachment(FrameBuffer::AttachType::RENDER_BUFFER);
+
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
 }
 
 void Renderer::render(float) {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  //  frameBuffer.use();
+  FrameBuffer::useDefault();
+  frameBuffer.clearBuffer();
   flatForwardShader.bind();
   flatForwardShader.loadViewMatrix(camera->getViewMatrix());
   flatForwardShader.loadCameraPosition(camera->position);
@@ -45,6 +54,16 @@ void Renderer::render(float) {
       }
     }
   }
+}
+
+void Renderer::blitToWindow() { frameBuffer.blit(nullptr, GL_BACK); }
+
+Image Renderer::readPixels() {
+  int width = 0;
+  int height = 0;
+  int numChannels = 0;
+  uchar *buffer = FrameBuffer::readPixelsWindow(numChannels, width, height);
+  return Image(buffer, width, height, numChannels);
 }
 
 void Renderer::updateProjectionMatrix(float ar, float fov, float near,

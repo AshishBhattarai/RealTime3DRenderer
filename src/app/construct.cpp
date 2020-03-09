@@ -11,7 +11,7 @@ using namespace render_system;
 
 Construct::Construct() {}
 
-render_system::RenderSystem *Construct::newRenderSystem(float ar) {
+render_system::RenderSystem *Construct::newRenderSystem(int width, int height) {
   /* Init RenderSystem */
   Image checkerImage;
   bool status =
@@ -27,7 +27,7 @@ render_system::RenderSystem *Construct::newRenderSystem(float ar) {
       shader::StageCodeMap{
           {shader::ShaderStage::VERTEX_SHADER, flatForwardVertex},
           {shader::ShaderStage::FRAGMENT_SHADER, flatForwardFragment}},
-      ar));
+      width, height));
 }
 
 } // namespace app

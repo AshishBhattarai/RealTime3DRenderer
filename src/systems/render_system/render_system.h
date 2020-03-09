@@ -41,7 +41,6 @@ private:
   static constexpr float DEFAULT_FAR = 1000.0f;
 
   Renderer renderer;
-  FrameBuffer frameBuffer;
   std::vector<Mesh> meshes;
   std::vector<PointLight> pointLights;
   RenderableMap renderables;
@@ -84,6 +83,6 @@ public:
       renderer.setCamera(camera);
   }
 
-  Image &&update(float dt);
+  Image update(float dt);
 };
 } // namespace render_system

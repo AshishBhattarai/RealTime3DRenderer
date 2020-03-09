@@ -71,4 +71,15 @@ bool loadBinaryFile(Buffer &buffer, const char *fileName) {
     return true;
   }
 }
+
+bool writeImage(Image &image, const char *fileName) {
+  int nrChannels = image.getNumChannels();
+  int width = image.getWidth();
+  int height = image.getHeight();
+  int stride = nrChannels * width;
+  stride = (stride + 3) & -stride;
+  return stbi_write_png(fileName, width, height, nrChannels, image.getBuffer(),
+                        stride);
+}
+
 } // namespace app::Loaders

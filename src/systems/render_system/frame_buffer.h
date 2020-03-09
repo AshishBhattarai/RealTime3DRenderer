@@ -2,6 +2,7 @@
 #include "types.h"
 #include <array>
 #include <cassert>
+#include <unordered_set>
 
 namespace render_system {
 
@@ -13,11 +14,7 @@ class FrameBuffer {
 public:
   static constexpr uint MAX_COLOR_ATTACHMENTS = 32;
   enum class AttachType { NONE, TEXTURE_BUFFER, RENDER_BUFFER };
-  enum class UseType : uint32_t {
-    NORMAL = 0x8D40,
-    READ = 0x8CA8,
-    DRAW = 0x8CA9
-  };
+  enum class UseType : u32 { NORMAL = 0x8D40, READ = 0x8CA8, DRAW = 0x8CA9 };
   FrameBuffer(int width, int height);
   ~FrameBuffer();
 
@@ -32,9 +29,8 @@ public:
    * @param transferType - ignored for render buffer
    * @param index - AttachmentIndex
    */
-  void setColorAttachment(AttachType type, uint32_t texTarget,
-                          uint32_t internalFormat, uint32_t transferFormat,
-                          uint32_t transferType, uint index = 0);
+  void setColorAttachment(AttachType type, u32 texTarget, u32 internalFormat,
+                          u32 transferFormat, u32 transferType, uint index = 0);
 
   /**
    * @brief setColorAttachment - creates textture buffer attachment
@@ -44,28 +40,27 @@ public:
    * @param transferType
    * @param index
    */
-  void setColorAttachment(uint32_t texTarget, uint32_t internalFormat,
-                          uint32_t transferFormat, uint32_t transferType,
-                          uint index = 0);
+  void setColorAttachment(u32 texTarget, u32 internalFormat, u32 transferFormat,
+                          u32 transferType, uint index = 0);
 
   /**
    * @brief setColorAttachment - creates render buffer attachment
    * @param internalFormat
    * @param index
    */
-  void setColorAttachment(uint32_t internalFormat, uint index = 0);
+  void setColorAttachment(u32 internalFormat, uint index = 0);
   /**
    * @brief setDepthAttachment
    * @param type
    * @param target - ignored for render buffer default(GL_TEXTURE_2D)
    */
-  void setDepthAttachment(AttachType type, uint32_t texTarget = 0x0DE1);
-  void setStencilAttachment(AttachType type, uint32_t texTarget = 0x0DE1);
-  void setDepthStencilAttachment(AttachType type, uint32_t texTarget = 0x0DE1);
+  void setDepthAttachment(AttachType type, u32 texTarget = 0x0DE1);
+  void setStencilAttachment(AttachType type, u32 texTarget = 0x0DE1);
+  void setDepthStencilAttachment(AttachType type, u32 texTarget = 0x0DE1);
 
   // utitly
-  bool isComplete();
-  void use(UseType type = UseType::NORMAL);
+  bool isComplete() const;
+  void use(UseType type = UseType::NORMAL) const;
   static void useDefault();
   void loadViewPort();
   /**
@@ -75,16 +70,9 @@ public:
   void clearBuffer();
   void deleteAllColorAttachments();
   void deleteColorAttachment(uint index = 0);
-  void deleteDepthAttachment() {
-    deleteAttachment(depthAttachType, &depthBuffer, 1);
-  }
-  void deleteStencilAttachment() {
-    deleteAttachment(stencilAttachType, &stencilBuffer, 1);
-  }
-  void deleteDepthStencilAttachment() {
-    deleteAttachment(depthStencilAttachType, &depthBuffer, 1);
-  }
-
+  void deleteDepthAttachment();
+  void deleteStencilAttachment();
+  void deleteDepthStencilAttachment();
   // getters
   uint getId() const { return fbo; }
   /**
@@ -123,9 +111,41 @@ public:
    * @param buffer -> output buffer
    * @param width -> output image width
    * @param height -> output image height
+   * @param fromBuffer - Default GL_COLOR_ATTACHMENT0
    * @return
    */
-  bool readPixels(char *buffer, int &nrChannels, int &width, int &height);
+  uchar *readPixels(int &nrChannels, int &width, int &height,
+                    u32 fromBuffer = 0x8CE0);
+
+  /**
+   * Read pixels from default framebuffer ie window
+   *
+   * @brief readPixelsDe
+   * @param nrChannels
+   * @param width
+   * @param height
+   * @return
+   */
+  static uchar *readPixelsWindow(int &nrChannels, int &width, int &height,
+                                 u32 fromBuffer = 0x0404);
+
+  /**
+   * @brief blit
+   * @param toFrameBuffer - Defaul nullptr (blits to window framebuffer)
+   * @param toBuffer
+   * @param fromBuffer - default GL_COLOR_ATTACHMENT0
+   * @return
+   */
+  void blit(FrameBuffer *toFrameBuffer, u32 toBuffer, u32 fromBuffer = 0x8CE0);
+
+  /**
+   * @brief blitWindow - blit from window (default framebuffer)
+   * @param toFrameBuffer
+   * @param toBuffer
+   * @param fromBuffer - default GL_BACK
+   */
+  static void blitWindow(const FrameBuffer &toFrameBuffer, u32 toBuffer,
+                         u32 fromBuffer = 0x0404);
 
 private:
   uint fbo;
@@ -133,6 +153,11 @@ private:
       colorBuffers;   // color attachment render/texture attachment buffer
   uint stencilBuffer; // stencil render/texture attachment buffer
   uint depthBuffer;   // deptStencil incase of GL_DEPTH24_STENCIL8
+
+  uint bufferFlag; // buffer flags ie COLOR_BUFFER_BIT, DEPTH_BUFFER_BIT ....
+
+  std::unordered_set<uint>
+      validColorBuffers; // contains index for valid color buffers
 
   int width;
   int height;
@@ -143,11 +168,10 @@ private:
   AttachType depthStencilAttachType;
 
   void deleteAttachment(AttachType &type, uint *buffer, uint num);
-  void createTextureBuffer(uint &buffer, uint32_t target,
-                           uint32_t internalFormat, uint32_t transferFormat,
-                           uint32_t transferType, uint32_t texAttachment);
-  void createRenderBuffer(uint &buffer, uint32_t internalFormat,
-                          uint32_t texAttachment);
+  void createTextureBuffer(uint &buffer, u32 target, u32 internalFormat,
+                           u32 transferFormat, u32 transferType,
+                           u32 texAttachment);
+  void createRenderBuffer(uint &buffer, u32 internalFormat, u32 texAttachment);
 };
 
 } // namespace render_system

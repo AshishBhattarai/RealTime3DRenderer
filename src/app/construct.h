@@ -15,7 +15,7 @@ private:
   friend class App;
   Construct();
 
-  render_system::RenderSystem *newRenderSystem(float ar);
+  render_system::RenderSystem *newRenderSystem(int width, int height);
 };
 
 }; // namespace app

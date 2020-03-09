@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.h"
+#include "frame_buffer.h"
 #include "shaders/flat_forward_program.h"
 #include "types.h"
 #include <glm/glm.hpp>
@@ -11,6 +12,7 @@
 #include <vector>
 
 class Buffer;
+class Image;
 namespace render_system {
 struct Mesh;
 struct RenderableEntity;
@@ -21,6 +23,7 @@ using RenderableMap = std::unordered_map<GLuint, std::vector<RenderableEntity>>;
 
 class Renderer {
 private:
+  FrameBuffer frameBuffer;
   const std::vector<Mesh> &meshes;
   const RenderableMap &renderables;
   const std::vector<PointLight> &pointLights;
@@ -32,11 +35,14 @@ private:
   shader::FlatForwardProgram flatForwardShader;
 
 public:
-  Renderer(const std::vector<Mesh> &meshes, const RenderableMap &renderables,
+  Renderer(int width, int height, const std::vector<Mesh> &meshes,
+           const RenderableMap &renderables,
            const std::vector<PointLight> &pointLights, const Camera *camera,
            const shader::StageCodeMap &flatForwardShader);
 
   void render(float dt);
+  void blitToWindow();
+  Image readPixels();
   void updateProjectionMatrix(float ar, float fov, float near, float far);
 
   void setCamera(const Camera *camera) { this->camera = camera; }

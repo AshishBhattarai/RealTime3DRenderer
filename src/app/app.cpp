@@ -28,7 +28,7 @@ App::App(int, char **)
     : display("App", 1024, 700), input(display), construct(),
       coordinator(ecs::Coordinator::getInstance()),
       worldSystem(new world_system::WorldSystem()),
-      renderSystem(construct.newRenderSystem(display.getAspectRatio())),
+      renderSystem(construct.newRenderSystem(1024, 700)),
       camera(new Camera(glm::vec3(0.0f, 0.0f, 0.0f))) {
   DEBUG_SLOG("App constructed.");
   //  input.setCursorStatus(INPUT_CURSOR_DISABLED);
@@ -145,7 +145,11 @@ void App::run() {
 
     processInput(dt);
     worldSystem->update(dt);
-    renderSystem->update(dt);
+    Image img = renderSystem->update(dt);
+    if (input.getKey(INPUT_KEY_H)) {
+      // screenshot
+      Loaders::writeImage(img, "test.png");
+    }
     auto err = glGetError();
     if (err != GL_NO_ERROR)
       CSLOG("OpenGL ERROR:", err);

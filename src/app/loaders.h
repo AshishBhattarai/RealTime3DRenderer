@@ -12,4 +12,5 @@ namespace app::Loaders {
 bool loadModel(tinygltf::Model &model, const char *fileName);
 bool loadImage(Image &image, const char *fileName);
 bool loadBinaryFile(Buffer &buffer, const char *fileName);
+bool writeImage(Image &image, const char *fileName);
 }; // namespace app::Loaders
