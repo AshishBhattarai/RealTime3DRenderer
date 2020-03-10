@@ -1,4 +1,6 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party)
+
 
 set(GLAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad)
 set(GLFW_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw)

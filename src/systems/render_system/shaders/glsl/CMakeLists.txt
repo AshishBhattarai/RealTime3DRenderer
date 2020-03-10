@@ -1,4 +1,5 @@
-set(SHADER_OUTPUT_DIR ${CMAKE_BINARY_DIR}/shaders)
+file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/shaders)
+set(SHADER_OUTPUT_DIR ${EXECUTABLE_OUTPUT_PATH}/shaders)
 
 function(add_spirv_shader INPUT_FILE OUTPUT_FILE)
     add_custom_command(

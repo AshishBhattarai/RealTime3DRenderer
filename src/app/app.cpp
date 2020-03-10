@@ -16,11 +16,11 @@
 #include "utils/buffer.h"
 #include "utils/image.h"
 #include "utils/slogger.h"
-#include <asio.hpp>
+#include <asio_noexcept.h>
 #include <glm/vec3.hpp>
 #include <iostream>
 #include <map>
-#include <third_party/tinygltf/tiny_gltf.h>
+#include <tinygltf/tiny_gltf.h>
 
 using namespace render_system;
 
@@ -154,7 +154,6 @@ void App::run() {
         Loaders::writeImage(
             image,
             (std::string("test.png") + std::to_string(time * 1000)).c_str());
-        CSLOG("END");
       });
     }
     auto err = glGetError();
