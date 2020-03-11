@@ -77,7 +77,7 @@ bool writeImage(const Image &image, const char *fileName) {
   int width = image.getWidth();
   int height = image.getHeight();
   int stride = nrChannels * width;
-  stride = (stride + 3) & -stride;
+  stride = (stride + 3) & -4;
   return stbi_write_png(fileName, width, height, nrChannels, image.getBuffer(),
                         stride);
 }
