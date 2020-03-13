@@ -3081,7 +3081,7 @@
                           </DElement>
                          </base-DElement>
                          <object>{f072493c-a3bb-4ff3-a2e4-2d55548d79c7}</object>
-                         <name>Network</name>
+                         <name>RtspClient</name>
                          <pos>x:250;y:460</pos>
                          <rect>x:-35;y:-20;w:70;h:40</rect>
                          <visual-role>0</visual-role>
@@ -3302,7 +3302,7 @@
                     </item>
                    </qlist>
                   </elements>
-                  <last-modified>1583858148054</last-modified>
+                  <last-modified>1584084577500</last-modified>
                   <toolbarid>Deployment</toolbarid>
                  </MDiagram>
                 </base-MDiagram>
@@ -4548,7 +4548,7 @@
                     <uid>{f072493c-a3bb-4ff3-a2e4-2d55548d79c7}</uid>
                    </MElement>
                   </base-MElement>
-                  <name>Network</name>
+                  <name>RtspClient</name>
                   <relations>
                    <handles>
                     <handles>
