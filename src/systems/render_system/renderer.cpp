@@ -58,12 +58,12 @@ void Renderer::render(float) {
 
 void Renderer::blitToWindow() { frameBuffer.blit(nullptr, GL_BACK); }
 
-Image Renderer::readPixels() {
+std::shared_ptr<Image> Renderer::readPixels() {
   int width = 0;
   int height = 0;
   int numChannels = 0;
   uchar *buffer = FrameBuffer::readPixelsWindow(numChannels, width, height);
-  return Image(buffer, width, height, numChannels);
+  return std::make_shared<Image>(buffer, width, height, numChannels);
 }
 
 void Renderer::updateProjectionMatrix(float ar, float fov, float near,

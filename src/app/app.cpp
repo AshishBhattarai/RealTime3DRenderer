@@ -146,13 +146,12 @@ void App::run() {
 
     processInput(dt);
     worldSystem->update(dt);
-    Image img = renderSystem->update(dt);
+    auto img = renderSystem->update(dt);
     if (input.getKey(INPUT_KEY_H)) {
       // screenshot
-      asio::post(threadPool, [image = std::move(img),
-                              time = display.getTime()]() {
+      asio::post(threadPool, [image = img, time = display.getTime()]() {
         Loaders::writeImage(
-            image,
+            *image,
             (std::string("test.png") + std::to_string(time * 1000)).c_str());
       });
     }

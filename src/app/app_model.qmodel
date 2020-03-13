@@ -3082,7 +3082,7 @@
                          </base-DElement>
                          <object>{f072493c-a3bb-4ff3-a2e4-2d55548d79c7}</object>
                          <name>Network</name>
-                         <pos>x:305;y:370</pos>
+                         <pos>x:250;y:460</pos>
                          <rect>x:-35;y:-20;w:70;h:40</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -3090,30 +3090,6 @@
                        <variety>nodeinstance</variety>
                        <shape-editable>false</shape-editable>
                       </DItem>
-                     </instance>
-                    </item>
-                    <item>
-                     <instance type="DConnection">
-                      <DConnection>
-                       <base-DRelation>
-                        <DRelation>
-                         <base-DElement>
-                          <DElement>
-                           <uid>{1fac4916-60ef-428e-96ff-1b31f6a007a7}</uid>
-                          </DElement>
-                         </base-DElement>
-                         <object>{84a4867d-baa4-4952-8da3-1e0164f6ee54}</object>
-                         <a>{19a9475d-05ad-4635-97ce-84f0754c6fd6}</a>
-                         <b>{136f6ba8-bdf0-45e1-b430-ae5c8efc7441}</b>
-                        </DRelation>
-                       </base-DRelation>
-                       <custom-relation>NodeAssoziation</custom-relation>
-                       <a>
-                        <DConnectionEnd>
-                         <navigable>true</navigable>
-                        </DConnectionEnd>
-                       </a>
-                      </DConnection>
                      </instance>
                     </item>
                     <item>
@@ -3128,7 +3104,7 @@
                          </base-DElement>
                          <object>{846eb1de-0f27-4041-89f1-a24c2693b87f}</object>
                          <name>NodeJS-Server</name>
-                         <pos>x:300;y:600</pos>
+                         <pos>x:225;y:605</pos>
                          <rect>x:-20;y:-40;w:40;h:80</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -3174,7 +3150,7 @@
                          </base-DElement>
                          <object>{74700635-7298-4b9c-94a5-475a95c9e14b}</object>
                          <name>JavaScript Application</name>
-                         <pos>x:305;y:760</pos>
+                         <pos>x:220;y:760</pos>
                          <rect>x:-40;y:-30;w:80;h:60</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -3254,9 +3230,79 @@
                       </DConnection>
                      </instance>
                     </item>
+                    <item>
+                     <instance type="DItem">
+                      <DItem>
+                       <base-DObject>
+                        <DObject>
+                         <base-DElement>
+                          <DElement>
+                           <uid>{e163b110-7b4e-43c7-90b8-2cb8b0ed7432}</uid>
+                          </DElement>
+                         </base-DElement>
+                         <object>{3bcb8d1c-cb13-48ef-9406-b09f069dc2b5}</object>
+                         <name>FrameQueue</name>
+                         <pos>x:300;y:375</pos>
+                         <rect>x:-45;y:-20;w:90;h:40</rect>
+                         <visual-role>0</visual-role>
+                        </DObject>
+                       </base-DObject>
+                       <variety>nodeinstance</variety>
+                       <shape-editable>false</shape-editable>
+                      </DItem>
+                     </instance>
+                    </item>
+                    <item>
+                     <instance type="DConnection">
+                      <DConnection>
+                       <base-DRelation>
+                        <DRelation>
+                         <base-DElement>
+                          <DElement>
+                           <uid>{5a893cc4-1469-43f3-b2b7-ab0cd612e9d0}</uid>
+                          </DElement>
+                         </base-DElement>
+                         <object>{489d39fb-603a-417a-b899-f825f8f9878e}</object>
+                         <a>{136f6ba8-bdf0-45e1-b430-ae5c8efc7441}</a>
+                         <b>{e163b110-7b4e-43c7-90b8-2cb8b0ed7432}</b>
+                        </DRelation>
+                       </base-DRelation>
+                       <custom-relation>NodeAssoziation</custom-relation>
+                       <a>
+                        <DConnectionEnd>
+                         <navigable>true</navigable>
+                        </DConnectionEnd>
+                       </a>
+                      </DConnection>
+                     </instance>
+                    </item>
+                    <item>
+                     <instance type="DConnection">
+                      <DConnection>
+                       <base-DRelation>
+                        <DRelation>
+                         <base-DElement>
+                          <DElement>
+                           <uid>{ba978004-8dda-40cd-97cb-b8413fb965de}</uid>
+                          </DElement>
+                         </base-DElement>
+                         <object>{08ef1561-6eab-4d07-b74b-de8b6f49496a}</object>
+                         <a>{e163b110-7b4e-43c7-90b8-2cb8b0ed7432}</a>
+                         <b>{19a9475d-05ad-4635-97ce-84f0754c6fd6}</b>
+                        </DRelation>
+                       </base-DRelation>
+                       <custom-relation>NodeAssoziation</custom-relation>
+                       <a>
+                        <DConnectionEnd>
+                         <navigable>true</navigable>
+                        </DConnectionEnd>
+                       </a>
+                      </DConnection>
+                     </instance>
+                    </item>
                    </qlist>
                   </elements>
-                  <last-modified>1583179169086</last-modified>
+                  <last-modified>1583858148054</last-modified>
                   <toolbarid>Deployment</toolbarid>
                  </MDiagram>
                 </base-MDiagram>
@@ -3431,6 +3477,34 @@
                              </base-MElement>
                              <a>{d0bc606f-46ad-4bbc-8e7c-ac0a7b1f9b55}</a>
                              <b>{477b4f40-677c-44c0-8c73-ed3936917e21}</b>
+                            </MRelation>
+                           </base-MRelation>
+                           <custom-relation>NodeAssoziation</custom-relation>
+                           <a>
+                            <MConnectionEnd>
+                             <navigable>true</navigable>
+                            </MConnectionEnd>
+                           </a>
+                          </MConnection>
+                         </instance>
+                        </target>
+                       </handle>
+                      </item>
+                      <item>
+                       <handle>
+                        <uid>{489d39fb-603a-417a-b899-f825f8f9878e}</uid>
+                        <target>
+                         <instance type="MConnection">
+                          <MConnection>
+                           <base-MRelation>
+                            <MRelation>
+                             <base-MElement>
+                              <MElement>
+                               <uid>{489d39fb-603a-417a-b899-f825f8f9878e}</uid>
+                              </MElement>
+                             </base-MElement>
+                             <a>{d0bc606f-46ad-4bbc-8e7c-ac0a7b1f9b55}</a>
+                             <b>{3bcb8d1c-cb13-48ef-9406-b09f069dc2b5}</b>
                             </MRelation>
                            </base-MRelation>
                            <custom-relation>NodeAssoziation</custom-relation>
@@ -4481,34 +4555,6 @@
                      <qlist>
                       <item>
                        <handle>
-                        <uid>{84a4867d-baa4-4952-8da3-1e0164f6ee54}</uid>
-                        <target>
-                         <instance type="MConnection">
-                          <MConnection>
-                           <base-MRelation>
-                            <MRelation>
-                             <base-MElement>
-                              <MElement>
-                               <uid>{84a4867d-baa4-4952-8da3-1e0164f6ee54}</uid>
-                              </MElement>
-                             </base-MElement>
-                             <a>{f072493c-a3bb-4ff3-a2e4-2d55548d79c7}</a>
-                             <b>{d0bc606f-46ad-4bbc-8e7c-ac0a7b1f9b55}</b>
-                            </MRelation>
-                           </base-MRelation>
-                           <custom-relation>NodeAssoziation</custom-relation>
-                           <a>
-                            <MConnectionEnd>
-                             <navigable>true</navigable>
-                            </MConnectionEnd>
-                           </a>
-                          </MConnection>
-                         </instance>
-                        </target>
-                       </handle>
-                      </item>
-                      <item>
-                       <handle>
                         <uid>{fb79c7b4-2536-4f32-ad14-f0a278c03c11}</uid>
                         <target>
                          <instance type="MConnection">
@@ -5089,6 +5135,65 @@
                 </base-MObject>
                 <variety-editable>false</variety-editable>
                 <variety>server</variety>
+               </MItem>
+              </instance>
+             </target>
+            </handle>
+           </item>
+           <item>
+            <handle>
+             <uid>{3bcb8d1c-cb13-48ef-9406-b09f069dc2b5}</uid>
+             <target>
+              <instance type="MItem">
+               <MItem>
+                <base-MObject>
+                 <MObject>
+                  <base-MElement>
+                   <MElement>
+                    <uid>{3bcb8d1c-cb13-48ef-9406-b09f069dc2b5}</uid>
+                   </MElement>
+                  </base-MElement>
+                  <name>FrameQueue</name>
+                  <relations>
+                   <handles>
+                    <handles>
+                     <qlist>
+                      <item>
+                       <handle>
+                        <uid>{08ef1561-6eab-4d07-b74b-de8b6f49496a}</uid>
+                        <target>
+                         <instance type="MConnection">
+                          <MConnection>
+                           <base-MRelation>
+                            <MRelation>
+                             <base-MElement>
+                              <MElement>
+                               <uid>{08ef1561-6eab-4d07-b74b-de8b6f49496a}</uid>
+                              </MElement>
+                             </base-MElement>
+                             <a>{3bcb8d1c-cb13-48ef-9406-b09f069dc2b5}</a>
+                             <b>{f072493c-a3bb-4ff3-a2e4-2d55548d79c7}</b>
+                            </MRelation>
+                           </base-MRelation>
+                           <custom-relation>NodeAssoziation</custom-relation>
+                           <a>
+                            <MConnectionEnd>
+                             <navigable>true</navigable>
+                            </MConnectionEnd>
+                           </a>
+                          </MConnection>
+                         </instance>
+                        </target>
+                       </handle>
+                      </item>
+                     </qlist>
+                    </handles>
+                   </handles>
+                  </relations>
+                 </MObject>
+                </base-MObject>
+                <variety-editable>false</variety-editable>
+                <variety>nodeinstance</variety>
                </MItem>
               </instance>
              </target>

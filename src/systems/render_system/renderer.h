@@ -42,7 +42,7 @@ public:
 
   void render(float dt);
   void blitToWindow();
-  Image readPixels();
+  std::shared_ptr<Image> readPixels();
   void updateProjectionMatrix(float ar, float fov, float near, float far);
 
   void setCamera(const Camera *camera) { this->camera = camera; }

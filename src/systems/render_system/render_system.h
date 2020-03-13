@@ -83,6 +83,6 @@ public:
       renderer.setCamera(camera);
   }
 
-  Image update(float dt);
+  std::shared_ptr<Image> update(float dt);
 };
 } // namespace render_system
