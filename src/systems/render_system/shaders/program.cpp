@@ -8,7 +8,7 @@ namespace render_system::shader {
 
 GLuint Program::createShader(const Buffer &data, GLenum type) {
   GLuint shader = glCreateShader(type);
-  glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, data.getContent(),
+  glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, data.data(),
                  data.getSize());
   // set shade entry point, with argc & argv
   glSpecializeShader(shader, "main", 0, 0, 0);

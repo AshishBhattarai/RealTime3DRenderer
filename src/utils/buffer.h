@@ -9,11 +9,16 @@
  */
 class Buffer {
 private:
-  char *buf;
+  uchar *buf;
   size_t size;
+  uint alignment;
 
 public:
-  Buffer(char *buf, size_t size) : buf(buf), size(size) {}
+  Buffer(size_t size, uint alignment = 0) : size(size), alignment(alignment) {
+    this->buf = (uchar *)malloc(size);
+  }
+  Buffer(uchar *buf, size_t size, uint alignment = 0)
+      : buf(buf), size(size), alignment(alignment) {}
   Buffer() = default;
 
   Buffer(Buffer &&buffer) {
@@ -35,10 +40,16 @@ public:
 
   ~Buffer() {
     if (buf)
-      delete buf;
+      free(buf);
     size = 0;
   }
 
-  const char *getContent() const { return buf; }
+  bool isValid() const { return buf; }
+  uchar *data() { return buf; }
+  const uchar *data() const { return buf; }
   size_t getSize() const { return size; }
+  uint getAlignment() const { return alignment; }
+  static size_t align(size_t offset, uint alignment) {
+    return (offset + (alignment - 1)) & -alignment;
+  }
 };

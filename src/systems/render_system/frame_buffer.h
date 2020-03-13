@@ -1,5 +1,6 @@
 #pragma once
 #include "types.h"
+#include "utils/buffer.h"
 #include <array>
 #include <cassert>
 #include <unordered_set>
@@ -114,7 +115,7 @@ public:
    * @param fromBuffer - Default GL_COLOR_ATTACHMENT0
    * @return
    */
-  uchar *readPixels(int &nrChannels, int &width, int &height,
+  Buffer readPixels(int &nrChannels, int &width, int &height,
                     u32 fromBuffer = 0x8CE0);
 
   /**
@@ -126,7 +127,7 @@ public:
    * @param height
    * @return
    */
-  static uchar *readPixelsWindow(int &nrChannels, int &width, int &height,
+  static Buffer readPixelsWindow(int &nrChannels, int &width, int &height,
                                  u32 fromBuffer = 0x0404);
 
   /**

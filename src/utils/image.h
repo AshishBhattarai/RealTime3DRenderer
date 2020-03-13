@@ -1,35 +1,44 @@
 #pragma once
 
+#include "buffer.h"
 #include "types.h"
 #include <memory>
 
 class Image {
 private:
-  uchar *buffer;
+  Buffer buffer;
   int width;
   int height;
   int numChannels;
 
 public:
   Image(uchar *buffer, int width, int height, int numChannels)
-      : buffer(buffer), width(width), height(height), numChannels(numChannels) {
-  }
+      : buffer(buffer, width * height * numChannels), width(width),
+        height(height), numChannels(numChannels) {}
+
+  Image(uchar *buffer, size_t size, uint align, int width, int height,
+        int numChannels)
+      : buffer(buffer, size, align), width(width), height(height),
+        numChannels(numChannels) {}
+
+  Image(Buffer &&buffer, int width, int height, int numChannels)
+      : buffer(std::move(buffer)), width(width), height(height),
+        numChannels(numChannels) {}
+
   Image() = default;
 
   Image(Image &&image) {
-    this->buffer = image.buffer;
+    this->buffer = std::move(image.buffer);
     this->width = image.width;
     this->height = image.height;
     this->numChannels = image.numChannels;
-    image.buffer = nullptr;
     image.width = image.height = image.numChannels = 0;
   }
   Image &operator=(Image &&image) {
-    this->buffer = image.buffer;
+    this->buffer = std::move(image.buffer);
     this->width = image.width;
     this->height = image.height;
     this->numChannels = image.numChannels;
-    image.buffer = nullptr;
     image.width = image.height = image.numChannels = 0;
     return *this;
   }
@@ -38,17 +47,16 @@ public:
   Image &operator=(Image &) = delete;
 
   ~Image() {
-    if (buffer) {
-      free(buffer);
+    if (buffer.data()) {
       buffer = 0;
       width = 0;
       height = 0;
     }
   }
 
-  const uchar *getBuffer() const { return buffer; }
+  const Buffer *getBuffer() const { return &buffer; }
   int getWidth() const { return width; }
   int getHeight() const { return height; }
   int getNumChannels() const { return numChannels; }
-  bool isValid() const { return buffer; }
+  bool isValid() const { return buffer.isValid(); }
 };

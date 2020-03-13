@@ -62,8 +62,8 @@ std::shared_ptr<Image> Renderer::readPixels() {
   int width = 0;
   int height = 0;
   int numChannels = 0;
-  uchar *buffer = FrameBuffer::readPixelsWindow(numChannels, width, height);
-  return std::make_shared<Image>(buffer, width, height, numChannels);
+  Buffer buffer = FrameBuffer::readPixelsWindow(numChannels, width, height);
+  return std::make_shared<Image>(std::move(buffer), width, height, numChannels);
 }
 
 void Renderer::updateProjectionMatrix(float ar, float fov, float near,

@@ -11,7 +11,7 @@ void Texture::loadTexture(const Image &image) {
   if (id || !image.getBuffer())
     return;
 
-  const uchar *data = image.getBuffer();
+  const uchar *data = image.getBuffer()->data();
   int width = image.getWidth();
   int height = image.getHeight();
   int numChannels = image.getNumChannels();

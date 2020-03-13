@@ -215,36 +215,35 @@ void FrameBuffer::setDepthStencilAttachment(AttachType type, u32 texTarget) {
   bufferFlag |= GL_STENCIL_BUFFER_BIT;
 }
 
-uchar *FrameBuffer::readPixels(int &nrChannels, int &width, int &height,
+Buffer FrameBuffer::readPixels(int &nrChannels, int &width, int &height,
                                u32 fromBuffer) {
   assert(isComplete() && "Framebuffers must be complete before use.");
   height = this->height;
   width = this->width;
   nrChannels = 4;
-  int stride = nrChannels * width;
-  stride = (stride + 3) & -4; // add padding, to create 4-byte alignment
+  // add padding, to create 4-byte alignment
+  int stride = Buffer::align(nrChannels * width, 4);
   int bufferSize = stride * height;
-  uchar *buffer = (uchar *)malloc(bufferSize);
+  Buffer buffer(bufferSize, 4);
   glNamedFramebufferReadBuffer(fbo, fromBuffer);
   glPixelStorei(GL_PACK_ALIGNMENT, 4); // alignment for each pixel in memory
-  glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+  glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data());
   return buffer;
 }
 
-uchar *FrameBuffer::readPixelsWindow(int &nrChannels, int &width, int &height,
+Buffer FrameBuffer::readPixelsWindow(int &nrChannels, int &width, int &height,
                                      u32 fromBuffer) {
   int viewPort[4] = {};
   glGetIntegerv(GL_VIEWPORT, viewPort);
   width = viewPort[2];
   height = viewPort[3];
   nrChannels = 4;
-  int stride = nrChannels * width;
-  stride = (stride + 3) & -4; // add padding, to create 4-byte alignment
+  int stride = Buffer::align(nrChannels * width, 4);
   int bufferSize = stride * height;
-  uchar *buffer = (uchar *)malloc(bufferSize);
+  Buffer buffer(bufferSize, 4);
   glNamedFramebufferReadBuffer(0, fromBuffer);
   glPixelStorei(GL_PACK_ALIGNMENT, 4); // alignment for each pixel in memory
-  glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+  glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data());
   return buffer;
 }
 

@@ -50,24 +50,21 @@ bool loadImage(Image &image, const char *fileName) {
 }
 
 bool loadBinaryFile(Buffer &buffer, const char *fileName) {
-  char *content = nullptr;
-  size_t size = 0;
   // read from file
   std::ifstream file(fileName, std::ios::binary | std::ios::ate);
   if (file.is_open()) {
-    size = file.tellg();
-    content = new char[size];
+    size_t size = file.tellg();
+    buffer = Buffer(size);
     file.seekg(0, std::ios::beg);
-    file.read(content, size);
+    file.read((char *)buffer.data(), size);
     file.close();
   }
   // check for errors
-  if (file.fail()) {
+  if (file.fail() && buffer.isValid()) {
     SLOG("Failed to read form binary file:", fileName);
     return false;
   } else {
     DEBUG_SLOG("Loaded binary file:", fileName);
-    buffer = Buffer(content, size);
     return true;
   }
 }
@@ -76,8 +73,8 @@ bool writeImage(const Image &image, const char *fileName) {
   int nrChannels = image.getNumChannels();
   int width = image.getWidth();
   int height = image.getHeight();
-  int stride = nrChannels * width;
-  stride = (stride + 3) & -4;
+  int stride =
+      Buffer::align(nrChannels * width, image.getBuffer()->getAlignment());
   return stbi_write_png(fileName, width, height, nrChannels, image.getBuffer(),
                         stride);
 }
