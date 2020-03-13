@@ -12,16 +12,16 @@ private:
   int numChannels;
 
 public:
-  Image(uchar *buffer, int width, int height, int numChannels)
+  explicit Image(uchar *buffer, int width, int height, int numChannels)
       : buffer(buffer, width * height * numChannels), width(width),
         height(height), numChannels(numChannels) {}
 
-  Image(uchar *buffer, size_t size, uint align, int width, int height,
-        int numChannels)
+  explicit Image(uchar *buffer, size_t size, uint align, int width, int height,
+                 int numChannels)
       : buffer(buffer, size, align), width(width), height(height),
         numChannels(numChannels) {}
 
-  Image(Buffer &&buffer, int width, int height, int numChannels)
+  explicit Image(Buffer &&buffer, int width, int height, int numChannels)
       : buffer(std::move(buffer)), width(width), height(height),
         numChannels(numChannels) {}
 
@@ -34,6 +34,7 @@ public:
     this->numChannels = image.numChannels;
     image.width = image.height = image.numChannels = 0;
   }
+
   Image &operator=(Image &&image) {
     this->buffer = std::move(image.buffer);
     this->width = image.width;
@@ -48,7 +49,6 @@ public:
 
   ~Image() {
     if (buffer.data()) {
-      buffer = 0;
       width = 0;
       height = 0;
     }

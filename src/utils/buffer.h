@@ -14,24 +14,29 @@ private:
   uint alignment;
 
 public:
-  Buffer(size_t size, uint alignment = 0) : size(size), alignment(alignment) {
+  explicit Buffer(size_t size, uint alignment = 0)
+      : size(size), alignment(alignment) {
     this->buf = (uchar *)malloc(size);
   }
-  Buffer(uchar *buf, size_t size, uint alignment = 0)
+  explicit Buffer(uchar *buf, size_t size, uint alignment = 0)
       : buf(buf), size(size), alignment(alignment) {}
   Buffer() = default;
 
   Buffer(Buffer &&buffer) {
     this->buf = buffer.buf;
     this->size = buffer.size;
+    this->alignment = buffer.alignment;
     buffer.buf = nullptr;
     buffer.size = 0;
+    buffer.alignment = 0;
   };
   Buffer &operator=(Buffer &&buffer) {
     this->buf = buffer.buf;
     this->size = buffer.size;
+    this->alignment = buffer.alignment;
     buffer.buf = nullptr;
     buffer.size = 0;
+    buffer.alignment = 0;
     return *this;
   }
 

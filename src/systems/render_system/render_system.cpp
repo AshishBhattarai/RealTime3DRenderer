@@ -199,7 +199,7 @@ void RenderSystem::relaceAllMaterial(uint meshId,
 
 std::shared_ptr<Image> RenderSystem::update(float dt) {
   renderer.render(dt);
-  auto img = renderer.readPixels();
+  std::shared_ptr<Image> img = renderer.readPixels();
   // Don't blit before reading the pixels.
   //  renderer.blitToWindow();
   return img;

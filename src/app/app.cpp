@@ -5,10 +5,12 @@
 #include "components/light.h"
 #include "components/mesh.h"
 #include "components/transform.h"
+#include "core/shared_queue.h"
 #include "display.h"
 #include "ecs/coordinator.h"
 #include "input.h"
 #include "loaders.h"
+#include "rtsp_client.h"
 #include "systems/render_system/camera.h"
 #include "systems/render_system/model.h"
 #include "systems/render_system/render_system.h"
@@ -127,6 +129,12 @@ void App::processInput(float dt) {
 
 void App::run() {
   DEBUG_SLOG("App running.");
+  FrameQueue frameQueue;
+  // create & start rtspClient
+  RtspClient rtspClient(display.getWidth(), display.getHeight(), frameQueue,
+                        "output.mp4", false);
+  assert(rtspClient.start());
+
   float ltf, lt, ct, dt = 0.0f;
   int frameCnt = 0;
   lt = ct = display.getTime(); // time in seconds
@@ -147,14 +155,16 @@ void App::run() {
     processInput(dt);
     worldSystem->update(dt);
     auto img = renderSystem->update(dt);
-    if (input.getKey(INPUT_KEY_H)) {
-      // screenshot
-      asio::post(threadPool, [image = img, time = display.getTime()]() {
-        Loaders::writeImage(
-            *image,
-            (std::string("test.png") + std::to_string(time * 1000)).c_str());
-      });
-    }
+    frameQueue.pushBack(img);
+    //    if (input.getKey(INPUT_KEY_H)) {
+    //      // screenshot
+    //      asio::post(threadPool, [image = img, time = display.getTime()]() {
+    //        Loaders::writeImage(
+    //            image,
+    //            (std::string("test.png") + std::to_string(time *
+    //            1000)).c_str());
+    //      });
+    //    }
     auto err = glGetError();
     if (err != GL_NO_ERROR)
       CSLOG("OpenGL ERROR:", err);

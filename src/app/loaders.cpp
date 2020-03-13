@@ -69,14 +69,14 @@ bool loadBinaryFile(Buffer &buffer, const char *fileName) {
   }
 }
 
-bool writeImage(const Image &image, const char *fileName) {
-  int nrChannels = image.getNumChannels();
-  int width = image.getWidth();
-  int height = image.getHeight();
+bool writeImage(std::shared_ptr<Image> image, const char *fileName) {
+  int nrChannels = image->getNumChannels();
+  int width = image->getWidth();
+  int height = image->getHeight();
   int stride =
-      Buffer::align(nrChannels * width, image.getBuffer()->getAlignment());
-  return stbi_write_png(fileName, width, height, nrChannels, image.getBuffer(),
-                        stride);
+      Buffer::align(nrChannels * width, image->getBuffer()->getAlignment());
+  return stbi_write_png(fileName, width, height, nrChannels,
+                        image->getBuffer()->data(), stride);
 }
 
 } // namespace app::Loaders

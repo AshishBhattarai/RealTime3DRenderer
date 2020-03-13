@@ -17,30 +17,40 @@ public:
       condVar.wait(lock);
     return queue.front();
   }
+
   void popFront() {
     std::unique_lock<std::mutex> lock(mutex);
     while (queue.empty())
       condVar.wait(lock);
-    return queue.pop_front();
+    queue.pop();
+  }
+
+  T popGetFront(const bool &discard) {
+    std::unique_lock<std::mutex> lock(mutex);
+    while (queue.empty() || discard)
+      condVar.wait(lock);
+    T front = queue.front();
+    queue.pop();
+    return front;
   }
 
   void pushBack(const T &item) {
     std::unique_lock<std::mutex> lock(mutex);
-    queue.push_back(item);
+    queue.push(item);
     lock.unlock();
     condVar.notify_one();
   }
 
   void pushBack(const T &&item) {
     std::unique_lock<std::mutex> lock(mutex);
-    queue.push_back(std::move(item));
+    queue.push(std::move(item));
     lock.unlock();
     condVar.notify_one();
   }
 
   template <typename... Args> void emplaceBack(Args &&... args) {
     std::unique_lock<std::mutex> lock(mutex);
-    queue.emplace_back(T(std::forward<Args>(args)...));
+    queue.emplace(T(std::forward<Args>(args)...));
     lock.unlock();
     condVar.notify_one();
   }
@@ -55,7 +65,7 @@ public:
   bool isEmpty() const { return size() == 0; }
 
 private:
-  std::deque<T> queue;
+  std::queue<T> queue;
   std::mutex mutex;
   std::condition_variable condVar;
 };

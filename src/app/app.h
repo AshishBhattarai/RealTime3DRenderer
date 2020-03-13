@@ -1,6 +1,7 @@
 #pragma once
 
 #include "construct.h"
+#include "core/shared_queue.h"
 #include "display.h"
 #include "input.h"
 #include "types.h"
@@ -39,7 +40,6 @@ private:
   world_system::WorldSystem *worldSystem;
   render_system::RenderSystem *renderSystem;
   render_system::Camera *camera;
-
   void processInput(float dt);
 };
 } // namespace app
