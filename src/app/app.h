@@ -30,6 +30,7 @@ public:
   ~App();
 
   void run();
+  void runRenderLoop(std::string_view renderOutpu);
 
 private:
   asio::thread_pool threadPool;

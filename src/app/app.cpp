@@ -31,7 +31,8 @@ App::App(int, char **)
     : threadPool(NUM_THREADS), display("App", 1024, 700), input(display),
       construct(), coordinator(ecs::Coordinator::getInstance()),
       worldSystem(new world_system::WorldSystem()),
-      renderSystem(construct.newRenderSystem(1024, 700)),
+      renderSystem(
+          construct.newRenderSystem(display.getWidth(), display.getHeight())),
       camera(new Camera(glm::vec3(0.0f, 0.0f, 0.0f))) {
   DEBUG_SLOG("App constructed.");
   //  input.setCursorStatus(INPUT_CURSOR_DISABLED);
@@ -129,10 +130,14 @@ void App::processInput(float dt) {
 
 void App::run() {
   DEBUG_SLOG("App running.");
+  runRenderLoop("output.mp4");
+}
+
+void App::runRenderLoop(std::string_view renderOutput) {
   FrameQueue frameQueue;
   // create & start rtspClient
   RtspClient rtspClient(display.getWidth(), display.getHeight(), frameQueue,
-                        "output.mp4", false);
+                        renderOutput, true);
   assert(rtspClient.start());
 
   float ltf, lt, ct, dt = 0.0f;
