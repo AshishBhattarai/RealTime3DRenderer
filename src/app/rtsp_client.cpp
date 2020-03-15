@@ -10,15 +10,21 @@ RtspClient::RtspClient(int width, int height, FrameQueue &frameQueue,
   std::string format = "";
   std::string res = std::to_string(width) + "x" + std::to_string(height);
   if (serverAddr.find("rtsp://") != std::string::npos) {
-    format = "-f rtsp ";
+    format = "-rtpflags skip_rtcp -allowed_media_types video -rtsp_transport "
+             "udp -f rtsp ";
   }
   if (!isNvidia) {
-    command = "ffmpeg -r 60 -f rawvideo -pix_fmt rgba -s " + res +
+    command = "ffmpeg -loglevel error -fflags 'nobuffer;flush_packets' -r 60 "
+              "-f rawvideo "
+              "-pix_fmt rgba -s " +
+              res +
               " -i - "
               "-tune zerolatency -threads 1 -preset fast -y -pix_fmt yuv420p "
               "-vf vflip -vsync 1 -r 60 -c:v libx264 ";
   } else {
-    command = "ffmpeg -hwaccel cuda -r 60 -f rawvideo -pix_fmt "
+    command = "ffmpeg -loglevel error -fflags 'nobuffer;flush_packets' "
+              "-hwaccel cuda -r 60 -f "
+              "rawvideo -pix_fmt "
               "rgba -s " +
               res +
               " -i - "

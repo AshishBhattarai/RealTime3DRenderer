@@ -28,7 +28,7 @@ using namespace render_system;
 
 namespace app {
 App::App(int, char **)
-    : threadPool(NUM_THREADS), display("App", 1024, 700), input(display),
+    : threadPool(NUM_THREADS), display("App", 1024, 720), input(display),
       construct(), coordinator(ecs::Coordinator::getInstance()),
       worldSystem(new world_system::WorldSystem()),
       renderSystem(
@@ -142,7 +142,7 @@ void App::runRenderLoop(std::string_view renderOutput) {
 
   float ltf, lt, ct, dt = 0.0f;
   int frameCnt = 0;
-  lt = ct = display.getTime(); // time in seconds
+  ltf = lt = ct = display.getTime(); // time in seconds
   while (!display.shouldClose()) {
     // calculate delta time
     ct = display.getTime();
