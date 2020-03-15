@@ -16,14 +16,14 @@ RtspClient::RtspClient(int width, int height, FrameQueue &frameQueue,
     command = "ffmpeg -r 60 -f rawvideo -pix_fmt rgba -s " + res +
               " -i - "
               "-tune zerolatency -threads 1 -preset fast -y -pix_fmt yuv420p "
-              "-vf vflip,realtime -vsync 1 -r 60 -c:v libx264 ";
+              "-vf vflip -vsync 1 -r 60 -c:v libx264 ";
   } else {
     command = "ffmpeg -hwaccel cuda -r 60 -f rawvideo -pix_fmt "
               "rgba -s " +
               res +
               " -i - "
               "-tune zerolatency -threads 1 -preset fast -y -pix_fmt bgr0 "
-              "-vf vflip,realtime -vsync 1 -r 60 -c:v h264_nvenc ";
+              "-vf vflip -vsync 1 -r 60 -c:v h264_nvenc ";
   }
   command += format;
   command += serverAddr;
@@ -47,7 +47,10 @@ bool RtspClient::start() {
     } else {
       while (!shouldStop) {
         // feed fames to ffmpeg
-        auto image = frameQueue.popGetFront(shouldStop);
+        std::shared_ptr<Image> image;
+        frameQueue.popGetFront(image, shouldStop);
+        if (shouldStop)
+          break;
         auto buffer = image->getBuffer();
         fwrite(buffer->data(), sizeof(uchar), buffer->getSize(), ffmpegStream);
       }

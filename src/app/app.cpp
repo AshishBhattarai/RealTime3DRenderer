@@ -137,7 +137,7 @@ void App::runRenderLoop(std::string_view renderOutput) {
   FrameQueue frameQueue;
   // create & start rtspClient
   RtspClient rtspClient(display.getWidth(), display.getHeight(), frameQueue,
-                        renderOutput, true);
+                        renderOutput, false);
   assert(rtspClient.start());
 
   float ltf, lt, ct, dt = 0.0f;

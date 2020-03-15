@@ -25,13 +25,12 @@ public:
     queue.pop();
   }
 
-  T popGetFront(const bool &discard) {
+  void popGetFront(T &front, const bool &discard) {
     std::unique_lock<std::mutex> lock(mutex);
     while (queue.empty() || discard)
       condVar.wait(lock);
-    T front = queue.front();
+    front = queue.front();
     queue.pop();
-    return front;
   }
 
   void pushBack(const T &item) {
