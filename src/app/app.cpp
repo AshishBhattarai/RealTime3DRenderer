@@ -130,14 +130,14 @@ void App::processInput(float dt) {
 
 void App::run() {
   DEBUG_SLOG("App running.");
-  runRenderLoop("output.mp4");
+  runRenderLoop("rtsp://localhost:8554/mystream");
 }
 
 void App::runRenderLoop(std::string_view renderOutput) {
   FrameQueue frameQueue;
   // create & start rtspClient
   RtspClient rtspClient(display.getWidth(), display.getHeight(), frameQueue,
-                        renderOutput, false);
+                        renderOutput, true);
   assert(rtspClient.start());
 
   float ltf, lt, ct, dt = 0.0f;

@@ -7,6 +7,7 @@ add_library(
     app_config.cpp
     construct.cpp
     rtsp_client.cpp
+    command_server.cpp
     app_model.qmodel
 )
 target_link_libraries(
