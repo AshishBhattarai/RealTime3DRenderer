@@ -1,5 +1,5 @@
 #include "texture.h"
-#include "utils/image.h"
+#include "core/image.h"
 #include <cassert>
 
 namespace render_system {

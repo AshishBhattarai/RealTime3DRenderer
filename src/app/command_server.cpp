@@ -1,4 +1,5 @@
 #include "command_server.h"
+#include "core/serializer.h"
 #include "utils/slogger.h"
 
 using namespace asio;

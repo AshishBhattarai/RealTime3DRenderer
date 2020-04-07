@@ -1,7 +1,7 @@
 #include "render_defaults.h"
+#include "core/image.h"
 #include "texture.h"
 #include "types.h"
-#include "utils/image.h"
 #include <string>
 
 namespace render_system {

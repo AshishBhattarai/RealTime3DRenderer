@@ -1,6 +1,6 @@
 #include "rtsp_client.h"
+#include "core/image.h"
 #include "core/shared_queue.h"
-#include "utils/image.h"
 #include "utils/slogger.h"
 
 namespace app {

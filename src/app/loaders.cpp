@@ -1,7 +1,7 @@
 #include "loaders.h"
+#include "core/buffer.h"
+#include "core/image.h"
 #include "types.h"
-#include "utils/buffer.h"
-#include "utils/image.h"
 #include "utils/slogger.h"
 
 #define TINYGLTF_IMPLEMENTATION

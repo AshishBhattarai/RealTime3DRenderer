@@ -3,12 +3,12 @@
 #include "components/light.h"
 #include "components/mesh.h"
 #include "components/transform.h"
+#include "core/image.h"
 #include "ecs/coordinator.h"
 #include "events/component_cache_invalid.h"
 #include "model.h"
 #include "render_defaults.h"
 #include "renderable_entity.h"
-#include "utils/image.h"
 #include "utils/slogger.h"
 
 namespace render_system {

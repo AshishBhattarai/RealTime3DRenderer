@@ -1,6 +1,6 @@
 #pragma once
+#include "core/buffer.h"
 #include "types.h"
-#include "utils/buffer.h"
 #include <array>
 #include <cassert>
 #include <unordered_set>

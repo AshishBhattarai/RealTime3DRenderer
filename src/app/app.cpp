@@ -5,6 +5,8 @@
 #include "components/light.h"
 #include "components/mesh.h"
 #include "components/transform.h"
+#include "core/buffer.h"
+#include "core/image.h"
 #include "core/shared_queue.h"
 #include "display.h"
 #include "ecs/coordinator.h"
@@ -15,8 +17,6 @@
 #include "systems/render_system/model.h"
 #include "systems/render_system/render_system.h"
 #include "systems/world_system/world_system.h"
-#include "utils/buffer.h"
-#include "utils/image.h"
 #include "utils/slogger.h"
 #include <asio_noexcept.h>
 #include <glm/vec3.hpp>
@@ -130,7 +130,7 @@ void App::processInput(float dt) {
 
 void App::run() {
   DEBUG_SLOG("App running.");
-  runRenderLoop("rtsp://localhost:8554/mystream");
+  runRenderLoop("rec.mp4");
 }
 
 void App::runRenderLoop(std::string_view renderOutput) {

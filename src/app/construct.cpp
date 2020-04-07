@@ -1,9 +1,9 @@
 #include "construct.h"
 
+#include "core/buffer.h"
+#include "core/image.h"
 #include "loaders.h"
 #include "systems/render_system/render_system.h"
-#include "utils/buffer.h"
-#include "utils/image.h"
 
 namespace app {
 

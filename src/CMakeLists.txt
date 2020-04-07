@@ -50,6 +50,7 @@ include_directories(${ASIO_INCLUDE_DIR})
 
 # modules
 add_subdirectory(third_party)
+add_subdirectory(core)
 add_subdirectory(ecs)
 add_subdirectory(systems/render_system)
 add_subdirectory(systems/world_system)
@@ -57,4 +58,4 @@ add_subdirectory(app)
 
 # exec
 add_executable(renderer-demo main.cpp)
-target_link_libraries(renderer-demo app-lib)
+target_link_libraries(renderer-demo app-lib serializer-lib)

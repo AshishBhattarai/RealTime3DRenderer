@@ -1,10 +1,10 @@
 #include "renderer.h"
 #include "camera.h"
 #include "components/transform.h"
+#include "core/image.h"
 #include "mesh.h"
 #include "render_defaults.h"
 #include "renderable_entity.h"
-#include "utils/image.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace render_system {
