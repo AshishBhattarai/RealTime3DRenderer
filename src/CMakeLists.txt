@@ -58,4 +58,4 @@ add_subdirectory(app)
 
 # exec
 add_executable(renderer-demo main.cpp)
-target_link_libraries(renderer-demo app-lib serializer-lib)
+target_link_libraries(renderer-demo app-lib)

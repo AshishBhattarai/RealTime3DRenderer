@@ -5,11 +5,11 @@
 #include "components/light.h"
 #include "components/mesh.h"
 #include "components/transform.h"
+#include "core/image.h"
 #include "ecs/coordinator.h"
 #include "events/component_cache_invalid.h"
 #include "systems/render_system/render_defaults.h"
 #include "systems/render_system/render_system.h"
-#include "utils/image.h"
 #include "utils/slogger.h"
 
 int main(int argc, char **argv) {
@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   sig.reset();
 
   /**
-   * Note:
+   * Note
    * Helper systems or sub-systems are registered from their parent systems.
    */
 
