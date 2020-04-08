@@ -99,7 +99,8 @@ long double Serializer::unPack754(u64 value, unsigned bits, unsigned expbits) {
   return result;
 }
 
-void Serializer::unPack(const Buffer &buffer, size_t bytesUnPacked, s8 &value) {
+void Serializer::unPack(const Buffer &buffer, size_t bytesUnPacked,
+                        char &value) {
   auto data = *(buffer.data() + bytesUnPacked);
   if (data <= 0x7fu)
     // positive number (doesn't use sign bit)
@@ -110,25 +111,33 @@ void Serializer::unPack(const Buffer &buffer, size_t bytesUnPacked, s8 &value) {
     value = -1 - (uchar)(0xffu - data);
 }
 
+void Serializer::unPack(const Buffer &buffer, size_t bytesUnPacked, s8 &value) {
+  auto data = *(buffer.data() + bytesUnPacked);
+  if (data <= 0x7fu)
+    value = data;
+  else
+    value = -1 - (u8)(0xffu - data);
+}
+
 void Serializer::unPack(const Buffer &buffer, size_t bytesUnPacked,
                         s16 &value) {
   auto buf = buffer.data() + bytesUnPacked;
   u16 data = (u16)buf[0] << 8 | buf[1];
   if (data <= 0x7fffu)
-    value = *buf;
+    value = data;
   else
-    value = -1 - (uchar)(0xffffu - data);
+    value = -1 - (u16)(0xffffu - data);
 }
 
 void Serializer::unPack(const Buffer &buffer, size_t bytesUnPacked,
                         s32 &value) {
   auto buf = buffer.data() + bytesUnPacked;
   u32 data =
-      ((u64)buf[0] << 24) | ((u64)buf[1] << 16) | ((u64)buf[2] << 8) | buf[3];
+      ((u32)buf[0] << 24) | ((u32)buf[1] << 16) | ((u32)buf[2] << 8) | buf[3];
   if (data <= 0x7fffffffu)
-    value = *buf;
+    value = data;
   else
-    value = -1 - (uchar)(0xffffffffu - data);
+    value = -1 - (u32)(0xffffffffu - data);
 }
 
 void Serializer::unPack(const Buffer &buffer, size_t bytesUnPacked,
@@ -138,9 +147,9 @@ void Serializer::unPack(const Buffer &buffer, size_t bytesUnPacked,
              ((u64)buf[3] << 32) | ((u64)buf[4] << 24) | ((u64)buf[5] << 16) |
              ((u64)buf[6] << 8) | buf[7];
   if (data <= 0x7fffffffffffffffu)
-    value = *buf;
+    value = data;
   else
-    value = -1 - (uchar)(0xffffffffffffffffu - data);
+    value = -1 - (u64)(0xffffffffffffffffu - data);
 }
 
 void Serializer::unPack(const Buffer &buffer, size_t bytesUnPacked, u8 &value) {

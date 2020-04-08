@@ -76,11 +76,12 @@ public:
    *
    * bytesUnPacked should be zero initially
    */
+  void unPack(const Buffer &buffer, size_t bytesUnPacked, char &value);
   void unPack(const Buffer &buffer, size_t bytesUnPacked, s8 &value);
   void unPack(const Buffer &buffer, size_t bytesUnPacked, s16 &value);
   void unPack(const Buffer &buffer, size_t bytesUnPacked, s32 &value);
   void unPack(const Buffer &buffer, size_t bytesUnPacked, s64 &value);
-  void unPack(const Buffer &buffer, size_t bytesUnPacked, u8 &value);
+  void unPack(const Buffer &buffer, size_t bytesUnPacked, uchar &value);
   void unPack(const Buffer &buffer, size_t bytesUnPacked, u16 &value);
   void unPack(const Buffer &buffer, size_t bytesUnPacked, u32 &value);
   void unPack(const Buffer &buffer, size_t bytesUnPacked, u64 &value);
