@@ -2,6 +2,7 @@
 
 #include "types.h"
 #include <cstdlib>
+#include <cstring>
 /**
  * @brief The Buffer class
  *
@@ -54,6 +55,7 @@ public:
   const uchar *data() const { return buf; }
   size_t getSize() const { return size; }
   uint getAlignment() const { return alignment; }
+  void clear() { memset(buf, 0, size); }
   static size_t align(size_t offset, uint alignment) {
     return (offset + (alignment - 1)) & -alignment;
   }
