@@ -37,5 +37,8 @@ public:
   float getTime() const;
   bool shouldClose() const;
   bool isFocused() const;
+
+  void hideWindow();
+  void showWindow();
 };
 } // namespace app

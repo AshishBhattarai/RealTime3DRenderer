@@ -1,6 +1,7 @@
 #pragma once
 
 #include "asio_noexcept.h"
+#include "command_queues.h"
 #include <memory>
 #include <vector>
 
@@ -14,7 +15,14 @@ public:
 
   void start();
 
+  CommandDto::RTSPConnection popConnectionQueue(bool discard = false) {
+    CommandDto::RTSPConnection dto;
+    commandQueues.connectionQueue.popGetFront(dto, discard);
+    return dto;
+  }
+
 private:
+  CommandQueues commandQueues;
   asio::io_service ios;
   asio::ip::tcp::acceptor acceptor;
   asio::executor_work_guard<asio::io_context::executor_type> work;

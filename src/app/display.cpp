@@ -49,6 +49,7 @@ Display::Display(std::string_view title, int width, int height)
   glfwSwapInterval(1);
   glViewport(0, 0, width, height);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+  hideWindow();
 }
 
 Display::~Display() {
@@ -74,4 +75,7 @@ bool Display::isFocused() const {
   return glfwGetWindowAttrib(window, GLFW_FOCUSED);
 }
 
+void Display::hideWindow() { glfwHideWindow(window); }
+
+void Display::showWindow() { glfwShowWindow(window); }
 } // namespace app

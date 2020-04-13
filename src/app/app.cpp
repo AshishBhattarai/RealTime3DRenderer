@@ -1,6 +1,7 @@
 #include "app.h"
 
 #include "app_config.h"
+#include "command_queues.h"
 #include "common.h"
 #include "components/light.h"
 #include "components/mesh.h"
@@ -28,8 +29,9 @@ using namespace render_system;
 
 namespace app {
 App::App(int, char **)
-    : threadPool(NUM_THREADS), display("App", 1024, 720), input(display),
-      construct(), coordinator(ecs::Coordinator::getInstance()),
+    : threadPool(NUM_THREADS), commandServer(8003, 4),
+      display("App", 1024, 720), input(display), construct(),
+      coordinator(ecs::Coordinator::getInstance()),
       worldSystem(new world_system::WorldSystem()),
       renderSystem(
           construct.newRenderSystem(display.getWidth(), display.getHeight())),
@@ -130,10 +132,17 @@ void App::processInput(float dt) {
 
 void App::run() {
   DEBUG_SLOG("App running.");
-  runRenderLoop("rec.mp4");
+  SLOG("Starting command server.");
+  commandServer.start();
+  SLOG("Waiting for clients to connect...");
+  //  runRenderLoop("rtsp://0.0.0.0:8554/mystream");
+  //  runRenderLoop("rec.mp4");
+  CommandDto::RTSPConnection connectionDto = commandServer.popConnectionQueue();
+  runRenderLoop(connectionDto.toRtspEndpoint());
 }
 
 void App::runRenderLoop(std::string_view renderOutput) {
+  display.showWindow();
   FrameQueue frameQueue;
   // create & start rtspClient
   RtspClient rtspClient(display.getWidth(), display.getHeight(), frameQueue,
@@ -176,6 +185,7 @@ void App::runRenderLoop(std::string_view renderOutput) {
     display.update();
     input.update();
   }
+  CSLOG("Closing renderer..");
 }
 
 App::~App() {

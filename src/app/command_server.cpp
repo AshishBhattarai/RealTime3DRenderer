@@ -36,8 +36,9 @@ struct RTSPConnectBody {
 class CommandServer::Connection
     : public std::enable_shared_from_this<Connection> {
 public:
-  Connection(io_service &ios)
-      : sock(ios), headerBuf(ReceiveBufferSize::HEADER_SIZE),
+  Connection(io_service &ios, CommandQueues &commandQueues)
+      : commandQueues(commandQueues), sock(ios),
+        headerBuf(ReceiveBufferSize::HEADER_SIZE),
         bodyBuf(ReceiveBufferSize::MAX_BODY_SIZE) {
     headerBuf.clear();
     bodyBuf.clear();
@@ -51,6 +52,7 @@ public:
   void start() { readHeader(); }
 
 private:
+  CommandQueues &commandQueues;
   tcp::socket sock;
   Serializer &serializer = Serializer::getInstance();
   Buffer headerBuf;
@@ -91,7 +93,7 @@ private:
                            bodySize, messageType));
   }
 
-  void handleReadHeader(const error_code &ec, size_t bytesTransferred) {
+  void handleReadHeader(const error_code &ec, const size_t bytesTransferred) {
     if (ec == error::eof || ec == error::connection_reset) {
       CSLOG("Client disconnected.");
     } else if (ec) {
@@ -108,7 +110,7 @@ private:
     }
   }
 
-  void handleReadBody(const error_code &ec, size_t bytesTransferred,
+  void handleReadBody(const error_code &ec, const size_t bytesTransferred,
                       size_t bodySize, MessageHeader::Type messageHeaderType) {
     if (ec == error::eof || ec == error::connection_reset) {
       CSLOG("Client disconnected.");
@@ -136,11 +138,15 @@ private:
     MessageBody::RTSPConnectBody rtspConnectionBody;
     serializer.unPack(bodyBuf, 0, rtspConnectionBody.ip,
                       rtspConnectionBody.port);
+    const auto ipv4 = asio::ip::address_v4(rtspConnectionBody.ip);
+    // connection request
+    commandQueues.connectionQueue.pushBack(
+        CommandDto::RTSPConnection(ipv4.to_string(), rtspConnectionBody.port));
   }
 }; // namespace app
 
 CommandServer::CommandServer(uint port, uint threadPoolSize)
-    : ios(), acceptor(ios, tcp::endpoint(tcp::v4(), port)),
+    : commandQueues(), ios(), acceptor(ios, tcp::endpoint(tcp::v4(), port)),
       work(make_work_guard(ios)) {
   for (uint i = 0; i < threadPoolSize; ++i) {
     threads.push_back(std::thread([&ios = ios]() { ios.run(); }));
@@ -149,13 +155,19 @@ CommandServer::CommandServer(uint port, uint threadPoolSize)
 
 CommandServer::~CommandServer() {
   work.reset();
+  for (uint i = 0; i < connections.size(); ++i) {
+    auto connection = connections[i].lock();
+    if (connection)
+      connection->getSocket().close();
+  }
   for (uint i = 0; i < threads.size(); ++i) {
     threads[i].join();
   }
 }
 
 void CommandServer::start() {
-  auto connection = std::make_shared<CommandServer::Connection>(ios);
+  auto connection =
+      std::make_shared<CommandServer::Connection>(ios, commandQueues);
   acceptor.async_accept(connection->getSocket(),
                         std::bind(&CommandServer::handleAccept, this,
                                   connection, std::placeholders::_1));

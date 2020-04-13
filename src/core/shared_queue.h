@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <queue>
@@ -9,28 +10,40 @@
  */
 template <typename T> class SharedQueue {
 public:
-  SharedQueue() {}
-
-  T &front() {
-    std::unique_lock<std::mutex> lock(mutex);
-    while (queue.empty())
-      condVar.wait(lock);
-    return queue.front();
+  SharedQueue() : stop(false) {}
+  ~SharedQueue() {
+    stop = true;
+    condVar.notify_all();
+    mutex.lock();
   }
 
-  void popFront() {
+  bool front(T &front) {
     std::unique_lock<std::mutex> lock(mutex);
-    while (queue.empty())
+    while (queue.empty() && !stop)
       condVar.wait(lock);
-    queue.pop();
+    if (!stop)
+      front = queue.front();
+    return !stop;
   }
 
-  void popGetFront(T &front, const bool &discard) {
+  bool popFront() {
     std::unique_lock<std::mutex> lock(mutex);
-    while (queue.empty() || discard)
+    while (queue.empty() && !stop)
       condVar.wait(lock);
-    front = queue.front();
-    queue.pop();
+    if (!stop)
+      queue.pop();
+    return !stop;
+  }
+
+  bool popGetFront(T &front, const bool &discard) {
+    std::unique_lock<std::mutex> lock(mutex);
+    while (queue.empty() && !stop && !discard)
+      condVar.wait(lock);
+    if (!stop && !discard) {
+      front = queue.front();
+      queue.pop();
+    }
+    return !stop && !discard;
   }
 
   void pushBack(const T &item) {
@@ -67,4 +80,5 @@ private:
   std::queue<T> queue;
   std::mutex mutex;
   std::condition_variable condVar;
+  std::atomic<bool> stop;
 };

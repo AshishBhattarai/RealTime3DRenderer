@@ -1,5 +1,6 @@
 #pragma once
 
+#include "command_server.h"
 #include "construct.h"
 #include "core/shared_queue.h"
 #include "display.h"
@@ -34,6 +35,7 @@ public:
 
 private:
   asio::thread_pool threadPool;
+  CommandServer commandServer;
   Display display;
   Input input;
   Construct construct;
@@ -41,6 +43,7 @@ private:
   world_system::WorldSystem *worldSystem;
   render_system::RenderSystem *renderSystem;
   render_system::Camera *camera;
+
   void processInput(float dt);
 };
 } // namespace app
