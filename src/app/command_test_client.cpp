@@ -28,7 +28,7 @@ public:
     u8 clientId = 1;
     u8 state = 1;
     serializer.pack(buf, 0, messageType, clientId, state, ip, port);
-    return asio::write(sock, asio::buffer(buf.data(), buf.getSize())) == 6;
+    return asio::write(sock, asio::buffer(buf.data(), buf.getSize())) == 9;
   }
 
   void join() { ios.run(); }

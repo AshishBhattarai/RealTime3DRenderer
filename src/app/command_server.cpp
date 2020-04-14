@@ -37,7 +37,7 @@ class CommandServer::Connection
     : public std::enable_shared_from_this<Connection> {
 public:
   Connection(io_service &ios, CommandQueues &commandQueues)
-      : commandQueues(commandQueues), sock(ios),
+      : commandQueues(commandQueues), sock(ios), strand(ios),
         headerBuf(ReceiveBufferSize::HEADER_SIZE),
         bodyBuf(ReceiveBufferSize::MAX_BODY_SIZE) {
     headerBuf.clear();
@@ -51,17 +51,25 @@ public:
 
   void start() { readHeader(); }
 
+  void close() {
+    asio::bind_executor(strand,
+                        [t = shared_from_this()]() { t->sock.close(); });
+  }
+
 private:
   CommandQueues &commandQueues;
   tcp::socket sock;
+  io_context::strand strand;
   Serializer &serializer = Serializer::getInstance();
   Buffer headerBuf;
   Buffer bodyBuf;
 
   void readHeader() {
-    async_read(sock, buffer(headerBuf.data(), headerBuf.getSize()),
-               std::bind(&Connection::handleReadHeader, shared_from_this(),
-                         std::placeholders::_1, std::placeholders::_2));
+    async_read(
+        sock, buffer(headerBuf.data(), headerBuf.getSize()),
+        asio::bind_executor(
+            strand, std::bind(&Connection::handleReadHeader, shared_from_this(),
+                              std::placeholders::_1, std::placeholders::_2)));
   }
 
   void readBody(const MessageHeader &messageHeader) {
@@ -87,10 +95,12 @@ private:
       bodySize = 0;
     }
     if (bodySize)
-      async_read(sock, buffer(bodyBuf.data(), bodySize),
-                 std::bind(&Connection::handleReadBody, shared_from_this(),
-                           std::placeholders::_1, std::placeholders::_2,
-                           bodySize, messageType));
+      async_read(
+          sock, buffer(bodyBuf.data(), bodySize),
+          asio::bind_executor(
+              strand, std::bind(&Connection::handleReadBody, shared_from_this(),
+                                std::placeholders::_1, std::placeholders::_2,
+                                bodySize, messageType)));
   }
 
   void handleReadHeader(const error_code &ec, const size_t bytesTransferred) {
@@ -158,7 +168,7 @@ CommandServer::~CommandServer() {
   for (uint i = 0; i < connections.size(); ++i) {
     auto connection = connections[i].lock();
     if (connection)
-      connection->getSocket().close();
+      connection->close();
   }
   for (uint i = 0; i < threads.size(); ++i) {
     threads[i].join();
