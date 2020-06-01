@@ -6,9 +6,9 @@
 #include "core/image.h"
 #include "ecs/coordinator.h"
 #include "events/component_cache_invalid.h"
-#include "model.h"
 #include "render_defaults.h"
 #include "renderable_entity.h"
+#include "scene.h"
 #include "utils/slogger.h"
 
 namespace render_system {
@@ -58,34 +58,75 @@ void RenderSystem::initSubSystems(ecs::Coordinator &coordinator) {
 }
 
 RenderSystem::RenderSystem(const RenderSystemConfig &config)
-    : renderer(config.width, config.height, meshes, renderables, pointLights,
+    : renderer(config.width, config.height, meshes, materials, renderables,
+               pointLights,
                &RenderDefaults::getInstance(&config.checkerImage).getCamera(),
-               config.flatForwardShader) {
+               config.flatForwardShader),
+      sceneLoader() {
   pointLights.reserve(shader::fragment::PointLight::MAX);
   updateProjectionMatrix(config.ar);
-  auto &coordinator = ecs::Coordinator::getInstance();
+  /* load default materials */
+  auto &renderDefaults = RenderDefaults::getInstance();
+  materials.emplace(DEFAULT_MATERIAL_ID,
+                    std::unique_ptr<Material>(new Material(
+                        {{DEFAULT_MATERIAL_ID, ShaderType::FORWARD_SHADER},
+                         renderDefaults.getCheckerTexture(),
+                         renderDefaults.getBlackTexture(),
+                         renderDefaults.getBlackTexture(),
+                         renderDefaults.getBlackTexture(),
+                         renderDefaults.getBlackTexture()})));
+  materials.emplace(DEFAULT_FLAT_MATERIAL_ID,
+                    std::unique_ptr<FlatMaterial>(new FlatMaterial(
+                        {BaseMaterial{DEFAULT_FLAT_MATERIAL_ID,
+                                      ShaderType::FLAT_FORWARD_SHADER},
+                         glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
+                         glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0, 1.0f})));
+
   /* Register & init helper systems(sub-systems) */
+  auto &coordinator = ecs::Coordinator::getInstance();
   initSubSystems(coordinator);
 
   /* Handle new entity that matches render system signature */
   connectEntityAddedSignal([&coordinator, &renderables = renderables,
-                            &entityToIndex =
-                                entityToIndex](const ecs::Entity &entity,
-                                               const ecs::Signature &) {
+                            &meshes = meshes,
+                            &materials = materials](const ecs::Entity &entity,
+                                                    const ecs::Signature &) {
+    // extract transform and model componenet
     const auto &transfrom =
         coordinator.getComponent<component::Transform>(entity);
-    unsigned int modelId =
-        coordinator.getComponent<component::Mesh>(entity).modelId;
-    auto it = renderables.find(modelId);
-    assert(modelId && it != renderables.end() && "Entity with invalid mesh");
-    if (it != renderables.end()) {
-      size_t idx = it->second.size() - 1;
-      it->second.emplace_back(
-          RenderableEntity(&transfrom.transformMat, entity));
-      entityToIndex.emplace(std::pair(entity, idx));
+    const auto &model = coordinator.getComponent<component::Model>(entity);
+#ifndef NDEBUG
+    // check if model entity is valid
+    if (meshes.find(model.meshId) != meshes.end()) { // .contains c++20
+      size_t primSize = 1;
+      if (primSize != model.primIdToMatId.size()) {
+        SLOG("All the primitives must be mapped to materials:", model.meshId,
+             entity);
+        return;
+      }
+      for (const auto &primToMat : model.primIdToMatId) {
+        if (materials.find(primToMat.second) == materials.end()) {
+          SLOG("Invalid materialId:", primToMat.second, entity);
+          return;
+        }
+        if (primToMat.first >= primSize) {
+          SLOG("Invalid primitiveId:", primToMat.first, entity);
+          return;
+        }
+      }
     } else {
-      SLOG("Error entity with invalid mesh:", modelId, entity);
+      SLOG("Invalid meshId:", model.meshId, entity);
+      return;
     }
+#endif
+    // register new renderableEntity
+    RenderableEntity renderableEntity = {entity, model.primIdToMatId,
+                                         &transfrom.transformMat};
+    if (renderables.find(model.meshId) != renderables.end())
+      renderables[model.meshId].emplace_back(renderableEntity);
+    else
+      renderables[model.meshId] =
+          std::vector<RenderableEntity>{renderableEntity};
   });
 
   connectEntityRemovedSignal([](const ecs::Entity &) {
@@ -96,20 +137,19 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
    * Handle Lights(Entities with light component)
    */
   lightingSystem->connectEntityAddedSignal(
-      [&coordinator, &pointLights = pointLights,
-       &entityToIndex = entityToIndex](const ecs::Entity &entity,
+      [&coordinator, &pointLights = pointLights/*,
+       &entityToIndex = entityToIndex*/](const ecs::Entity &entity,
                                        const ecs::Signature &) {
-        if (pointLights.size() >= shader::fragment::PointLight::MAX) {
-          CSLOG("Error: Maximum point lights reached.");
-          return;
-        }
-        const auto &transfrom =
-            coordinator.getComponent<component::Transform>(entity);
-        const auto &light = coordinator.getComponent<component::Light>(entity);
-        PointLight pointLight(&transfrom.transformMat[3], &light.color,
-                              &light.range, &light.intensity, entity);
-        pointLights.push_back(pointLight);
-        entityToIndex.emplace(std::pair(entity, pointLights.size()));
+    if (pointLights.size() >= shader::fragment::PointLight::MAX) {
+      CSLOG("Error: Maximum point lights reached.");
+      return;
+    }
+    const auto &transfrom =
+        coordinator.getComponent<component::Transform>(entity);
+    const auto &light = coordinator.getComponent<component::Light>(entity);
+    PointLight pointLight(&transfrom.transformMat[3], &light.color,
+                          &light.range, &light.intensity, entity);
+    pointLights.push_back(pointLight);
       });
 
   lightingSystem->connectEntityRemovedSignal([](const ecs::Entity &) {
@@ -153,48 +193,25 @@ RenderSystem::~RenderSystem() {
   delete eventListener;
 }
 
-std::map<std::string, uint>
-RenderSystem::registerMeshes(tinygltf::Model &modelData) {
-  Model model(modelData);
-  std::map<std::string, uint> ids;
-  for (size_t i = 0; i < model.meshes.size(); ++i) {
-    std::string name = model.names[i];
-    uint id = registerMesh(std::move(model.meshes[i]));
-    ids.emplace(std::pair(name, id));
+SceneRegisterReturn
+RenderSystem::registerGltfScene(tinygltf::Model &modelData) {
+  auto sceneData = sceneLoader.loadScene(modelData);
+  std::vector<MeshId> ids;
+  std::vector<uint> numPrimitives;
+  for (size_t i = 0; i < sceneData.meshes.size(); ++i) {
+    std::string name = sceneData.meshNames[i];
+    uint meshId = sceneData.meshes[i].id;
+    meshes.emplace(meshId, sceneData.meshes[i]);
+    numPrimitives.emplace_back(sceneData.meshes[i].primitives.size());
+    ids.emplace_back(meshId);
   }
-  return ids;
-}
-
-uint RenderSystem::registerMesh(Mesh &&mesh) {
-  if (!mesh.isValid())
-    return 0;
-  uint id = 0;
-  meshes.emplace_back(std::move(mesh));
-  id = meshes.back().primitives[0].vao + MESH_ID_OFFSET;
-  meshToIndex.emplace(std::pair(id, meshes.size() - 1));
-  renderables.emplace(std::pair(id, std::vector<RenderableEntity>{}));
-  return id;
-}
-
-void RenderSystem::relaceAllMaterial(uint meshId,
-                                     const BaseMaterial *material) {
-  size_t idx = meshToIndex[meshId];
-  for (auto &primitive : meshes[idx].primitives) {
-    if (material->shaderType == ShaderType::FLAT_FORWARD_SHADER) {
-      auto *mat = static_cast<const FlatMaterial *>(material);
-      std::unique_ptr<FlatMaterial> newMaterial =
-          std::make_unique<FlatMaterial>();
-      newMaterial->shaderType = ShaderType::FLAT_FORWARD_SHADER;
-      newMaterial->ao = mat->ao;
-      newMaterial->albedo = mat->albedo;
-      newMaterial->emission = mat->emission;
-      newMaterial->roughtness = mat->roughtness;
-      newMaterial->metallic = mat->metallic;
-      primitive.material = std::move(newMaterial);
-    } else {
-      assert(false && "TODO");
-    }
+  for (auto &mat : sceneData.materials) {
+    materials.emplace(mat->id, std::move(mat));
   }
+  return {sceneData.name,           ids,
+          sceneData.meshNames,      numPrimitives,
+          sceneData.hasTexCoords,   sceneData.primIdToMatId,
+          sceneData.matIdToNameList};
 }
 
 std::shared_ptr<Image> RenderSystem::update(float dt) {

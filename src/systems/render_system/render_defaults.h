@@ -23,8 +23,6 @@ public:
   GLuint getWhiteTexture() const { return whiteTexture; }
   GLuint getBlackTexture() const { return blackTexture; }
   const Camera &getCamera() const { return camera; }
-  const FlatMaterial &getFlatMaterial() const { return flatMaterial; }
-  const Material &getMaterial() const { return material; }
 
 private:
   // 4x4 chekerboard texture
@@ -32,9 +30,6 @@ private:
   // 1x1 black & white textures;
   GLuint blackTexture;
   GLuint whiteTexture;
-
-  FlatMaterial flatMaterial;
-  Material material;
 
   Camera camera;
 

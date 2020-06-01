@@ -1,15 +1,16 @@
 #pragma once
 
 #include "types.h"
-#include <string>
+#include <map>
 
 namespace component {
-struct Mesh {
-  std::string name;
-  uint modelId;
-
-  Mesh(std::string name, uint modelId) : name(name), modelId(modelId) {}
-  Mesh(std::pair<std::string, uint> nameIdPair)
-      : name(nameIdPair.first), modelId(nameIdPair.second) {}
+/**
+ * @brief The Model struct represent entity model(mesh + material)
+ * to change model an entity should remove and add the component again.
+ */
+struct Model {
+  uint meshId;
+  // primitive id to material id
+  std::map<PrimitiveId, MaterialId> primIdToMatId;
 };
 } // namespace component

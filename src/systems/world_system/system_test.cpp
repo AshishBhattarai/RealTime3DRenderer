@@ -9,7 +9,7 @@ namespace system_test {
 inline void initTest() {
   using namespace ecs;
   Coordinator &coordinator = Coordinator::getInstance();
-  coordinator.registerComponent<component::Mesh>();
+  coordinator.registerComponent<component::Model>();
   coordinator.registerComponent<component::Transform>();
   coordinator.registerComponent<component::Light>();
 }

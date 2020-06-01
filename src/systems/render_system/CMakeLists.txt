@@ -3,7 +3,7 @@ add_subdirectory(shaders)
 
 add_library(render-system-lib
     render_system.cpp
-    model.cpp
+    scene.cpp
     render_defaults.cpp
     camera.cpp
     renderer.cpp

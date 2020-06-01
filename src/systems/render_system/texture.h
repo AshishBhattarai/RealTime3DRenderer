@@ -18,10 +18,11 @@ private:
     return temp;
   }
 
+  void loadTexture(const uchar *buffer, int width, int height, int numChannels);
+
 public:
   Texture(const Image &image);
   void loadTexture(const Image &image);
-  void loadTexture(const uchar *buffer, int width, int height, int numChannels);
 };
 
 } // namespace render_system

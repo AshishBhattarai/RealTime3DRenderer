@@ -1,6 +1,7 @@
-#include "model.h"
+#include "scene.h"
 #include "render_defaults.h"
 #include "shaders/config.h"
+#include "utils/slogger.h"
 #include <iostream>
 #include <third_party/tinygltf/tiny_gltf.h>
 
@@ -32,15 +33,11 @@ namespace render_system {
  *
  */
 
-Model::Model(tinygltf::Model &modelData) : currentIbo(0) {
-  loadModel(modelData);
-}
+uint SceneLoader::loadedMeshCount = 1;
+uint SceneLoader::loadedMaterialCount = 2;
 
-void Model::loadModel(tinygltf::Model &modelData) {
-  if (!meshes.empty())
-    return;
+Scene SceneLoader::loadScene(tinygltf::Model &modelData) {
   const tinygltf::Scene &scene = modelData.scenes[modelData.defaultScene];
-  this->name = scene.name;
   // load all buffer view into vbos
 
   std::map<int, GLuint> vbos;
@@ -63,20 +60,57 @@ void Model::loadModel(tinygltf::Model &modelData) {
   }
 
   // load meshes
+  std::vector<Mesh> meshes;
+  std::vector<std::string> names;
+  std::vector<std::unique_ptr<BaseMaterial>> materials;
+  std::vector<std::map<MaterialId, std::string>> matIdToNameList;
+  std::vector<std::map<PrimitiveId, MaterialId>>
+      primIdToMatIdList; // map<Mesh_NAME, map<PRIMITIVE_ID, MATERIAL_ID>>
+  std::vector<bool> hasTexCoords;
+
   for (const tinygltf::Mesh &meshData : modelData.meshes) {
-    this->meshes.push_back(processMesh(vbos, meshData, modelData));
-    this->names.push_back(meshData.name);
+    auto ret = processMesh(vbos, meshData, modelData);
+    if (!ret.success) {
+      SLOG(ret.message);
+      continue;
+    }
+    meshes.push_back(ret.mesh);
+    hasTexCoords.push_back(ret.hasTexCoords);
+    names.push_back(meshData.name);
+    primIdToMatIdList.push_back(ret.primIdToMatId);
+    matIdToNameList.push_back(ret.matIdToName);
+    // move material unique pointers
+    materials.insert(materials.end(),
+                     std::make_move_iterator(ret.materials.begin()),
+                     std::make_move_iterator(ret.materials.end()));
   }
 
   // cleanup vbos
   for (size_t i = 0; i < vbos.size(); ++i)
     glDeleteBuffers(1, &vbos[i]);
+
+  return {scene.name,
+          meshes,
+          names,
+          hasTexCoords,
+          primIdToMatIdList,
+          matIdToNameList,
+          std::move(materials)};
 }
 
-Mesh Model::processMesh(const std::map<int, GLuint> &vbos,
-                        const tinygltf::Mesh &meshData,
-                        const tinygltf::Model &modelData) {
-  Mesh mesh;
+SceneLoader::ProcessMeshRet
+SceneLoader::processMesh(const std::map<int, GLuint> &vbos,
+                         const tinygltf::Mesh &meshData,
+                         const tinygltf::Model &modelData) {
+  std::vector<Primitive> primitives;
+  std::vector<std::unique_ptr<BaseMaterial>> materials;
+  std::vector<std::string> materialNames;
+
+  std::map<PrimitiveId, MaterialId> primIdToMatId;
+  std::map<MaterialId, std::string> matIdToName;
+  bool hasTexCoords = false;
+  bool success = true;
+  std::string message; // contains reason if sucess == false
 
   // loop through mesh primitives
   for (size_t i = 0; i < meshData.primitives.size(); ++i) {
@@ -84,7 +118,6 @@ Mesh Model::processMesh(const std::map<int, GLuint> &vbos,
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    bool hasTextureCoords = false;
     const tinygltf::Primitive &primitive = meshData.primitives[i];
     // primitive attributes (Position, Normal, TexCoords)
     for (const auto &attrib : primitive.attributes) {
@@ -108,7 +141,10 @@ Mesh Model::processMesh(const std::map<int, GLuint> &vbos,
         vaa = shader::vertex::attribute::NORMAL_LOC;
       if (attrib.first.compare("TEXCOORD_0") == 0) {
         vaa = shader::vertex::attribute::TEXCOORD0_LOC;
-        hasTextureCoords = true;
+        hasTexCoords = true;
+      } else if (hasTexCoords) {
+        message = "Invalid mesh data, some contain texcoords and some don't.";
+        success = false;
       }
 
       if (vaa > -1) {
@@ -123,20 +159,24 @@ Mesh Model::processMesh(const std::map<int, GLuint> &vbos,
     }
 
     // primitive materials
-    std::unique_ptr<BaseMaterial> material;
-
     int matIndex = primitive.material;
-    if (matIndex == -1) {
-      const RenderDefaults &renderDefault = RenderDefaults::getInstance();
-      if (hasTextureCoords)
-        material = std::make_unique<Material>(renderDefault.getMaterial());
-      else
-        material =
-            std::make_unique<FlatMaterial>(renderDefault.getFlatMaterial());
-    } else {
+    if (matIndex != -1) {
       const tinygltf::Material &materialData =
           modelData.materials[primitive.material];
-      material = processMaterial(materialData, modelData, hasTextureCoords);
+      // process material
+      auto processMatRet = processMaterial(materialData, modelData);
+      materials.emplace_back(
+          std::unique_ptr<BaseMaterial>(processMatRet.material.release()));
+      materialNames.emplace_back(processMatRet.name);
+      // primitive to material map
+      primIdToMatId[vao] = materials.back()->id;
+    } else {
+      // if material for a primitive doesn't exists set default mat
+      if (hasTexCoords) {
+        primIdToMatId[vao] = DEFAULT_MATERIAL_ID;
+      } else {
+        primIdToMatId[vao] = DEFAULT_FLAT_MATERIAL_ID;
+      }
     }
 
     // primitive indices
@@ -150,85 +190,128 @@ Mesh Model::processMesh(const std::map<int, GLuint> &vbos,
     GLuint ibo = vbos.at(indexAccessor.bufferView);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
+    // make sure we have valid data
+    assert(vao && "Invalid index buffer.");
+    assert(primitive.mode >= GL_POINTS && primitive.mode <= GL_TRIANGLE_FAN &&
+           "Invalid primitive mode.");
+    assert(indexAccessor.componentType >= GL_SHORT &&
+           indexAccessor.componentType <= GL_FLOAT);
+    assert(indexAccessor.count > 0 && "Count must be greater than 0.");
+
     // register primitives to our mesh
-    mesh.primitives.emplace_back(Primitive(
-        std::move(material), vao, primitive.mode, indexAccessor.componentType,
-        indexAccessor.count, (void *)indexAccessor.byteOffset));
+    primitives.push_back({vao, (const GLenum)primitive.mode,
+                          (const GLenum)indexAccessor.componentType,
+                          (const GLsizei)indexAccessor.count,
+                          (void *)indexAccessor.byteOffset});
     glBindVertexArray(0);
   }
-  return mesh;
+  if (loadedMeshCount == UINT_MAX) {
+    success = false;
+    message = "SceneLoader maximum mesh count reached.";
+  }
+  if (success)
+    return {{loadedMeshCount++, primitives},
+            std::move(materials),
+            materialNames,
+            primIdToMatId,
+            matIdToName,
+            hasTexCoords,
+            success,
+            message};
+  else
+    return {{0, {}}, {}, {}, {}, {}, false, false, message};
 }
 
-std::unique_ptr<BaseMaterial>
-Model::processMaterial(const tinygltf::Material &materialData,
-                       const tinygltf::Model &modelData,
-                       bool hasTextureCoords) {
-  std::unique_ptr<Material> material = std::make_unique<Material>();
-  std::unique_ptr<FlatMaterial> flatMaterial = std::make_unique<FlatMaterial>();
+SceneLoader::ProcessMaterialRet
+SceneLoader::processMaterial(const tinygltf::Material &materialData,
+                             const tinygltf::Model &modelData) {
+  assert(loadedMeshCount != UINT_MAX && "Out of model ids.");
   const RenderDefaults &renderDefault = RenderDefaults::getInstance();
-
+  std::unique_ptr<FlatMaterial> flatMaterial = nullptr;
   const tinygltf::PbrMetallicRoughness &pbrInfo =
       materialData.pbrMetallicRoughness;
+
+  // material texture indices
   int baseColorTextureIndex = pbrInfo.baseColorTexture.index;
   int normalTextureIndex = materialData.normalTexture.index;
   int emissionTextureIndex = materialData.emissiveTexture.index;
   int occlusionTextureIndex = materialData.occlusionTexture.index;
   int metallicRoughnessTextureIndex = pbrInfo.metallicRoughnessTexture.index;
 
-  // TODO: Different material for mesh without texture coords
+  // material texture id
+  GLuint albedo = 0;
+  GLuint normal = 0;
+  GLuint emission = 0;
+  GLuint metallicRoughness = 0;
+  GLuint ao = 0;
+
+  /**
+   * load material texture if they exists, otherwise fallback to color or
+   * default texture
+   */
   if (baseColorTextureIndex != -1) {
     const tinygltf::Image &baseColorImage =
         modelData.images[modelData.textures[baseColorTextureIndex].source];
-    material->albedo = processTexture(baseColorImage);
+    albedo = processTexture(baseColorImage);
   } else {
-    material->albedo = renderDefault.getCheckerTexture();
-    flatMaterial->albedo =
+    const auto albedo =
         glm::vec4(pbrInfo.baseColorFactor[0], pbrInfo.baseColorFactor[1],
                   pbrInfo.baseColorFactor[2], pbrInfo.baseColorFactor[3]);
-    flatMaterial->emission = glm::vec3(materialData.emissiveFactor[0],
-                                       materialData.emissiveFactor[1],
-                                       materialData.emissiveFactor[2]);
-    flatMaterial->ao = 1.0f;
-    flatMaterial->metallic = pbrInfo.metallicFactor;
-    flatMaterial->roughtness = pbrInfo.roughnessFactor;
+    const auto emission = glm::vec3(materialData.emissiveFactor[0],
+                                    materialData.emissiveFactor[1],
+                                    materialData.emissiveFactor[2]);
+    const auto ao = 1.0f;
+    const auto metallic = (float)pbrInfo.metallicFactor;
+    const auto roughtness = (float)pbrInfo.roughnessFactor;
+    flatMaterial.reset(new FlatMaterial(
+        {{loadedMaterialCount++, ShaderType::FLAT_FORWARD_SHADER},
+         albedo,
+         emission,
+         ao,
+         metallic,
+         roughtness}));
   }
   if (normalTextureIndex != -1) {
     const tinygltf::Image &normalImage =
         modelData.images[modelData.textures[normalTextureIndex].source];
-    material->normal = processTexture(normalImage);
+    normal = processTexture(normalImage);
   } else
-    material->normal =
-        renderDefault.getBlackTexture(); // TODO: Use default 1x1 texture
+    normal = renderDefault.getBlackTexture();
   if (emissionTextureIndex != -1) {
     const tinygltf::Image &emissionImage =
         modelData.images[modelData.textures[emissionTextureIndex].source];
-    material->emission = processTexture(emissionImage);
+    emission = processTexture(emissionImage);
   } else
-    material->emission = renderDefault.getBlackTexture();
+    emission = renderDefault.getBlackTexture();
   if (metallicRoughnessTextureIndex != -1) {
     const tinygltf::Image &metallicRoughnessImage =
         modelData
             .images[modelData.textures[metallicRoughnessTextureIndex].source];
-    material->metallicRoughness = processTexture(metallicRoughnessImage);
+    metallicRoughness = processTexture(metallicRoughnessImage);
   } else
-    material->metallicRoughness = renderDefault.getBlackTexture();
+    metallicRoughness = renderDefault.getBlackTexture();
   if (occlusionTextureIndex != -1) {
     const tinygltf::Image &occlusionImage =
         modelData.images[modelData.textures[occlusionTextureIndex].source];
-    material->ao = processTexture(occlusionImage);
+    ao = processTexture(occlusionImage);
   } else
-    material->ao = renderDefault.getWhiteTexture();
+    ao = renderDefault.getBlackTexture();
 
-  if (hasTextureCoords) {
-    material->shaderType = ShaderType::FORWARD_SHADER;
-    return material;
-  } else {
-    material->shaderType = ShaderType::FLAT_FORWARD_SHADER;
-    return flatMaterial;
-  }
+  if (flatMaterial)
+    return {materialData.name,
+            std::unique_ptr<BaseMaterial>(flatMaterial.release())};
+  else
+    return {materialData.name,
+            std::unique_ptr<Material>(new Material(
+                {{loadedMaterialCount++, ShaderType::FORWARD_SHADER},
+                 albedo,
+                 metallicRoughness,
+                 ao,
+                 normal,
+                 emission}))};
 }
 
-GLuint Model::processTexture(const tinygltf::Image &image) {
+GLuint SceneLoader::processTexture(const tinygltf::Image &image) {
   GLuint texId;
   glGenTextures(1, &texId);
   glBindTexture(GL_TEXTURE_2D, texId);

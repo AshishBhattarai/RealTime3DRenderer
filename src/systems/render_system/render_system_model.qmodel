@@ -54,7 +54,7 @@
                           </qlist>
                          </stereotypes>
                          <name>Renderer</name>
-                         <pos>x:370;y:555</pos>
+                         <pos>x:595;y:-260</pos>
                          <rect>x:-135;y:-85;w:270;h:170</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -76,7 +76,7 @@
                          </base-DElement>
                          <object>{79c85de5-b786-4698-a7cd-a152c191dee1}</object>
                          <name>Mesh</name>
-                         <pos>x:90;y:650</pos>
+                         <pos>x:315;y:-165</pos>
                          <rect>x:-75;y:-65;w:150;h:130</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -99,7 +99,7 @@
                          </base-DElement>
                          <object>{df9fcf35-bb3c-460c-aff2-c46b5760a41b}</object>
                          <name>Primitive</name>
-                         <pos>x:-105;y:725</pos>
+                         <pos>x:120;y:-90</pos>
                          <rect>x:-65;y:-65;w:130;h:130</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -122,7 +122,7 @@
                          </base-DElement>
                          <object>{1401dea6-6499-492c-b560-fa9ae649f7e5}</object>
                          <name>Material</name>
-                         <pos>x:-280;y:1050</pos>
+                         <pos>x:-55;y:235</pos>
                          <rect>x:-65;y:-90;w:130;h:180</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -145,7 +145,7 @@
                          </base-DElement>
                          <object>{430bda86-e5db-47be-a647-962789531f0c}</object>
                          <name>ShaderManager</name>
-                         <pos>x:430;y:750</pos>
+                         <pos>x:655;y:-65</pos>
                          <rect>x:-95;y:-65;w:190;h:130</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -242,7 +242,7 @@
                          </base-DElement>
                          <object>{6b77b368-ffa9-4577-959c-660627311cf5}</object>
                          <name>BaseMaterial</name>
-                         <pos>x:-220;y:875</pos>
+                         <pos>x:5;y:60</pos>
                          <rect>x:-45;y:-45;w:90;h:90</rect>
                          <visual-role>0</visual-role>
                          <stereotype-display>1</stereotype-display>
@@ -265,7 +265,7 @@
                          </base-DElement>
                          <object>{373fe361-2411-44c4-9c3c-296edae7fe74}</object>
                          <name>RenderableEntity</name>
-                         <pos>x:-95;y:480</pos>
+                         <pos>x:130;y:-335</pos>
                          <rect>x:-85;y:-50;w:170;h:100</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -312,7 +312,7 @@
                          </base-DElement>
                          <object>{805ad1ce-d8ef-4fdd-a059-0a3f2b3c6b49}</object>
                          <name>ShaderProgram</name>
-                         <pos>x:745;y:1085</pos>
+                         <pos>x:970;y:270</pos>
                          <rect>x:-50;y:-30;w:100;h:60</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -332,7 +332,7 @@
                          </base-DElement>
                          <object>{08f0d8ab-fb12-48b4-8c4e-e6f75debf610}</object>
                          <name>PBRForwardShader</name>
-                         <pos>x:530;y:930</pos>
+                         <pos>x:755;y:115</pos>
                          <rect>x:-60;y:-30;w:120;h:60</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -352,7 +352,7 @@
                          </base-DElement>
                          <object>{292232b6-cc26-4703-9f75-0f5dd1de73b2}</object>
                          <name>PBRDiffuseShader</name>
-                         <pos>x:660;y:825</pos>
+                         <pos>x:885;y:10</pos>
                          <rect>x:-80;y:-35;w:160;h:70</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -428,7 +428,7 @@
                          </base-DElement>
                          <object>{3342240b-0509-404a-9072-4578dc9502a5}</object>
                          <name>UnformBuffer</name>
-                         <pos>x:800;y:630</pos>
+                         <pos>x:1025;y:-185</pos>
                          <rect>x:-45;y:-30;w:90;h:60</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -448,7 +448,7 @@
                          </base-DElement>
                          <object>{7be8152d-77f2-40b5-ae4d-c4b27ebc1f78}</object>
                          <name>GlobalFSBuffer</name>
-                         <pos>x:625;y:680</pos>
+                         <pos>x:850;y:-135</pos>
                          <rect>x:-50;y:-30;w:100;h:60</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -468,7 +468,7 @@
                          </base-DElement>
                          <object>{3e0bbd16-63d1-4e07-afe0-fb91ca2a415e}</object>
                          <name>GlobaVSBuffer</name>
-                         <pos>x:635;y:535</pos>
+                         <pos>x:860;y:-280</pos>
                          <rect>x:-50;y:-30;w:100;h:60</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -649,7 +649,7 @@
                          </base-DElement>
                          <object>{4d3a717f-f7c3-45c8-a0f7-408c934d8de8}</object>
                          <name>Model</name>
-                         <pos>x:135;y:885</pos>
+                         <pos>x:360;y:70</pos>
                          <rect>x:-75;y:-65;w:150;h:130</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -697,7 +697,7 @@
                          </base-DElement>
                          <object>{0d530141-d381-42d4-951b-11513962014c}</object>
                          <name>tinygltf</name>
-                         <pos>x:155;y:1120</pos>
+                         <pos>x:380;y:305</pos>
                          <rect>x:-30;y:-20;w:60;h:40</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -736,7 +736,7 @@
                          </base-DElement>
                          <object>{456ef019-1385-420f-9ec7-698ee57571c2}</object>
                          <name>FlatMaterial</name>
-                         <pos>x:-100;y:1050</pos>
+                         <pos>x:125;y:235</pos>
                          <rect>x:-55;y:-70;w:110;h:140</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -801,7 +801,7 @@
                          </base-DElement>
                          <object>{8acb2c10-0ab7-42b3-9f09-14c166bea25c}</object>
                          <name>PBRFlatForwardShader</name>
-                         <pos>x:385;y:1005</pos>
+                         <pos>x:610;y:190</pos>
                          <rect>x:-70;y:-30;w:140;h:60</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -864,7 +864,7 @@
                          </base-DElement>
                          <object>{8b2bd1a5-e9b9-4a86-880a-68ace5274e93}</object>
                          <name>RenderSystem</name>
-                         <pos>x:385;y:325</pos>
+                         <pos>x:610;y:-490</pos>
                          <rect>x:-120;y:-55;w:240;h:110</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -912,7 +912,7 @@
                          </base-DElement>
                          <object>{1c8601e8-a96d-43c2-8981-49f293673a23}</object>
                          <name>Postprocess</name>
-                         <pos>x:695;y:370</pos>
+                         <pos>x:920;y:-445</pos>
                          <rect>x:-70;y:-45;w:140;h:90</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -954,7 +954,7 @@
                          <uid>{e9d31c88-ec88-4a51-ba9a-bb2757e8a7dd}</uid>
                         </DElement>
                        </base-DElement>
-                       <pos>x:300;y:700</pos>
+                       <pos>x:525;y:-115</pos>
                        <rect>x:-820;y:-575;w:1640;h:1150</rect>
                       </DBoundary>
                      </instance>
@@ -971,7 +971,7 @@
                          </base-DElement>
                          <object>{c431fb76-ec49-46d4-99be-118638962dc9}</object>
                          <name>shader</name>
-                         <pos>x:920;y:410</pos>
+                         <pos>x:1145;y:-405</pos>
                          <rect>x:-50;y:-40;w:100;h:80</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -1007,7 +1007,7 @@
                     </item>
                    </qlist>
                   </elements>
-                  <last-modified>1583249346983</last-modified>
+                  <last-modified>1591029191162</last-modified>
                   <toolbarid>General</toolbarid>
                  </MDiagram>
                 </base-MDiagram>

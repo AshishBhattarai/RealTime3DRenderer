@@ -17,23 +17,7 @@ RenderDefaults::RenderDefaults(const Image *checkerImage)
   this->blackTexture = texture.moveId();
   texture.loadTexture((const uchar[]){0, 0, 0, 0}, 1, 1, 4);
   this->whiteTexture = texture.moveId();
-
-  // default flat material
-  flatMaterial.ao = 1.0f;
-  flatMaterial.albedo = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-  flatMaterial.emission = glm::vec3(0.0f, 0.0f, 0.0f);
-  flatMaterial.metallic = 0.0f;
-  flatMaterial.roughtness = 0.0f;
-  flatMaterial.shaderType = ShaderType::FLAT_FORWARD_SHADER;
-
-  // default material
-  material.albedo = checkerTexture;
-  material.normal = blackTexture;
-  material.emission = blackTexture;
-  material.metallicRoughness = blackTexture;
-  material.ao = whiteTexture;
-  material.shaderType = ShaderType::FORWARD_SHADER;
-}
+} // namespace render_system
 
 RenderDefaults::~RenderDefaults() {
   glDeleteTextures(1, &checkerTexture);

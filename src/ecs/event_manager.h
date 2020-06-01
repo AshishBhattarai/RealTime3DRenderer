@@ -127,7 +127,7 @@ private:
 
   template <typename E> constexpr void checkIsDerived() {
     static_assert(std::is_base_of<Event<E>, E>::value,
-                  "T not derived from System.");
+                  "T not derived from Event.");
   }
 
   /**

@@ -29,6 +29,10 @@ void Texture::loadTexture(const uchar *buffer, int width, int height,
   else if (numChannels == 3)
     format = GL_RGB;
 
+  /**
+   * To make texture filter customizable, i can have a RTextureLoader singleton
+   * that has a textureFilterType member that is use to set filter type.
+   */
   glGenTextures(1, &id);
   glBindTexture(GL_TEXTURE_2D, id);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,

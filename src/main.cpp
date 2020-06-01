@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
   using namespace ecs;
   Coordinator &coordinator = Coordinator::getInstance();
   ComponentFamily transformFamily =
-      coordinator.registerComponent<component::Mesh>();
+      coordinator.registerComponent<component::Model>();
   ComponentFamily meshFamily =
       coordinator.registerComponent<component::Transform>();
   coordinator.registerComponent<component::Light>();

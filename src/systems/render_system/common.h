@@ -6,9 +6,7 @@
 #include <vector>
 
 namespace render_system {
-using MeshId = uint;
-
-constexpr MeshId MESH_ID_OFFSET = 1000;
-constexpr MeshId INVALID_MESH_ID = 0;
-
+constexpr MeshId INVALID_MESH_ID = 0; // TODO: Default mesh sphere
+constexpr MaterialId DEFAULT_FLAT_MATERIAL_ID = 0;
+constexpr MaterialId DEFAULT_MATERIAL_ID = 1;
 } // namespace render_system

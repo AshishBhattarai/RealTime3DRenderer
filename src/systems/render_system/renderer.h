@@ -19,12 +19,14 @@ struct RenderableEntity;
 struct PointLight;
 class Camera;
 
-using RenderableMap = std::unordered_map<GLuint, std::vector<RenderableEntity>>;
+using RenderableMap = std::unordered_map<MeshId, std::vector<RenderableEntity>>;
 
 class Renderer {
 private:
   FrameBuffer frameBuffer;
-  const std::vector<Mesh> &meshes;
+  const std::unordered_map<MeshId, Mesh> &meshes;
+  const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>>
+      &materials;
   const RenderableMap &renderables;
   const std::vector<PointLight> &pointLights;
   //  std::unordered_set<EntityId> removeables;
@@ -35,7 +37,10 @@ private:
   shader::FlatForwardProgram flatForwardShader;
 
 public:
-  Renderer(int width, int height, const std::vector<Mesh> &meshes,
+  Renderer(int width, int height,
+           const std::unordered_map<MeshId, Mesh> &meshes,
+           const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>>
+               &materials,
            const RenderableMap &renderables,
            const std::vector<PointLight> &pointLights, const Camera *camera,
            const shader::StageCodeMap &flatForwardShader);

@@ -15,8 +15,8 @@
 #include "loaders.h"
 #include "rtsp_client.h"
 #include "systems/render_system/camera.h"
-#include "systems/render_system/model.h"
 #include "systems/render_system/render_system.h"
+#include "systems/render_system/scene.h"
 #include "systems/world_system/world_system.h"
 #include "utils/slogger.h"
 #include <asio_noexcept.h>
@@ -70,26 +70,23 @@ App::App(int, char **)
   float spacing = 2.5f;
 
   // Add world objects
+  auto regScene = renderSystem->registerGltfScene(model);
+  PrimitiveId primId = regScene.numPrimitives.front() - 1;
   for (int i = 0; i < nrRow; ++i) {
     float metallic = i / (float)nrRow;
     for (int j = 0; j < nrCOl; ++j) {
       float roughness = j / (float)nrCOl;
-      std::map<std::string, uint> ids = renderSystem->registerMeshes(model);
-      FlatMaterial newMat;
-      newMat.ao = 1.0f;
-      newMat.albedo = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-      newMat.emission = glm::vec3(0.0f, 0.0f, 0.0f);
-      newMat.metallic = metallic;
-      newMat.roughtness = roughness;
-      newMat.shaderType = ShaderType::FLAT_FORWARD_SHADER;
-      renderSystem->relaceAllMaterial(ids.begin()->second, &newMat);
-      component::Mesh mesh(*ids.begin());
+      MaterialId matId = renderSystem->registerMaterial<FlatMaterial>(
+          ShaderType::FLAT_FORWARD_SHADER, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
+          glm::vec3(0.0f, 0.0f, 0.0f), metallic, roughness, 1.0f);
+
+      component::Model model = {regScene.meshIds.front(), {{primId, matId}}};
 
       world_system::WorldObject &worldObject =
           worldSystem->createWorldObject(component::Transform(
               glm::vec3((j - (nrCOl / 2.0f)) * spacing,
                         (i - (nrRow / 2.0f)) * spacing, -10.0f)));
-      worldObject.addComponent<component::Mesh>(mesh);
+      worldObject.addComponent<component::Model>(model);
     }
   }
 
@@ -133,12 +130,13 @@ void App::processInput(float dt) {
 void App::run() {
   DEBUG_SLOG("App running.");
   SLOG("Starting command server.");
-  commandServer.start();
-  SLOG("Waiting for clients to connect...");
+  //  commandServer.start();
+  //  SLOG("Waiting for clients to connect...");
+  //  CommandDto::RTSPConnection connectionDto =
+  //  commandServer.popConnectionQueue();
+  //  runRenderLoop(connectionDto.toRtspEndpoint());
   //  runRenderLoop("rtsp://0.0.0.0:8554/mystream");
-  //  runRenderLoop("rec.mp4");
-  CommandDto::RTSPConnection connectionDto = commandServer.popConnectionQueue();
-  runRenderLoop(connectionDto.toRtspEndpoint());
+  runRenderLoop("rec.mp4");
 }
 
 void App::runRenderLoop(std::string_view renderOutput) {

@@ -5,6 +5,7 @@
 #include "frame_buffer.h"
 #include "point_light.h"
 #include "renderer.h"
+#include "scene.h"
 
 namespace tinygltf {
 struct Model;
@@ -16,7 +17,6 @@ class Image;
 class Buffer;
 namespace render_system {
 class Camera;
-class Model;
 
 struct RenderSystemConfig {
   const Image &checkerImage; // can be removed after RenderSystem construction
@@ -32,6 +32,21 @@ struct RenderSystemConfig {
         ar(width / (float)height), width(width), height(height) {}
 };
 
+struct SceneRegisterReturn {
+  const std::string sceneName;
+
+  /**
+   * All these vectors elements belong to a same mesh.
+   * IE: meshIds[i] <> meshNames <> ........... <> matIdToNameMap
+   */
+  const std::vector<MeshId> meshIds;
+  const std::vector<std::string> meshNames;
+  const std::vector<uint> numPrimitives;
+  const std::vector<bool> hasTexCoords;
+  const std::vector<std::map<PrimitiveId, MaterialId>> primIdToMatId;
+  const std::vector<std::map<MaterialId, std::string>> matIdToNameMap;
+};
+
 class RenderSystem : ecs::System<RenderSystem> {
 private:
   class LightingSystem;
@@ -41,11 +56,15 @@ private:
   static constexpr float DEFAULT_FAR = 1000.0f;
 
   Renderer renderer;
-  std::vector<Mesh> meshes;
-  std::vector<PointLight> pointLights;
+  SceneLoader sceneLoader;
+
   RenderableMap renderables;
-  std::unordered_map<ecs::Entity, size_t> entityToIndex;
-  std::unordered_map<MeshId, size_t> meshToIndex;
+  std::unordered_map<MeshId, Mesh> meshes;
+  std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>> materials;
+  std::vector<PointLight> pointLights;
+  //  std::unordered_map<ecs::Entity, size_t> entityToIndex;
+  std::unordered_map<MeshId, size_t> meshIdToIndex;
+  std::unordered_map<MeshId, size_t> materialIdToIndex;
 
   LightingSystem *lightingSystem;
   EventListener *eventListener;
@@ -56,17 +75,14 @@ public:
   RenderSystem(const RenderSystemConfig &config);
   ~RenderSystem();
 
-  /**
-   * Moves all the meshes in give model to the render system.
-   *
-   * retunrs valid id(no-zero) on success.
-   * 				 zero on failure.
-   */
-  uint registerMesh(Mesh &&mesh);
   // returns map of mesh name to id
-  std::map<std::string, uint> registerMeshes(tinygltf::Model &modelData);
-  /** Temp (TODO: Probably remove this) */
-  void relaceAllMaterial(uint meshId, const BaseMaterial *material);
+  SceneRegisterReturn registerGltfScene(tinygltf::Model &modelData);
+  template <typename T, typename... Args>
+  MaterialId registerMaterial(ShaderType shaderType, Args... args) {
+    auto id = sceneLoader.generateMaterialId();
+    materials.emplace(id, std::unique_ptr<T>(new T{{id, shaderType}, args...}));
+    return id;
+  }
 
   // TODO: Delete mesh and set all existing entites to default mesh
   bool unregisterMesh(std::string_view name);

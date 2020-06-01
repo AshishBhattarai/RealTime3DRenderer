@@ -1,7 +1,9 @@
 #pragma once
 
+#include "common.h"
 #include "glm/glm.hpp"
 #include "types.h"
+#include <map>
 
 namespace component {
 class Transform;
@@ -13,9 +15,7 @@ namespace render_system {
  */
 struct RenderableEntity {
   const EntityId entityId;
+  const std::map<PrimitiveId, MaterialId> primIdToMatId;
   const glm::mat4 *transform;
-
-  RenderableEntity(const glm::mat4 *transform, const EntityId &entityId)
-      : entityId(entityId), transform(transform) {}
 };
 } // namespace render_system

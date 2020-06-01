@@ -34,22 +34,23 @@ public:
                           u32 transferFormat, u32 transferType, uint index = 0);
 
   /**
-   * @brief setColorAttachment - creates textture buffer attachment
+   * @brief setColorAttachment - creates texture buffer attachment
    * @param texTarget
    * @param internalFormat
    * @param transferFormat
    * @param transferType
    * @param index
    */
-  void setColorAttachment(u32 texTarget, u32 internalFormat, u32 transferFormat,
-                          u32 transferType, uint index = 0);
+  void setColorAttachmentTB(u32 texTarget, u32 internalFormat,
+                            u32 transferFormat, u32 transferType,
+                            uint index = 0);
 
   /**
    * @brief setColorAttachment - creates render buffer attachment
    * @param internalFormat
    * @param index
    */
-  void setColorAttachment(u32 internalFormat, uint index = 0);
+  void setColorAttachmentRB(u32 internalFormat, uint index = 0);
   /**
    * @brief setDepthAttachment
    * @param type

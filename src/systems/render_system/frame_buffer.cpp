@@ -143,9 +143,9 @@ void FrameBuffer::setColorAttachment(AttachType type, u32 texTarget,
   validColorBuffers.insert(index);
 }
 
-void FrameBuffer::setColorAttachment(u32 texTarget, u32 internalFormat,
-                                     u32 transferFormat, u32 transferType,
-                                     uint index) {
+void FrameBuffer::setColorAttachmentTB(u32 texTarget, u32 internalFormat,
+                                       u32 transferFormat, u32 transferType,
+                                       uint index) {
   assert(index < MAX_COLOR_ATTACHMENTS &&
          "Color attachment index out of range.");
   assert(!colorBuffers[index] && "[WARN] - Color attachment already exists.");
@@ -159,7 +159,7 @@ void FrameBuffer::setColorAttachment(u32 texTarget, u32 internalFormat,
   validColorBuffers.insert(index);
 }
 
-void FrameBuffer::setColorAttachment(u32 internalFormat, uint index) {
+void FrameBuffer::setColorAttachmentRB(u32 internalFormat, uint index) {
   assert(index < MAX_COLOR_ATTACHMENTS &&
          "Color attachment index out of range.");
   assert(!colorBuffers[index] && "[WARN] - Color attachment already exists.");

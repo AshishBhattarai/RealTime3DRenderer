@@ -19,6 +19,10 @@ typedef uintptr_t uptr;
 
 typedef u32 EntityId;
 
+typedef uint MeshId;
+typedef uint MaterialId;
+typedef uint PrimitiveId;
+
 // will require for custom allocato
 static_assert(sizeof(uint) == sizeof(u32), "Check conversion.");
 
