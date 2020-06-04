@@ -58,7 +58,6 @@ private:
   Renderer renderer;
   SceneLoader sceneLoader;
 
-  RenderableMap renderables;
   std::unordered_map<MeshId, Mesh> meshes;
   std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>> materials;
   std::vector<PointLight> pointLights;
@@ -66,6 +65,7 @@ private:
   std::unordered_map<MeshId, size_t> meshIdToIndex;
   std::unordered_map<MeshId, size_t> materialIdToIndex;
 
+  ecs::Coordinator &coordinator;
   LightingSystem *lightingSystem;
   EventListener *eventListener;
 

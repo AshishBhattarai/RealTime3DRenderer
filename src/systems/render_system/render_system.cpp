@@ -23,7 +23,6 @@ class RenderSystem::LightingSystem : ecs::System<LightingSystem> {
 class RenderSystem::EventListener
     : public ecs::Receiver<event::ComponentCacheInvalid<component::Transform>> {
 private:
-  std::function<void()> transformCacheInvalidCallback;
   std::function<void()> lightCacheInvalidCallback;
 
 public:
@@ -31,14 +30,8 @@ public:
       event::ComponentCacheInvalid<component::Transform>;
   using LightCacheInvalidEvent = event::ComponentCacheInvalid<component::Light>;
 
-  EventListener(const std::function<void()> &transformCacheInvalidCallback,
-                const std::function<void()> &lightCacheInvalidCallback)
-      : transformCacheInvalidCallback(transformCacheInvalidCallback),
-        lightCacheInvalidCallback(lightCacheInvalidCallback) {}
-
-  void receive(const TrasformCacheInvalidEvent &) {
-    transformCacheInvalidCallback();
-  }
+  EventListener(const std::function<void()> &lightCacheInvalidCallback)
+      : lightCacheInvalidCallback(lightCacheInvalidCallback) {}
 
   void receive(const LightCacheInvalidEvent &) { lightCacheInvalidCallback(); }
 };
@@ -58,11 +51,10 @@ void RenderSystem::initSubSystems(ecs::Coordinator &coordinator) {
 }
 
 RenderSystem::RenderSystem(const RenderSystemConfig &config)
-    : renderer(config.width, config.height, meshes, materials, renderables,
-               pointLights,
+    : renderer(config.width, config.height, meshes, materials,
                &RenderDefaults::getInstance(&config.checkerImage).getCamera(),
                config.flatForwardShader),
-      sceneLoader() {
+      sceneLoader(), coordinator(ecs::Coordinator::getInstance()) {
   pointLights.reserve(shader::fragment::PointLight::MAX);
   updateProjectionMatrix(config.ar);
   /* load default materials */
@@ -83,61 +75,13 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
                          glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0, 1.0f})));
 
   /* Register & init helper systems(sub-systems) */
-  auto &coordinator = ecs::Coordinator::getInstance();
   initSubSystems(coordinator);
-
-  /* Handle new entity that matches render system signature */
-  connectEntityAddedSignal([&coordinator, &renderables = renderables,
-                            &meshes = meshes,
-                            &materials = materials](const ecs::Entity &entity,
-                                                    const ecs::Signature &) {
-    // extract transform and model componenet
-    const auto &transfrom =
-        coordinator.getComponent<component::Transform>(entity);
-    const auto &model = coordinator.getComponent<component::Model>(entity);
-#ifndef NDEBUG
-    // check if model entity is valid
-    if (meshes.find(model.meshId) != meshes.end()) { // .contains c++20
-      size_t primSize = 1;
-      if (primSize != model.primIdToMatId.size()) {
-        SLOG("All the primitives must be mapped to materials:", model.meshId,
-             entity);
-        return;
-      }
-      for (const auto &primToMat : model.primIdToMatId) {
-        if (materials.find(primToMat.second) == materials.end()) {
-          SLOG("Invalid materialId:", primToMat.second, entity);
-          return;
-        }
-        if (primToMat.first >= primSize) {
-          SLOG("Invalid primitiveId:", primToMat.first, entity);
-          return;
-        }
-      }
-    } else {
-      SLOG("Invalid meshId:", model.meshId, entity);
-      return;
-    }
-#endif
-    // register new renderableEntity
-    RenderableEntity renderableEntity = {entity, model.primIdToMatId,
-                                         &transfrom.transformMat};
-    if (renderables.find(model.meshId) != renderables.end())
-      renderables[model.meshId].emplace_back(renderableEntity);
-    else
-      renderables[model.meshId] =
-          std::vector<RenderableEntity>{renderableEntity};
-  });
-
-  connectEntityRemovedSignal([](const ecs::Entity &) {
-    // TODO
-  });
 
   /*
    * Handle Lights(Entities with light component)
    */
   lightingSystem->connectEntityAddedSignal(
-      [&coordinator, &pointLights = pointLights/*,
+      [&coordinator = coordinator, &pointLights = pointLights/*,
        &entityToIndex = entityToIndex*/](const ecs::Entity &entity,
                                        const ecs::Signature &) {
     if (pointLights.size() >= shader::fragment::PointLight::MAX) {
@@ -156,36 +100,20 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
     // TODO
   });
 
-  eventListener = new EventListener(
-      // Transform cache invalid
-      [&renderables = renderables, &coordinator] {
-        for (auto it = renderables.begin(); it != renderables.end(); ++it) {
-          for (auto &renderableEntity : it->second) {
-            renderableEntity.transform =
-                &coordinator
-                     .getComponent<component::Transform>(
-                         renderableEntity.entityId)
-                     .transformMat;
-          }
-        }
-      },
-      [&poinLights = pointLights, &coordinator] {
-        // light cache invalid
-        for (auto &pointLight : poinLights) {
-          const auto &transfrom =
-              coordinator.getComponent<component::Transform>(
-                  pointLight.entityId);
-          const auto &light =
-              coordinator.getComponent<component::Light>(pointLight.entityId);
-          pointLight.position = &transfrom.transformMat[3];
-          pointLight.color = &light.color;
-          pointLight.radius = &light.range;
-          pointLight.intensity = &light.intensity;
-        }
-      });
-
-  coordinator.subscribeToEvent<EventListener::TrasformCacheInvalidEvent>(
-      *eventListener);
+  eventListener = new EventListener([&poinLights = pointLights,
+                                     &coordinator = coordinator] {
+    // light cache invalid
+    for (auto &pointLight : poinLights) {
+      const auto &transfrom =
+          coordinator.getComponent<component::Transform>(pointLight.entityId);
+      const auto &light =
+          coordinator.getComponent<component::Light>(pointLight.entityId);
+      pointLight.position = &transfrom.transformMat[3];
+      pointLight.color = &light.color;
+      pointLight.radius = &light.range;
+      pointLight.intensity = &light.intensity;
+    }
+  });
 }
 
 RenderSystem::~RenderSystem() {
@@ -215,7 +143,15 @@ RenderSystem::registerGltfScene(tinygltf::Model &modelData) {
 }
 
 std::shared_ptr<Image> RenderSystem::update(float dt) {
-  renderer.render(dt);
+  // load preRender data
+  renderer.preRender(this->pointLights);
+  // render entites
+  for (EntityId entity : this->getEntites()) {
+    auto transform =
+        coordinator.getComponent<component::Transform>(entity).transformMat;
+    auto model = coordinator.getComponent<component::Model>(entity);
+    renderer.render(dt, transform, model.meshId, model.primIdToMatId);
+  }
   std::shared_ptr<Image> img = renderer.readPixels();
   // Don't blit before reading the pixels.
   //  renderer.blitToWindow();

@@ -13,28 +13,23 @@ Renderer::Renderer(
     int width, int height, const std::unordered_map<MeshId, Mesh> &meshes,
     const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>>
         &materials,
-    const RenderableMap &renderables,
-    const std::vector<PointLight> &pointLights, const Camera *camera,
-    const shader::StageCodeMap &flatForwardShader)
+    const Camera *camera, const shader::StageCodeMap &flatForwardShader)
     : frameBuffer(width, height), meshes(meshes), materials(materials),
-      renderables(renderables), pointLights(pointLights),
       projectionMatrix(1.0f), camera(camera),
       flatForwardShader(flatForwardShader) {
 
   // Setup framebuffer
-  frameBuffer.use();
-  frameBuffer.setColorAttachmentRB(GL_RGB);
-  frameBuffer.setDepthAttachment(FrameBuffer::AttachType::RENDER_BUFFER);
+  //  frameBuffer.use();
+  //  frameBuffer.setColorAttachmentRB(GL_RGB);
+  //  frameBuffer.setDepthAttachment(FrameBuffer::AttachType::RENDER_BUFFER);
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
 }
 
-void Renderer::render(float) {
-  //  frameBuffer.use();
-  FrameBuffer::useDefault();
-  frameBuffer.clearBuffer();
+void Renderer::preRender(const std::vector<PointLight> &pointLights) {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   flatForwardShader.bind();
   flatForwardShader.loadViewMatrix(camera->getViewMatrix());
   flatForwardShader.loadCameraPosition(camera->position);
@@ -42,26 +37,25 @@ void Renderer::render(float) {
     flatForwardShader.loadPointLight(pointLights[i], i);
   }
   flatForwardShader.loadPointLightSize(pointLights.size());
-  for (auto renderable : renderables) {
-    // fetch entites and mesh
-    const auto &entites = renderable.second;
-    const auto &mesh = meshes.at(renderable.first);
-    for (size_t i = 0; i < mesh.primitives.size(); ++i) {
-      // bind primitive
-      const Primitive &primitive = mesh.primitives[i];
-      glBindVertexArray(primitive.vao);
-      for (const RenderableEntity &entity : entites) {
-        // set entity specific data
-        const auto &material = materials.at(entity.primIdToMatId.at(i));
-        if (material->shaderType == ShaderType::FLAT_FORWARD_SHADER)
-          flatForwardShader.loadMaterial(
-              *static_cast<FlatMaterial *>(material.get()));
-        flatForwardShader.loadTransformMatrix(*entity.transform);
-        // draw
-        glDrawElements(primitive.mode, primitive.indexCount,
-                       primitive.indexType, primitive.indexOffset);
-      }
-    }
+}
+
+void Renderer::render(float, const glm::mat4 &transform, const MeshId &meshId,
+                      std::map<PrimitiveId, MaterialId> primIdToMatId) {
+  // fetch mesh
+  const auto &mesh = meshes.at(meshId);
+  for (size_t i = 0; i < mesh.primitives.size(); ++i) {
+    // bind primitive
+    const Primitive &primitive = mesh.primitives[i];
+    glBindVertexArray(primitive.vao);
+    // set entity specific data
+    const auto &material = materials.at(primIdToMatId[i]);
+    if (material->shaderType == ShaderType::FLAT_FORWARD_SHADER)
+      flatForwardShader.loadMaterial(
+          *static_cast<FlatMaterial *>(material.get()));
+    flatForwardShader.loadTransformMatrix(transform);
+    // draw
+    glDrawElements(primitive.mode, primitive.indexCount, primitive.indexType,
+                   primitive.indexOffset);
   }
 }
 

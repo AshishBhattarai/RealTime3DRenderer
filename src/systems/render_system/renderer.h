@@ -19,19 +19,13 @@ struct RenderableEntity;
 struct PointLight;
 class Camera;
 
-using RenderableMap = std::unordered_map<MeshId, std::vector<RenderableEntity>>;
-
 class Renderer {
 private:
   FrameBuffer frameBuffer;
   const std::unordered_map<MeshId, Mesh> &meshes;
   const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>>
       &materials;
-  const RenderableMap &renderables;
-  const std::vector<PointLight> &pointLights;
-  //  std::unordered_set<EntityId> removeables;
   glm::mat4 projectionMatrix;
-
   const Camera *camera;
 
   shader::FlatForwardProgram flatForwardShader;
@@ -41,11 +35,11 @@ public:
            const std::unordered_map<MeshId, Mesh> &meshes,
            const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>>
                &materials,
-           const RenderableMap &renderables,
-           const std::vector<PointLight> &pointLights, const Camera *camera,
-           const shader::StageCodeMap &flatForwardShader);
+           const Camera *camera, const shader::StageCodeMap &flatForwardShader);
 
-  void render(float dt);
+  void preRender(const std::vector<PointLight> &pointLights);
+  void render(float dt, const glm::mat4 &transform, const MeshId &meshId,
+              std::map<PrimitiveId, MaterialId> primIdToMatId);
   void blitToWindow();
   std::shared_ptr<Image> readPixels();
   void updateProjectionMatrix(float ar, float fov, float near, float far);
