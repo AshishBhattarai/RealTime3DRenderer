@@ -37,7 +37,9 @@ public:
                &materials,
            const Camera *camera, const shader::StageCodeMap &flatForwardShader);
 
-  void preRender(const std::vector<PointLight> &pointLights);
+  void loadPointLight(const PointLight &pointLight, uint idx);
+  void loadPointLightCount(size_t count);
+  void preRender();
   void render(float dt, const glm::mat4 &transform, const MeshId &meshId,
               std::map<PrimitiveId, MaterialId> primIdToMatId);
   void blitToWindow();

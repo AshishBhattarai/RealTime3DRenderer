@@ -50,7 +50,6 @@ struct SceneRegisterReturn {
 class RenderSystem : ecs::System<RenderSystem> {
 private:
   class LightingSystem;
-  class EventListener;
   static constexpr float DEFAULT_FOV = 75.0f;
   static constexpr float DEFAULT_NEAR = 0.1f;
   static constexpr float DEFAULT_FAR = 1000.0f;
@@ -67,9 +66,8 @@ private:
 
   ecs::Coordinator &coordinator;
   LightingSystem *lightingSystem;
-  EventListener *eventListener;
 
-  void initSubSystems(ecs::Coordinator &coordinator);
+  void initSubSystems();
 
 public:
   RenderSystem(const RenderSystemConfig &config);
@@ -83,7 +81,6 @@ public:
     materials.emplace(id, std::unique_ptr<T>(new T{{id, shaderType}, args...}));
     return id;
   }
-
   // TODO: Delete mesh and set all existing entites to default mesh
   bool unregisterMesh(std::string_view name);
 

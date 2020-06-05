@@ -28,15 +28,19 @@ Renderer::Renderer(
   glEnable(GL_CULL_FACE);
 }
 
-void Renderer::preRender(const std::vector<PointLight> &pointLights) {
+void Renderer::loadPointLight(const PointLight &pointLight, uint idx) {
+  flatForwardShader.loadPointLight(pointLight, idx);
+}
+
+void Renderer::loadPointLightCount(size_t count) {
+  flatForwardShader.loadPointLightSize(count);
+}
+
+void Renderer::preRender() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   flatForwardShader.bind();
   flatForwardShader.loadViewMatrix(camera->getViewMatrix());
   flatForwardShader.loadCameraPosition(camera->position);
-  for (uint i = 0; i < pointLights.size(); ++i) {
-    flatForwardShader.loadPointLight(pointLights[i], i);
-  }
-  flatForwardShader.loadPointLightSize(pointLights.size());
 }
 
 void Renderer::render(float, const glm::mat4 &transform, const MeshId &meshId,

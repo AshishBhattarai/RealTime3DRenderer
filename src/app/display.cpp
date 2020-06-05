@@ -46,7 +46,7 @@ Display::Display(std::string_view title, int width, int height)
     assert(false && "Failed to init glad.");
     exit(FailureCode::GLAD_INIT_FALUIRE);
   }
-  glfwSwapInterval(0);
+  glfwSwapInterval(1);
   glViewport(0, 0, width, height);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
   hideWindow();

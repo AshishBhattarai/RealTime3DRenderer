@@ -3,7 +3,6 @@
 #include "component_manager.h"
 #include "entity_manager.h"
 #include "event_manager.h"
-#include "events/component_cache_invalid.h"
 #include "system_manager.h"
 #include <memory>
 
@@ -25,13 +24,11 @@ public:
 
   // component
   template <typename T> ComponentFamily registerComponent() {
-    eventManager.registerEvent<event::ComponentCacheInvalid<T>>();
     return componentManager.registerComponent<T>();
   }
 
   template <typename T> void addComponent(Entity entity, const T &component) {
-    if (componentManager.addComponent<T>(entity, component))
-      eventManager.emit<event::ComponentCacheInvalid<T>>();
+    componentManager.addComponent<T>(entity, component);
     Signature signature = entityManager.updateSignaure(
         entity, componentManager.getComponentFamily<T>(), true);
     systemManager.entitySignatureChanged(entity, signature);

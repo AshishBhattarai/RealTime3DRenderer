@@ -9,6 +9,12 @@
  * A simple threadsafe wrapper for std::queue
  */
 template <typename T> class SharedQueue {
+private:
+  std::queue<T> queue;
+  std::mutex mutex;
+  std::condition_variable condVar;
+  std::atomic<bool> stop;
+
 public:
   SharedQueue() : stop(false) {}
   ~SharedQueue() {
@@ -67,7 +73,7 @@ public:
     condVar.notify_one();
   }
 
-  size_t size() const {
+  size_t size() {
     std::unique_lock<std::mutex> lock(mutex);
     size_t size = queue.size();
     lock.unlock();
@@ -75,10 +81,4 @@ public:
   }
 
   bool isEmpty() const { return size() == 0; }
-
-private:
-  std::queue<T> queue;
-  std::mutex mutex;
-  std::condition_variable condVar;
-  std::atomic<bool> stop;
 };
