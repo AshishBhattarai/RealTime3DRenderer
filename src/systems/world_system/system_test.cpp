@@ -1,6 +1,6 @@
 #define CATCH_CONFIG_MAIN
 #include "components/light.h"
-#include "components/mesh.h"
+#include "components/model.h"
 #include "third_party/catch.hpp"
 #include "world_system.h"
 

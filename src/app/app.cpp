@@ -4,7 +4,7 @@
 #include "command_queues.h"
 #include "common.h"
 #include "components/light.h"
-#include "components/mesh.h"
+#include "components/model.h"
 #include "components/transform.h"
 #include "core/buffer.h"
 #include "core/image.h"

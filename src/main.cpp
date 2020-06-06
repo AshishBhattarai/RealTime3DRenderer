@@ -3,7 +3,7 @@
 #include "app/app.h"
 #include "app/loaders.h"
 #include "components/light.h"
-#include "components/mesh.h"
+#include "components/model.h"
 #include "components/transform.h"
 #include "core/image.h"
 #include "ecs/coordinator.h"
