@@ -40,3 +40,11 @@ protected:
 template <typename T> constexpr auto toUnderlying(T e) noexcept {
   return static_cast<std::underlying_type_t<T>>(e);
 }
+
+template <typename... T> constexpr bool orUnderlying(T... e) {
+  return (toUnderlying(e) | ...);
+}
+
+template <typename... T> constexpr bool andUnderlying(T... e) {
+  return (toUnderlying(e) & ...);
+}

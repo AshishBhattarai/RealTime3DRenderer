@@ -10,20 +10,23 @@ private:
   int width;
   int height;
   int numChannels;
+  bool isHDR;
 
 public:
-  explicit Image(uchar *buffer, int width, int height, int numChannels)
+  explicit Image(uchar *buffer, int width, int height, int numChannels,
+                 bool isHDR = false)
       : buffer(buffer, width * height * numChannels), width(width),
-        height(height), numChannels(numChannels) {}
+        height(height), numChannels(numChannels), isHDR(isHDR) {}
 
   explicit Image(uchar *buffer, size_t size, uint align, int width, int height,
-                 int numChannels)
+                 int numChannels, bool isHDR = false)
       : buffer(buffer, size, align), width(width), height(height),
-        numChannels(numChannels) {}
+        numChannels(numChannels), isHDR(isHDR) {}
 
-  explicit Image(Buffer &&buffer, int width, int height, int numChannels)
+  explicit Image(Buffer &&buffer, int width, int height, int numChannels,
+                 bool isHDR = false)
       : buffer(std::move(buffer)), width(width), height(height),
-        numChannels(numChannels) {}
+        numChannels(numChannels), isHDR(isHDR) {}
 
   Image() = default;
 
@@ -58,5 +61,6 @@ public:
   int getWidth() const { return width; }
   int getHeight() const { return height; }
   int getNumChannels() const { return numChannels; }
+  bool getIsHDR() const { return isHDR; }
   bool isValid() const { return buffer.isValid(); }
 };

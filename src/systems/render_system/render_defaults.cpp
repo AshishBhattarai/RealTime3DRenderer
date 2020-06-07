@@ -11,12 +11,11 @@ RenderDefaults::RenderDefaults(const Image *checkerImage)
 
   assert(checkerImage && "Invalid checker image received.");
 
-  Texture texture = Texture(*checkerImage);
-  this->checkerTexture = texture.moveId();
-  texture.loadTexture((const uchar[]){255, 255, 255, 255}, 1, 1, 4);
-  this->blackTexture = texture.moveId();
-  texture.loadTexture((const uchar[]){0, 0, 0, 0}, 1, 1, 4);
-  this->whiteTexture = texture.moveId();
+  this->checkerTexture = Texture(*checkerImage).release();
+  this->blackTexture =
+      Texture((const uchar[]){255, 255, 255, 255}, 1, 1, 4).release();
+  this->whiteTexture = Texture((const uchar[]){0, 0, 0, 0}, 1, 1, 4).release();
+  ;
 } // namespace render_system
 
 RenderDefaults::~RenderDefaults() {
