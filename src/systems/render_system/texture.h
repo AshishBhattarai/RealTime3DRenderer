@@ -53,7 +53,7 @@ public:
    * @return releases the ownership of current id.
    */
   GLuint release();
-  void bind() { glBindTexture(target, id); }
+  void bind() const { glBindTexture(target, id); }
   GLuint getId() const { return id; }
   GLenum getTarget() const { return target; }
 }; // namespace Texture

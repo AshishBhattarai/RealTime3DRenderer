@@ -41,9 +41,9 @@ void RenderSystem::initSubSystems() {
 RenderSystem::RenderSystem(const RenderSystemConfig &config)
     : renderer(config.width, config.height, meshes, materials,
                &RenderDefaults::getInstance(&config.checkerImage).getCamera(),
-               config.flatForwardShader),
-      sceneLoader(), coordinator(ecs::Coordinator::getInstance()) {
-  pointLights.reserve(shader::fragment::PointLight::MAX);
+               config.flatForwardShader, config.skyboxShader),
+      sceneLoader(), coordinator(ecs::Coordinator::getInstance()),
+      skybox(nullptr) {
   updateProjectionMatrix(config.ar);
   /* load default materials */
   auto &renderDefaults = RenderDefaults::getInstance();
@@ -96,6 +96,11 @@ RenderSystem::registerGltfScene(tinygltf::Model &modelData) {
           sceneData.matIdToNameList};
 }
 
+bool RenderSystem::setSkyBox(Image *image) {
+  skybox = std::make_unique<Texture>(*image);
+  return skybox->getId() != 0;
+}
+
 std::shared_ptr<Image> RenderSystem::update(float dt) {
   // load preRender data
   renderer.preRender();
@@ -114,6 +119,11 @@ std::shared_ptr<Image> RenderSystem::update(float dt) {
     ++i;
   }
   renderer.loadPointLightCount(i);
+
+  // draw skybox
+  if (skybox) {
+    renderer.renderSkybox(*skybox);
+  }
 
   // render entites
   for (EntityId entity : this->getEntites()) {

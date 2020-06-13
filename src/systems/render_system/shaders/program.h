@@ -19,8 +19,10 @@ enum class ShaderStage : short {
 using StageCodeMap = std::map<ShaderStage, const Buffer &>;
 
 class Program {
-private:
+protected:
   GLuint program;
+
+private:
   short shaderStageFlags;
   GLuint createShader(const Buffer &data, GLenum type);
 

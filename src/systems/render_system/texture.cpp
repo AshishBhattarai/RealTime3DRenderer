@@ -10,6 +10,7 @@ Texture::Texture(const Image &image, short flags)
   assert(image.getBuffer() && "Invalid buffer data.");
   if (!image.getBuffer()) {
     CSLOG("LOAD_TEXTURE failed invalid image.");
+    return;
   }
 
   const uchar *data = image.getBuffer()->data();
@@ -72,7 +73,7 @@ void Texture::loadTexture2D(const uchar *buffer, int width, int height,
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format,
-               transferType, buffer);
+               transferType, (void *)buffer);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
   target = GL_TEXTURE_2D;

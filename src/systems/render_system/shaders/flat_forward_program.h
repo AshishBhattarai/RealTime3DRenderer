@@ -12,16 +12,6 @@ class FlatForwardProgram : public Program {
 public:
   FlatForwardProgram(const StageCodeMap &codeMap);
 
-  void loadProjectionMatrix(const glm::mat4 &matrix) {
-    glUniformMatrix4fv(vertex::uniform::PROJECTION_LOC, 1, GL_FALSE,
-                       glm::value_ptr(matrix));
-  }
-
-  void loadViewMatrix(const glm::mat4 &matrix) {
-    glUniformMatrix4fv(vertex::uniform::VIEW_LOC, 1, GL_FALSE,
-                       glm::value_ptr(matrix));
-  }
-
   void loadTransformMatrix(const glm::mat4 &matrix) {
     glUniformMatrix4fv(vertex::uniform::TRANSFORMATION_LOC, 1, GL_FALSE,
                        glm::value_ptr(matrix));
@@ -41,10 +31,6 @@ public:
     glUniform1f(fragment::uniform::POINT_LIGHT_LOC[idx] +
                     fragment::PointLight::INTENSITY,
                 *pointLight.intensity);
-  }
-
-  void loadCameraPosition(const glm::vec3 &pos) {
-    glUniform3fv(fragment::uniform::CAM_POS_LOC, 1, glm::value_ptr(pos));
   }
 
   void loadPointLightSize(int size) {

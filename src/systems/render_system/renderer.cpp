@@ -5,6 +5,7 @@
 #include "mesh.h"
 #include "render_defaults.h"
 #include "renderable_entity.h"
+#include "shaders/general_vs_ubo.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace render_system {
@@ -13,10 +14,12 @@ Renderer::Renderer(
     int width, int height, const std::unordered_map<MeshId, Mesh> &meshes,
     const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>>
         &materials,
-    const Camera *camera, const shader::StageCodeMap &flatForwardShader)
+    const Camera *camera, const shader::StageCodeMap &flatForwardShader,
+    const shader::StageCodeMap &skyboxShader)
     : frameBuffer(width, height), meshes(meshes), materials(materials),
-      projectionMatrix(1.0f), camera(camera),
-      flatForwardShader(flatForwardShader) {
+      projectionMatrix(1.0f), camera(camera), generalVSUBO(),
+      flatForwardShader(flatForwardShader), skyboxShader(skyboxShader),
+      cube(RenderDefaults::getInstance().getCubeVao()) {
 
   // Setup framebuffer
   //  frameBuffer.use();
@@ -38,9 +41,8 @@ void Renderer::loadPointLightCount(size_t count) {
 
 void Renderer::preRender() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  flatForwardShader.bind();
-  flatForwardShader.loadViewMatrix(camera->getViewMatrix());
-  flatForwardShader.loadCameraPosition(camera->position);
+  generalVSUBO.setViewMatrix(camera->getViewMatrix());
+  generalVSUBO.setCameraPos(camera->position);
 }
 
 void Renderer::render(float, const glm::mat4 &transform, const MeshId &meshId,
@@ -53,14 +55,22 @@ void Renderer::render(float, const glm::mat4 &transform, const MeshId &meshId,
     glBindVertexArray(primitive.vao);
     // set entity specific data
     const auto &material = materials.at(primIdToMatId[i]);
-    if (material->shaderType == ShaderType::FLAT_FORWARD_SHADER)
+    if (material->shaderType == ShaderType::FLAT_FORWARD_SHADER) {
+      flatForwardShader.bind();
       flatForwardShader.loadMaterial(
           *static_cast<FlatMaterial *>(material.get()));
-    flatForwardShader.loadTransformMatrix(transform);
+      flatForwardShader.loadTransformMatrix(transform);
+    }
     // draw
     glDrawElements(primitive.mode, primitive.indexCount, primitive.indexType,
                    primitive.indexOffset);
   }
+}
+
+void Renderer::renderSkybox(const Texture &texture) {
+  // render skybox
+  glActiveTexture(GL_TEXTURE0 + skyboxShader.textureUnit);
+  skyboxShader.bindTexture(texture);
 }
 
 void Renderer::blitToWindow() { frameBuffer.blit(nullptr, GL_BACK); }
@@ -76,9 +86,7 @@ std::shared_ptr<Image> Renderer::readPixels() {
 void Renderer::updateProjectionMatrix(float ar, float fov, float near,
                                       float far) {
   projectionMatrix = glm::perspective(glm::radians(fov), ar, near, far);
-  flatForwardShader.bind();
-  flatForwardShader.loadProjectionMatrix(projectionMatrix);
-  flatForwardShader.unBind();
+  generalVSUBO.setProjectionMatrix(projectionMatrix);
 }
 
 } // namespace render_system

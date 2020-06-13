@@ -42,6 +42,11 @@ App::App(int, char **)
   renderSystem->setCamera(camera);
   renderSystem->updateProjectionMatrix(display.getAspectRatio());
 
+  // load skybox
+  Image skybox;
+  Loaders::loadImage(skybox, "resources/skybox/autumn_park_2k.hdr", true);
+  renderSystem->setSkyBox(&skybox);
+
   // load model
   tinygltf::Model model;
   Loaders::loadModel(model, "resources/meshes/sphere.gltf");
@@ -102,6 +107,15 @@ App::App(int, char **)
     testLight.addComponent<component::Light>(component::Light(
         glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
   }
+  GLint size;
+  glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &size);
+  std::cout << "UBO MB: " << size / 1024 << std::endl;
+  glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &size);
+  std::cout << "SSBO MB: " << size / 1024 << std::endl;
+
+  auto err = glGetError();
+  if (err != GL_NO_ERROR)
+    CSLOG("OpenGL ERROR:", err);
 } // namespace app
 
 void App::processInput(float dt) {

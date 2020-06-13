@@ -1,7 +1,7 @@
 #version 460 core
 #extension GL_GOOGLE_include_directive: require
 
-#define FRAGMENT_SHADER
+#define FORWARD_FRAGMENT_SHADER
 #include "config.h"
 #define PI 3.1415926538f
 
@@ -11,6 +11,7 @@ layout (location = VERT_INTERFACE_BLOCK_LOC) in VertexData {
    vec2 texCoord;
    vec3 worldPos;
    vec3 normal;
+   vec3 camPos;
 } fs_in;
 
 struct Material {
@@ -30,7 +31,6 @@ struct PointLight {
 layout(location = FRAG_U_MATERIAL_ALBEDO_LOC) uniform Material material;
 layout(location = FRAG_U_POINT_LIGHT0_POS) uniform PointLight pointLights[MAX_POINT_LIGHTS];
 layout(location = FRAG_U_POINT_LIGHT_SIZE) uniform int pointLightSize;
-layout(location = FRAG_U_CAM_POS) uniform vec3 camPos;
 
 float invSqureAttenuation(float distance, float radius) {
     return pow(clamp(1.0f - pow((distance / radius), 4.0f), 0.0f, 1.0f), 2.0f)/(distance * distance + 1.0f);
@@ -65,7 +65,7 @@ float geometrySmith(float NoV, float NoL, float roughness) {
 
 void main() {
     vec3 normal = normalize(fs_in.normal);
-    vec3 viewDir = normalize(camPos - fs_in.worldPos);
+    vec3 viewDir = normalize(fs_in.camPos - fs_in.worldPos);
 
     // calculate surface reflection at zero incidence
     vec3 F0 = vec3(0.04f);

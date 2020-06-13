@@ -22,6 +22,7 @@ public:
   GLuint getCheckerTexture() const { return checkerTexture; }
   GLuint getWhiteTexture() const { return whiteTexture; }
   GLuint getBlackTexture() const { return blackTexture; }
+  GLuint getCubeVao() const { return cube; }
   const Camera &getCamera() const { return camera; }
 
 private:
@@ -30,6 +31,9 @@ private:
   // 1x1 black & white textures;
   GLuint blackTexture;
   GLuint whiteTexture;
+
+  // 1x1 cube model vao
+  GLuint cube;
 
   Camera camera;
 

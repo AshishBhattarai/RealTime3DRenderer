@@ -21,15 +21,10 @@ class Camera;
 struct RenderSystemConfig {
   const Image &checkerImage; // can be removed after RenderSystem construction
   const shader::StageCodeMap &flatForwardShader;
-  float ar;
+  const shader::StageCodeMap &skyboxShader;
   int width;
   int height;
-
-  RenderSystemConfig(const Image &checkerImage,
-                     const shader::StageCodeMap &flatForwardShader, float width,
-                     float height)
-      : checkerImage(checkerImage), flatForwardShader(flatForwardShader),
-        ar(width / (float)height), width(width), height(height) {}
+  float ar;
 };
 
 struct SceneRegisterReturn {
@@ -59,13 +54,13 @@ private:
 
   std::unordered_map<MeshId, Mesh> meshes;
   std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>> materials;
-  std::vector<PointLight> pointLights;
   //  std::unordered_map<ecs::Entity, size_t> entityToIndex;
   std::unordered_map<MeshId, size_t> meshIdToIndex;
   std::unordered_map<MeshId, size_t> materialIdToIndex;
 
   ecs::Coordinator &coordinator;
   LightingSystem *lightingSystem;
+  std::unique_ptr<Texture> skybox;
 
   void initSubSystems();
 
@@ -83,19 +78,18 @@ public:
   }
   // TODO: Delete mesh and set all existing entites to default mesh
   bool unregisterMesh(std::string_view name);
+  bool setSkyBox(Image *image);
+  std::shared_ptr<Image> update(float dt);
 
   void updateProjectionMatrix(float ar, float fov = DEFAULT_FOV,
                               float near = DEFAULT_NEAR,
                               float far = DEFAULT_FAR) {
     renderer.updateProjectionMatrix(ar, fov, near, far);
   }
-
   void setCamera(const Camera *camera) {
     assert(camera && "Invalid camera supplied.");
     if (camera)
       renderer.setCamera(camera);
   }
-
-  std::shared_ptr<Image> update(float dt);
 };
 } // namespace render_system

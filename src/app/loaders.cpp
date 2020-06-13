@@ -31,20 +31,26 @@ bool loadModel(tinygltf::Model &model, const char *fileName) {
   return res;
 }
 
-bool loadImage(Image &image, const char *fileName) {
+bool loadImage(Image &image, const char *fileName, bool isHDR) {
   int width = 0;
   int height = 0;
   int numChannels = 0;
 
-  uchar *buffer = stbi_load(std::string(fileName).c_str(), &width, &height,
-                            &numChannels, 0);
+  void *buffer = nullptr;
+  if (isHDR)
+    buffer = stbi_load_16(std::string(fileName).c_str(), &width, &height,
+                          &numChannels, 0);
+  else
+    buffer = stbi_load(std::string(fileName).c_str(), &width, &height,
+                       &numChannels, 0);
+
   assert(buffer && "failed to load the checker texture.");
   if (!buffer) {
     SLOG("Failed to load image:", fileName);
     return false;
   } else {
     DEBUG_SLOG("Loaded image: ", fileName);
-    image = Image(buffer, width, height, numChannels);
+    image = Image((uchar *)buffer, width, height, numChannels, isHDR);
     return true;
   }
 }

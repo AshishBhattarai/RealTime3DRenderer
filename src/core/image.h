@@ -35,6 +35,7 @@ public:
     this->width = image.width;
     this->height = image.height;
     this->numChannels = image.numChannels;
+    this->isHDR = image.isHDR;
     image.width = image.height = image.numChannels = 0;
   }
 
@@ -43,6 +44,7 @@ public:
     this->width = image.width;
     this->height = image.height;
     this->numChannels = image.numChannels;
+    this->isHDR = image.isHDR;
     image.width = image.height = image.numChannels = 0;
     return *this;
   }
