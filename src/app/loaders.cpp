@@ -35,11 +35,12 @@ bool loadImage(Image &image, const char *fileName, bool isHDR) {
   int width = 0;
   int height = 0;
   int numChannels = 0;
+  stbi_set_flip_vertically_on_load(true);
 
   void *buffer = nullptr;
   if (isHDR)
-    buffer = stbi_load_16(std::string(fileName).c_str(), &width, &height,
-                          &numChannels, 0);
+    buffer = stbi_loadf(std::string(fileName).c_str(), &width, &height,
+                        &numChannels, 0);
   else
     buffer = stbi_load(std::string(fileName).c_str(), &width, &height,
                        &numChannels, 0);
@@ -50,7 +51,12 @@ bool loadImage(Image &image, const char *fileName, bool isHDR) {
     return false;
   } else {
     DEBUG_SLOG("Loaded image: ", fileName);
-    image = Image((uchar *)buffer, width, height, numChannels, isHDR);
+    size_t bufSize = width * height * numChannels;
+    if (isHDR)
+      bufSize *= 4;
+    image = Image(Buffer((uchar *)buffer, bufSize), width, height, numChannels,
+                  isHDR);
+    stbi_image_free(buffer);
     return true;
   }
 }

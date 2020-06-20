@@ -39,16 +39,23 @@ constexpr uint RADIUS = 2;
 constexpr uint INTENSITY = 3;
 } // namespace PointLight
 } // namespace fragment
+#undef FORWARD_VERTEX_SHADER
+#undef FORWARD_FRAGMENT_SHADER
 
+#define SKYBOX_VERTEX_SHADER
 #define SKYBOX_FRAGMENT_SHADER
 #undef GLSL_CONFIG_H
 #include "glsl/config.h"
 // skybox shader
 namespace skybox {
+namespace vertex {
+constexpr int POSITION_LOC = VERT_A_POSITION_LOC;
+}
 namespace fragment {
 constexpr int TEXTURE_LOC = FRAG_U_TEXTURE_LOC;
 }
 } // namespace skybox
+#undef SKYBOX_VERTEX_SHADER
 #undef SKYBOX_FRAGMENT_SHADER
 } // namespace shader
 enum class ShaderType { FORWARD_SHADER, FLAT_FORWARD_SHADER };

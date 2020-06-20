@@ -17,10 +17,19 @@ private:
 public:
   explicit Buffer(size_t size, uint alignment = 0)
       : size(size), alignment(alignment) {
-    this->buf = (uchar *)malloc(size);
+    this->buf = new uchar[size];
   }
-  explicit Buffer(uchar *buf, size_t size, uint alignment = 0)
-      : buf(buf), size(size), alignment(alignment) {}
+
+  explicit Buffer(const uchar *data, size_t size, uint alignment = 0)
+      : Buffer(size, alignment) {
+    if (data && (data + (size - 1)))
+      memcpy((void *)this->buf, (void *)data, size);
+    else {
+      delete buf;
+      this->size = 0;
+    }
+  }
+
   Buffer() = default;
 
   Buffer(Buffer &&buffer) {
@@ -46,11 +55,11 @@ public:
 
   ~Buffer() {
     if (buf)
-      free(buf);
+      delete buf;
     size = 0;
   }
 
-  bool isValid() const { return buf; }
+  bool isValid() const { return buf != nullptr; }
   uchar *data() { return buf; }
   const uchar *data() const { return buf; }
   size_t getSize() const { return size; }

@@ -97,7 +97,8 @@ RenderSystem::registerGltfScene(tinygltf::Model &modelData) {
 }
 
 bool RenderSystem::setSkyBox(Image *image) {
-  skybox = std::make_unique<Texture>(*image);
+  skybox = std::make_unique<Texture>(
+      *image, toUnderlying(TextureFlags::DISABLE_MIPMAP));
   return skybox->getId() != 0;
 }
 

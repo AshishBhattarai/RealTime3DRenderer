@@ -3,6 +3,7 @@
 
 #define SKYBOX_FRAGMENT_SHADER
 #include "config.h"
+#define PI 3.1415926538f
 
 layout(location = COLOR_ATTACHMENT0) out vec4 fragColor;
 layout(location = VERT_V_DIRECTION_LOC) in vec3 texDir;
@@ -19,9 +20,14 @@ void main(void)
     fragColor = texture(cubeMap, texDir);
 #else
    // dir to sphere uv
-   vec2 uv = vec2(atan(texDir.x, texDir.y), asin(texDir.y));
-   uv *= vec2(0.1591, 0.3183);
+   vec3 v = normalize(texDir);
+   vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
+   uv *= vec2(0.159155f, 0.31830989f);
    uv += 0.5;
-   fragColor = texture(equirectangularMap, uv);
+   vec3 color = texture(equirectangularMap, uv).xyz;
+   // apply gamma correction + tonemapping
+//   color = color / (color + vec3(1.0f));
+//   color = pow(color, vec3(1.0f / 2.2f));
+   fragColor = vec4(color, 1.0f);
 #endif
 }

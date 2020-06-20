@@ -50,10 +50,10 @@ public:
   void render(float dt, const glm::mat4 &transform, const MeshId &meshId,
               std::map<PrimitiveId, MaterialId> primIdToMatId);
   void renderSkybox(const Texture &texture);
+
   void blitToWindow();
   std::shared_ptr<Image> readPixels();
   void updateProjectionMatrix(float ar, float fov, float near, float far);
-
   void setCamera(const Camera *camera) { this->camera = camera; }
 };
 } // namespace render_system

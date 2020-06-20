@@ -19,7 +19,7 @@ layout(std140, binding = VERT_UB_GENERAL_LOC) uniform GeneralUB {
 
 void main(void)
 {
-    vertDir = normalize(position); // direction on vertex
+    vertDir = position; // direction on vertex
     vec4 pos = projection * mat4(mat3(view)) * vec4(position.xyz, 1.0f);
     gl_Position = pos.xyww;
 }

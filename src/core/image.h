@@ -13,16 +13,6 @@ private:
   bool isHDR;
 
 public:
-  explicit Image(uchar *buffer, int width, int height, int numChannels,
-                 bool isHDR = false)
-      : buffer(buffer, width * height * numChannels), width(width),
-        height(height), numChannels(numChannels), isHDR(isHDR) {}
-
-  explicit Image(uchar *buffer, size_t size, uint align, int width, int height,
-                 int numChannels, bool isHDR = false)
-      : buffer(buffer, size, align), width(width), height(height),
-        numChannels(numChannels), isHDR(isHDR) {}
-
   explicit Image(Buffer &&buffer, int width, int height, int numChannels,
                  bool isHDR = false)
       : buffer(std::move(buffer)), width(width), height(height),
@@ -53,10 +43,8 @@ public:
   Image &operator=(Image &) = delete;
 
   ~Image() {
-    if (buffer.data()) {
-      width = 0;
-      height = 0;
-    }
+    width = 0;
+    height = 0;
   }
 
   const Buffer *getBuffer() const { return &buffer; }

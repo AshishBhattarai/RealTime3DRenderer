@@ -32,6 +32,7 @@ Renderer::Renderer(
 }
 
 void Renderer::loadPointLight(const PointLight &pointLight, uint idx) {
+  flatForwardShader.bind();
   flatForwardShader.loadPointLight(pointLight, idx);
 }
 
@@ -69,8 +70,13 @@ void Renderer::render(float, const glm::mat4 &transform, const MeshId &meshId,
 
 void Renderer::renderSkybox(const Texture &texture) {
   // render skybox
+  glDepthFunc(GL_LEQUAL);
+  skyboxShader.bind();
   glActiveTexture(GL_TEXTURE0 + skyboxShader.textureUnit);
   skyboxShader.bindTexture(texture);
+  glBindVertexArray(cube);
+  glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+  glDepthFunc(GL_LESS);
 }
 
 void Renderer::blitToWindow() { frameBuffer.blit(nullptr, GL_BACK); }

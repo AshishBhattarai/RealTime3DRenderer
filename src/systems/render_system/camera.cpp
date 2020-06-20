@@ -55,7 +55,7 @@ void Camera::processRotation(float xoffset, float yoffset) {
   rotation.y += xoffset * mouseSensitivity;
   rotation.x += yoffset * mouseSensitivity;
 
-  // limit pitch to avoid unwanted rotation
+  //   limit pitch to avoid unwanted rotation
   if (rotation.x > 89.0f)
     rotation.x = 89.0f;
   if (rotation.x < -89.0f)

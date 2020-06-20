@@ -1,6 +1,7 @@
 #pragma once
 #include "types.h"
 #include <glad/glad.h>
+#include <vector>
 
 // Image/Texture medium converts to or from opengl texture
 
@@ -15,10 +16,11 @@ namespace render_system {
 enum class TextureFlags : short {
   NONE = 0x0000,
   HDR = 0x0001,
-  CUBE_MAP = 0x0002
+  DISABLE_MIPMAP = 0x0002,
+  SRGB = 0x0008 // convert to SRGB
 };
 
-class Texture {
+class Texture : NonCopyable {
 private:
   GLuint id;
   GLenum target;
@@ -34,14 +36,11 @@ private:
    * @param cmi - CubeMap Index, Only used for (flags|CUBE_MAP) = true
    * @return
    */
-  void loadTexture2D(const uchar *buffer, int width, int height,
-                     int numChannels,
-                     short flags = toUnderlying(TextureFlags::NONE));
+  void loadTexture(const std::vector<const Image *> &images,
+                   short flags = toUnderlying(TextureFlags::NONE));
 
 public:
   Texture(const Image &image, short flags = toUnderlying(TextureFlags::NONE));
-  Texture(const uchar *buffer, int width, int height, int numChannels,
-          short flags = toUnderlying(TextureFlags::NONE));
   /**
    * If isDefault is true texture isn't deleted on destructor
    **/

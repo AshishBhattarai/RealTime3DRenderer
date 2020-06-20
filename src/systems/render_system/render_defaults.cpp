@@ -2,6 +2,7 @@
 #include "core/image.h"
 #include "texture.h"
 #include "types.h"
+#include <glad/glad.h>
 #include <string>
 
 namespace render_system {
@@ -11,11 +12,59 @@ RenderDefaults::RenderDefaults(const Image *checkerImage)
 
   assert(checkerImage && "Invalid checker image received.");
 
+  const uchar black[] = {255, 255, 255, 255};
+  const uchar white[] = {0, 0, 0, 0};
+
   this->checkerTexture = Texture(*checkerImage).release();
-  this->blackTexture =
-      Texture((const uchar[]){255, 255, 255, 255}, 1, 1, 4).release();
-  this->whiteTexture = Texture((const uchar[]){0, 0, 0, 0}, 1, 1, 4).release();
-  ;
+  this->blackTexture = Texture(Image(Buffer(black, 4, 0), 1, 1, 4)).release();
+  this->whiteTexture = Texture(Image(Buffer(white, 4, 0), 1, 1, 4)).release();
+
+  // load cube
+  float cubeVertices[] = {
+      1.0f,  1.0f,  1.0f,  1.0f,  -1.0f, 1.0f,
+      -1.0f, -1.0f, 1.0f,  -1.0f, 1.0f,  1.0f, // (front)
+      1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  -1.0f,
+      1.0f,  -1.0f, -1.0f, 1.0f,  -1.0f, 1.0f, // (right)
+      1.0f,  1.0f,  1.0f,  -1.0f, 1.0f,  1.0f,
+      -1.0f, 1.0f,  -1.0f, 1.0f,  1.0f,  -1.0f, // (top)
+      -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f, 1.0f,
+      -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, // (left)
+      -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,
+      1.0f,  -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f, // (bottom)
+      1.0f,  -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f,
+      -1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f // (back)
+  };
+
+  unsigned int indices[] = {
+      0,  1,  2,  2,  3,  0,  //  (front)
+      4,  5,  6,  6,  7,  4,  //  (right)
+      8,  9,  10, 10, 11, 8,  //  (top)
+      12, 13, 14, 14, 15, 12, //  (left)
+      16, 17, 18, 18, 19, 16, //  (bottom)
+      20, 21, 22, 22, 23, 20  //  (back)
+  };
+
+  glGenVertexArrays(1, &cube);
+  GLuint vbo[2]; // vbo[0] cube vbo, vbo[1] cube ibo
+  glGenBuffers(2, vbo);
+
+  // load data
+  glBindVertexArray(cube);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices,
+               GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
+               GL_STATIC_DRAW);
+
+  // set vertex attrib pointers
+  glEnableVertexAttribArray(shader::skybox::vertex::POSITION_LOC);
+  glVertexAttribPointer(shader::skybox::vertex::POSITION_LOC, 3, GL_FLOAT,
+                        GL_FALSE, 0, (void *)0);
+  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glDeleteBuffers(2, vbo);
 } // namespace render_system
 
 RenderDefaults::~RenderDefaults() {
