@@ -1,5 +1,6 @@
 #pragma once
 #include "types.h"
+#include <array>
 #include <glad/glad.h>
 #include <vector>
 
@@ -13,15 +14,12 @@ namespace render_system {
  *
  * NONE indicates LDR RGB texture
  */
-enum class TextureFlags : short {
-  NONE = 0x0000,
-  HDR = 0x0001,
-  DISABLE_MIPMAP = 0x0002,
-  SRGB = 0x0008 // convert to SRGB
-};
+enum class TextureFlags : short { NONE = 0x0000, DISABLE_MIPMAP = 0x0002 };
 
 class Texture : NonCopyable {
 private:
+  static constexpr uint CUBE_MAP_IMAGES_SIZE = 6;
+
   GLuint id;
   GLenum target;
   bool isDefault;
@@ -40,9 +38,19 @@ private:
                    short flags = toUnderlying(TextureFlags::NONE));
 
 public:
+  /**
+   * @brief Texture construts a texture object in GPU.
+   * @param image source image.
+   * @param flags additional image properties.
+   */
   Texture(const Image &image, short flags = toUnderlying(TextureFlags::NONE));
+
+  Texture(const std::array<const Image *, 6> images, short flags);
+
   /**
    * If isDefault is true texture isn't deleted on destructor
+   *
+   * TODO: Remove this and move to duplicate default.
    **/
   Texture(GLuint id, bool isDefault = false) : id(id), isDefault(isDefault) {}
   ~Texture();

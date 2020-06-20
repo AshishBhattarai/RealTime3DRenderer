@@ -14,10 +14,16 @@ Texture::Texture(const Image &image, short flags)
     return;
   }
 
-  short nFlags = flags;
-  if (image.getIsHDR())
-    nFlags |= toUnderlying(TextureFlags::HDR);
-  loadTexture({&image}, nFlags);
+  loadTexture({&image}, flags);
+}
+
+Texture::Texture(const std::array<const Image *, 6> images, short flags)
+    : id(0), target(GL_TEXTURE_CUBE_MAP), isDefault(false) {
+#ifndef NDEBUG
+  for (auto image : images)
+    assert(image && "All images should be valid.");
+#endif
+  loadTexture(std::vector(images.begin(), images.end()), flags);
 }
 
 Texture::~Texture() {
@@ -29,16 +35,9 @@ Texture::~Texture() {
 
 void Texture::loadTexture(const std::vector<const Image *> &images,
                           short flags) {
-
-  GLenum internalFormat = GL_RGBA;
-  GLenum transferType = GL_UNSIGNED_BYTE;
-  target = GL_TEXTURE_2D;
+  assert((images.size() == 1 || images.size() == 6) &&
+         "Invalid number of images.");
   bool disableMipmap = flags & toUnderlying(TextureFlags::DISABLE_MIPMAP);
-  if (flags & toUnderlying(TextureFlags::HDR)) {
-    internalFormat = GL_RGB16F;
-    transferType = GL_FLOAT;
-  }
-
   /**
    * To make texture filter customizable, i can have a RTextureLoader
    * singleton that has a textureFilterType member that is use to set
@@ -51,21 +50,35 @@ void Texture::loadTexture(const std::vector<const Image *> &images,
     texTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 
   for (uint i = 0; i < images.size(); ++i) {
-    const Image &image = *images.at(i);
+    const Image &image = *images[i];
     auto numChannels = image.getNumChannels();
     auto width = image.getWidth();
     auto height = image.getHeight();
     const void *buffer = image.getBuffer()->data();
 
     GLenum format = GL_RGBA;
+
     if (numChannels == 1)
       format = GL_RED;
     else if (numChannels == 2)
       format = GL_RG;
-    else if (numChannels == 3)
+    else if (numChannels == 3) {
       format = GL_RGB;
+    }
 
-    glTexImage2D(texTarget + i, 0, GL_RGB, width, height, 0, format,
+    GLenum internalFormat = GL_RGBA;
+    GLenum transferType = GL_UNSIGNED_BYTE;
+    if (image.getIsHDR()) {
+      /**
+       * With 32-bit HDR we're using 4 times more memory for storing color
+       * values. As 32 bits isn't really necessary (unless you need a high level
+       * of precision) using GL_RGBA16F will suffice.
+       */
+      internalFormat = GL_RGB16F;
+      transferType = GL_FLOAT;
+    }
+
+    glTexImage2D(texTarget + i, 0, internalFormat, width, height, 0, format,
                  transferType, (void *)buffer);
   }
   if (!disableMipmap) {

@@ -25,9 +25,9 @@ void main(void)
    uv *= vec2(0.159155f, 0.31830989f);
    uv += 0.5;
    vec3 color = texture(equirectangularMap, uv).xyz;
-   // apply gamma correction + tonemapping
-//   color = color / (color + vec3(1.0f));
-//   color = pow(color, vec3(1.0f / 2.2f));
+   // apply tonemapping and gamma correction
+   color = vec3(1.0) - exp(-color * 0.5); // 0.5 exposure
+   color = pow(color, vec3(1.0f / 2.2f));
    fragColor = vec4(color, 1.0f);
 #endif
 }

@@ -44,7 +44,8 @@ App::App(int, char **)
 
   // load skybox
   Image skybox;
-  Loaders::loadImage(skybox, "resources/skybox/autumn_park_2k.hdr", true);
+  Loaders::loadImage(skybox, "resources/skybox/14-Hamarikyu_Bridge_B.hdr",
+                     true);
   renderSystem->setSkyBox(&skybox);
 
   // load model
