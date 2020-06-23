@@ -3,7 +3,8 @@
 
 namespace render_system::shader {
 SkyboxShader::SkyboxShader(const StageCodeMap &codeMap) : Program(codeMap) {
-  glUniformBlockBinding(this->program, shader::vertex::uniform::GENERAL_UB_LOC,
+  glUniformBlockBinding(this->program,
+                        shader::forward::vertex::uniform::GENERAL_UB_LOC,
                         shader::vertex::generalUBOBinding);
   bind();
   glUniform1i(shader::skybox::fragment::TEXTURE_LOC, textureUnit);

@@ -6,7 +6,6 @@
 #include "systems/render_system/render_system.h"
 
 namespace app {
-
 using namespace render_system;
 
 Construct::Construct() {}
@@ -16,16 +15,16 @@ render_system::RenderSystem *Construct::newRenderSystem(int width, int height) {
   Image checkerImage;
   bool status =
       Loaders::loadImage(checkerImage, "resources/defaults/checker.bmp");
-  Buffer flatForwardVertex;
-  Buffer flatForwardFragment;
-  Buffer skyboxVertex;
-  Buffer skyboxFragment;
+  Buffer flatForwardVertex, flatForwardFragment, skyboxVertex, skyboxFragment,
+      skyboxCubeMapFragment;
   status = Loaders::loadBinaryFile(flatForwardVertex,
                                    "shaders/flat_forward_vert.spv");
   status = Loaders::loadBinaryFile(flatForwardFragment,
                                    "shaders/flat_forward_frag.spv");
   status = Loaders::loadBinaryFile(skyboxVertex, "shaders/skybox_vert.spv");
   status = Loaders::loadBinaryFile(skyboxFragment, "shaders/skybox_frag.spv");
+  status = Loaders::loadBinaryFile(skyboxCubeMapFragment,
+                                   "shaders/skybox_cubemap_frag.spv");
 
   return new RenderSystem(
       {checkerImage,
@@ -35,7 +34,10 @@ render_system::RenderSystem *Construct::newRenderSystem(int width, int height) {
        shader::StageCodeMap{
            {shader::ShaderStage::VERTEX_SHADER, skyboxVertex},
            {shader::ShaderStage::FRAGMENT_SHADER, skyboxFragment}},
+       shader::StageCodeMap{
+           {shader::ShaderStage::VERTEX_SHADER, skyboxVertex},
+           {shader::ShaderStage::FRAGMENT_SHADER, skyboxCubeMapFragment},
+       },
        width, height, width / (float)height});
-}
-
+} // namespace app
 } // namespace app

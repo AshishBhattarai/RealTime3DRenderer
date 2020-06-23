@@ -101,8 +101,11 @@ void FrameBuffer::createTextureBuffer(uint &buffer, u32 target,
   for (uint i = 0; i < size; ++i) {
     glTexImage2D(texTarget + i, 0, internalFormat, width, height, 0,
                  transferFormat, transferType, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, texAttachment, texTarget + i, buffer,
-                           0);
+    if (size == 1) {
+      // for cubemap we call this before rendering each face.(bindColorCubeMap).
+      glFramebufferTexture2D(GL_FRAMEBUFFER, texAttachment, texTarget + i,
+                             buffer, 0);
+    }
   }
   glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -176,9 +179,9 @@ void FrameBuffer::setDepthAttachment(AttachType type, u32 texTarget) {
   assert(!depthBuffer && "[WARN] - Depth attachment already exists.");
   assert(type != AttachType::NONE && "Attacty type cannot be NONE.");
   if (type == AttachType::RENDER_BUFFER) {
-    createRenderBuffer(depthBuffer, GL_DEPTH_COMPONENT, GL_DEPTH_ATTACHMENT);
+    createRenderBuffer(depthBuffer, GL_DEPTH_COMPONENT24, GL_DEPTH_ATTACHMENT);
   } else if (type == AttachType::TEXTURE_BUFFER) {
-    createTextureBuffer(depthBuffer, texTarget, GL_DEPTH_COMPONENT,
+    createTextureBuffer(depthBuffer, texTarget, GL_DEPTH_COMPONENT24,
                         GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
   }
   depthAttachType = type;
@@ -189,10 +192,11 @@ void FrameBuffer::setStencilAttachment(AttachType type, u32 texTarget) {
   assert(!stencilBuffer && "[WARN] - Stencil attachment already exists.");
   assert(type != AttachType::NONE && "Attacty type cannot be NONE.");
   if (type == AttachType::RENDER_BUFFER) {
-    createRenderBuffer(stencilBuffer, GL_STENCIL_INDEX, GL_STENCIL_ATTACHMENT);
+    createRenderBuffer(stencilBuffer, GL_STENCIL_INDEX8, GL_STENCIL_ATTACHMENT);
   } else if (type == AttachType::TEXTURE_BUFFER) {
-    createTextureBuffer(stencilBuffer, texTarget, GL_STENCIL_INDEX,
-                        GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, 0);
+    createTextureBuffer(stencilBuffer, texTarget, GL_STENCIL_INDEX8,
+                        GL_STENCIL_INDEX, GL_UNSIGNED_BYTE,
+                        GL_STENCIL_ATTACHMENT);
   }
   depthAttachType = type;
   bufferFlag |= GL_STENCIL_BUFFER_BIT;
@@ -203,16 +207,32 @@ void FrameBuffer::setDepthStencilAttachment(AttachType type, u32 texTarget) {
          "[WARN] - Depth or stencil attachment already exists.");
   assert(type != AttachType::NONE && "Attacty type cannot be NONE.");
   if (type == AttachType::RENDER_BUFFER) {
-    createRenderBuffer(depthBuffer, GL_DEPTH32F_STENCIL8,
+    createRenderBuffer(depthBuffer, GL_DEPTH24_STENCIL8,
                        GL_DEPTH_STENCIL_ATTACHMENT);
   } else if (type == AttachType::TEXTURE_BUFFER) {
     createTextureBuffer(depthBuffer, texTarget, GL_DEPTH24_STENCIL8,
-                        GL_DEPTH32F_STENCIL8, GL_UNSIGNED_INT_24_8,
+                        GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8,
                         GL_DEPTH_STENCIL_ATTACHMENT);
   }
   depthAttachType = type;
   bufferFlag |= GL_DEPTH_BUFFER_BIT;
   bufferFlag |= GL_STENCIL_BUFFER_BIT;
+}
+
+void FrameBuffer::bindColorCubeMap(u32 texTarget, uint index) {
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index,
+                         texTarget, colorBuffers[index], 0);
+}
+
+uint FrameBuffer::releaseColorAttachment(uint index) {
+  if (colorAttachTypes[index] != AttachType::TEXTURE_BUFFER)
+    return 0;
+  GLuint textureId = colorBuffers[index];
+  colorBuffers[index] = 0;
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index,
+                         GL_TEXTURE_2D, 0, 0);
+  validColorBuffers.erase(validColorBuffers.find(index));
+  return textureId;
 }
 
 Buffer FrameBuffer::readPixels(int &nrChannels, int &width, int &height,

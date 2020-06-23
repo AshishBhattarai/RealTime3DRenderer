@@ -1,20 +1,30 @@
 #pragma once
 
-#define FORWARD_VERTEX_SHADER
-#define FORWARD_FRAGMENT_SHADER
+#define FRAGMENT_SHADER
+#define VERTEX_SHADER
 #include "glsl/config.h"
 #include "types.h"
 
 namespace render_system {
 namespace shader {
-// attribute locations
 namespace vertex {
 constexpr uint generalUBOBinding = 0;
+// attribute locations
 namespace attribute {
 constexpr int POSITION_LOC = VERT_A_POSITION_LOC;
 constexpr int NORMAL_LOC = VERT_A_NORMAL_LOC;
 constexpr int TEXCOORD0_LOC = VERT_A_TEXTCOORD0_LOC;
 } // namespace attribute
+} // namespace vertex
+namespace fragment {}
+
+#undef GLSL_CONFIG_H
+#define FORWARD_VERTEX_SHADER
+#define FORWARD_FRAGMENT_SHADER
+#include "glsl/config.h"
+// forward shader
+namespace forward {
+namespace vertex {
 namespace uniform {
 constexpr int GENERAL_UB_LOC = VERT_UB_GENERAL_LOC;
 constexpr int TRANSFORMATION_LOC = VERT_U_TRANSFORMATION_LOC;
@@ -39,6 +49,7 @@ constexpr uint RADIUS = 2;
 constexpr uint INTENSITY = 3;
 } // namespace PointLight
 } // namespace fragment
+} // namespace forward
 #undef FORWARD_VERTEX_SHADER
 #undef FORWARD_FRAGMENT_SHADER
 
@@ -57,6 +68,24 @@ constexpr int TEXTURE_LOC = FRAG_U_TEXTURE_LOC;
 } // namespace skybox
 #undef SKYBOX_VERTEX_SHADER
 #undef SKYBOX_FRAGMENT_SHADER
+
+#define VISUAL_PREP_VERTEX_SHADER
+#define VISUAL_PREP_FRAGMENT_SHADER
+#undef GLSL_CONFIG_H
+#include "glsl/config.h"
+namespace visualprep {
+namespace vertex {}
+namespace fragment {
+constexpr int EXPOSURE_LOC = FRAG_U_EXPOSURE_LOC;
+constexpr int GAMMA_LOC = FRAG_U_GAMMA_LOC;
+constexpr int TEXTURE_LOC = FRAG_U_FRAME_TEXTURE_LOC;
+} // namespace fragment
+} // namespace visualprep
+#undef VISUAL_PREP_VERTEX_SHADER
+#undef VISUAL_PREP_FRAGMENT_SHADER
 } // namespace shader
 enum class ShaderType { FORWARD_SHADER, FLAT_FORWARD_SHADER };
 } // namespace render_system
+
+#undef FRAGMENT_SHADER
+#undef VERTEX_SHADER

@@ -22,6 +22,7 @@ struct RenderSystemConfig {
   const Image &checkerImage; // can be removed after RenderSystem construction
   const shader::StageCodeMap &flatForwardShader;
   const shader::StageCodeMap &skyboxShader;
+  const shader::StageCodeMap &skyboxCubeMapShader;
   int width;
   int height;
   float ar;

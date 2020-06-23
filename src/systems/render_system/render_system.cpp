@@ -41,7 +41,8 @@ void RenderSystem::initSubSystems() {
 RenderSystem::RenderSystem(const RenderSystemConfig &config)
     : renderer(config.width, config.height, meshes, materials,
                &RenderDefaults::getInstance(&config.checkerImage).getCamera(),
-               config.flatForwardShader, config.skyboxShader),
+               config.flatForwardShader, config.skyboxShader,
+               config.skyboxCubeMapShader),
       sceneLoader(), coordinator(ecs::Coordinator::getInstance()),
       skybox(nullptr) {
   updateProjectionMatrix(config.ar);
@@ -97,19 +98,20 @@ RenderSystem::registerGltfScene(tinygltf::Model &modelData) {
 }
 
 bool RenderSystem::setSkyBox(Image *image) {
-  skybox = std::make_unique<Texture>(
-      *image, toUnderlying(TextureFlags::DISABLE_MIPMAP));
+  auto equiTex = Texture(*image, toUnderlying(TextureFlags::DISABLE_MIPMAP));
+  skybox = std::make_unique<Texture>(renderer.equiTriangularToCubeMap(equiTex));
   return skybox->getId() != 0;
 }
 
 std::shared_ptr<Image> RenderSystem::update(float dt) {
   // load preRender data
   renderer.preRender();
+  //  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // load lights
   uint i = 0;
   for (EntityId entity : lightingSystem->getEntites()) {
-    if (i == shader::fragment::PointLight::MAX)
+    if (i == shader::forward::fragment::PointLight::MAX)
       break;
     const auto &transfrom =
         coordinator.getComponent<component::Transform>(entity);

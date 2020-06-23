@@ -3,13 +3,9 @@
 
 // configuration file for vertex shaders
 #ifdef FORWARD_VERTEX_SHADER
-// attribute locations
-#define VERT_A_POSITION_LOC 0
-#define VERT_A_NORMAL_LOC 1
-#define VERT_A_TEXTCOORD0_LOC 2
+#define VERTEX_SHADER
 // uniform locations
 #define VERT_U_TRANSFORMATION_LOC 0
-// uniform buffer block indices
 #endif
 
 /**
@@ -22,7 +18,7 @@
 #endif
 
 #ifdef FORWARD_FRAGMENT_SHADER
-#define COLOR_ATTACHMENT0 0
+#define FRAGMENT_SHADER
 #define FRAG_U_MATERIAL_ALBEDO_LOC 10
 #define FRAG_U_MATERIAL_METALLIC_LOC 11
 #define FRAG_U_MATERIAL_ROUGHNESS_LOC 12
@@ -49,15 +45,11 @@
 #endif
 
 #ifdef SKYBOX_VERTEX_SHADER
-// attribute locations
-#define VERT_A_POSITION_LOC 0
-// uniform locations
-#define VERT_U_PROJECTION_LOC 0
-#define VERT_U_VIEW_LOC 1
+#define VERTEX_SHADER
 #endif
 
 #ifdef SKYBOX_FRAGMENT_SHADER
-#define COLOR_ATTACHMENT0 0
+#define FRAGMENT_SHADER
 #define FRAG_U_TEXTURE_LOC 0
 #endif
 
@@ -65,8 +57,32 @@
 #define VERT_V_DIRECTION_LOC 1
 #endif
 
-#if defined(FORWARD_VERTEX_SHADER) || defined(SKYBOX_VERTEX_SHADER)
+#ifdef VISUAL_PREP_VERTEX_SHADER
+#define VERTEX_SHADER
+#endif
+
+#ifdef VISUAL_PREP_FRAGMENT_SHADER
+#define FRAGMENT_SHADER
+#define FRAG_U_EXPOSURE_LOC 0
+#define FRAG_U_GAMMA_LOC 1
+#define FRAG_U_FRAME_TEXTURE_LOC 5
+#endif
+
+#if defined(VISUAL_PREP_VERTEX_SHADER) || defined(VISUAL_PREP_FRAGMENT_SHADER)
+#define VERT_V_TEX_COORDS_LOC 10
+#endif
+
+#ifdef VERTEX_SHADER
+// attribute locations
+#define VERT_A_POSITION_LOC 0
+#define VERT_A_NORMAL_LOC 1
+#define VERT_A_TEXTCOORD0_LOC 2
+// uniform block
 #define VERT_UB_GENERAL_LOC 0
+#endif
+
+#ifdef FRAGMENT_SHADER
+#define COLOR_ATTACHMENT0 0
 #endif
 
 #endif

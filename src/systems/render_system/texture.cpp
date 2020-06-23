@@ -26,8 +26,19 @@ Texture::Texture(const std::array<const Image *, 6> images, short flags)
   loadTexture(std::vector(images.begin(), images.end()), flags);
 }
 
+Texture::Texture(Texture &&texture) : id(texture.id), target(texture.target) {
+  texture.id = 0;
+}
+
+Texture &Texture::operator=(Texture &&texture) {
+  this->id = texture.id;
+  this->target = texture.target;
+  texture.id = 0;
+  return *this;
+}
+
 Texture::~Texture() {
-  if (!isDefault) {
+  if (!isDefault && id) {
     glBindTexture(target, 0);
     glDeleteTextures(1, &id);
   }

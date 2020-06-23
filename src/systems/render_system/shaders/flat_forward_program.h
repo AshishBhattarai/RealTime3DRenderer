@@ -13,36 +13,39 @@ public:
   FlatForwardProgram(const StageCodeMap &codeMap);
 
   void loadTransformMatrix(const glm::mat4 &matrix) {
-    glUniformMatrix4fv(vertex::uniform::TRANSFORMATION_LOC, 1, GL_FALSE,
-                       glm::value_ptr(matrix));
+    glUniformMatrix4fv(forward::vertex::uniform::TRANSFORMATION_LOC, 1,
+                       GL_FALSE, glm::value_ptr(matrix));
   }
 
   void loadPointLight(const PointLight &pointLight, uint idx) {
-    assert(idx < fragment::PointLight::MAX && "Invalid point light index");
-    glUniform3fv(fragment::uniform::POINT_LIGHT_LOC[idx] +
-                     fragment::PointLight::POSITION,
+    assert(idx < forward::fragment::PointLight::MAX &&
+           "Invalid point light index");
+    glUniform3fv(forward::fragment::uniform::POINT_LIGHT_LOC[idx] +
+                     forward::fragment::PointLight::POSITION,
                  1, glm::value_ptr(*pointLight.position));
-    glUniform3fv(fragment::uniform::POINT_LIGHT_LOC[idx] +
-                     fragment::PointLight::COLOR,
+    glUniform3fv(forward::fragment::uniform::POINT_LIGHT_LOC[idx] +
+                     forward::fragment::PointLight::COLOR,
                  1, glm::value_ptr(*pointLight.color));
-    glUniform1f(fragment::uniform::POINT_LIGHT_LOC[idx] +
-                    fragment::PointLight::RADIUS,
+    glUniform1f(forward::fragment::uniform::POINT_LIGHT_LOC[idx] +
+                    forward::fragment::PointLight::RADIUS,
                 *pointLight.radius);
-    glUniform1f(fragment::uniform::POINT_LIGHT_LOC[idx] +
-                    fragment::PointLight::INTENSITY,
+    glUniform1f(forward::fragment::uniform::POINT_LIGHT_LOC[idx] +
+                    forward::fragment::PointLight::INTENSITY,
                 *pointLight.intensity);
   }
 
   void loadPointLightSize(int size) {
-    glUniform1i(fragment::uniform::POINT_LIGHT_SIZE_LOC, size);
+    glUniform1i(forward::fragment::uniform::POINT_LIGHT_SIZE_LOC, size);
   }
 
   void loadMaterial(const FlatMaterial &material) {
-    glUniform3fv(fragment::uniform::PBR_ALBEDO_LOC, 1,
+    glUniform3fv(forward::fragment::uniform::PBR_ALBEDO_LOC, 1,
                  glm::value_ptr(material.albedo));
-    glUniform1f(fragment::uniform::PBR_METALLIC_LOC, material.metallic);
-    glUniform1f(fragment::uniform::PBR_ROUGHNESS_LOC, material.roughtness);
-    glUniform1f(fragment::uniform::PBR_AO_LOC, material.ao);
+    glUniform1f(forward::fragment::uniform::PBR_METALLIC_LOC,
+                material.metallic);
+    glUniform1f(forward::fragment::uniform::PBR_ROUGHNESS_LOC,
+                material.roughtness);
+    glUniform1f(forward::fragment::uniform::PBR_AO_LOC, material.ao);
   }
 };
 } // namespace render_system::shader

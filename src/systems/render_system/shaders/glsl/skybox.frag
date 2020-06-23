@@ -16,18 +16,14 @@ layout(location = FRAG_U_TEXTURE_LOC) uniform sampler2D equirectangularMap;
 
 void main(void)
 {
+   vec3 v = normalize(texDir);
 #ifdef CUBEMAP_SKYBOX
-    fragColor = texture(cubeMap, texDir);
+   fragColor = vec4(texture(cubeMap, v).xyz, 1.0f);
 #else
    // dir to sphere uv
-   vec3 v = normalize(texDir);
    vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
    uv *= vec2(0.159155f, 0.31830989f);
    uv += 0.5;
-   vec3 color = texture(equirectangularMap, uv).xyz;
-   // apply tonemapping and gamma correction
-   color = vec3(1.0) - exp(-color * 0.5); // 0.5 exposure
-   color = pow(color, vec3(1.0f / 2.2f));
-   fragColor = vec4(color, 1.0f);
+   fragColor = vec4(texture(equirectangularMap, uv).xyz, 1.0f);
 #endif
 }

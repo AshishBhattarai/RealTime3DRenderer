@@ -60,6 +60,23 @@ public:
   void setStencilAttachment(AttachType type, u32 texTarget = 0x0DE1);
   void setDepthStencilAttachment(AttachType type, u32 texTarget = 0x0DE1);
 
+  /**
+   * @brief bindColorCubeMap - This for rendering color buffer into a cubemaop
+   * face. This method calls glFramebufferTexture2D with given textureTarget
+   * @param texTarget
+   * @param index
+   */
+  void bindColorCubeMap(u32 texTarget, uint index = 0);
+
+  /**
+   * @brief releaseColorAttachment - This method releases the ownership of color
+   * attachment texture
+   * @param index
+   * @return returns 0 if the color attachment is not texture attachment or
+   * invalid index.
+   */
+  uint releaseColorAttachment(uint index = 0);
+
   // utitly
   bool isComplete() const;
   void use(UseType type = UseType::NORMAL) const;

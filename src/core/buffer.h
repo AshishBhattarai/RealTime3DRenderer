@@ -8,7 +8,7 @@
  *
  * Represents data buffer. Can be use to store content of binary files.
  */
-class Buffer {
+class Buffer : NonCopyable {
 private:
   uchar *buf;
   size_t size;

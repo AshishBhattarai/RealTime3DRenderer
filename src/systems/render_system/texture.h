@@ -39,20 +39,31 @@ private:
 
 public:
   /**
-   * @brief Texture construts a texture object in GPU.
+   * @brief Texture construts a 2D texture object in GPU.
    * @param image source image.
    * @param flags additional image properties.
    */
   Texture(const Image &image, short flags = toUnderlying(TextureFlags::NONE));
 
+  /**
+   * @brief Texture construts a cubemap texture object in GPU.
+   * @param images array of cubemap source iamges.
+   * @param flags additional image properties.
+   */
   Texture(const std::array<const Image *, 6> images, short flags);
 
+  Texture(GLuint id, GLenum target) : id(id), target(target) {}
   /**
-   * If isDefault is true texture isn't deleted on destructor
-   *
-   * TODO: Remove this and move to duplicate default.
-   **/
-  Texture(GLuint id, bool isDefault = false) : id(id), isDefault(isDefault) {}
+   * @brief Texture move constructor.
+   */
+  Texture(Texture &&texture);
+
+  /**
+   * @brief operator = Texture move assignment
+   * @return reference to new texture object.
+   */
+  Texture &operator=(Texture &&);
+
   ~Texture();
 
   /**

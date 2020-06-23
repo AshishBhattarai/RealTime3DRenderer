@@ -19,7 +19,7 @@ public:
   static EventFamily getFamily() { return family; }
 
 private:
-  static EventFamily family;
+  static EventFamily family; // EventFamily is int
   friend class EventManager;
 
   static EventFamily genFamily() {

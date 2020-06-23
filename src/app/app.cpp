@@ -100,7 +100,8 @@ App::App(int, char **)
       glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(10.0f, 10.0f, 10.0f),
       glm::vec3(-10.0f, -10.0f, 10.0f), glm::vec3(10.0f, -10.0f, 10.0f)};
 
-  for (uint i = 0; i < render_system::shader::fragment::PointLight::MAX; ++i) {
+  for (uint i = 0;
+       i < render_system::shader::forward::fragment::PointLight::MAX; ++i) {
     glm::vec3 lightPosition = lightPositions[i];
     lightPosition += glm::vec3(sin(display.getTime() * 5.0) * 5.0, 0.0, 0.0);
     world_system::WorldObject &testLight =

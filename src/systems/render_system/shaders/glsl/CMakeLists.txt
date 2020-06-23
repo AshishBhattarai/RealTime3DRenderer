@@ -15,8 +15,9 @@ add_spirv_shader(flat_forward.vert flat_forward_vert.spv "")
 add_spirv_shader(flat_forward.frag flat_forward_frag.spv "")
 add_spirv_shader(skybox.vert skybox_vert.spv "")
 add_spirv_shader(skybox.frag skybox_frag.spv "")
-add_spirv_shader(skybox.vert skybox_cubemap_vert.spv "-DCUBEMAP_SKYBOX")
 add_spirv_shader(skybox.frag skybox_cubemap_frag.spv "-DCUBEMAP_SKYBOX")
+add_spirv_shader(visualprep.vert visualprep_vert.spv "")
+add_spirv_shader(visualprep.frag visualprep_frag.spv "")
 
 ###
 # Command created by add_custom_command() is not being run when you type make.
@@ -28,6 +29,7 @@ add_custom_target(glsl-code ALL DEPENDS
     ${SHADER_OUTPUT_DIR}/flat_forward_frag.spv
     ${SHADER_OUTPUT_DIR}/skybox_vert.spv
     ${SHADER_OUTPUT_DIR}/skybox_frag.spv
-    ${SHADER_OUTPUT_DIR}/skybox_cubemap_vert.spv
     ${SHADER_OUTPUT_DIR}/skybox_cubemap_frag.spv
+    ${SHADER_OUTPUT_DIR}/visualprep_vert.spv
+    ${SHADER_OUTPUT_DIR}/visualprep_frag.spv
 )

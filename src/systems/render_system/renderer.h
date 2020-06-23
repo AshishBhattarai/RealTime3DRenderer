@@ -34,6 +34,7 @@ private:
   shader::GeneralVSUBO generalVSUBO;
   shader::FlatForwardProgram flatForwardShader;
   shader::SkyboxShader skyboxShader;
+  shader::SkyboxShader skyboxCubeMapShader;
   const GLuint cube;
 
 public:
@@ -42,7 +43,8 @@ public:
            const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>>
                &materials,
            const Camera *camera, const shader::StageCodeMap &flatForwardShader,
-           const shader::StageCodeMap &skyboxShader);
+           const shader::StageCodeMap &skyboxShader,
+           const shader::StageCodeMap &skyboxCubeMapShader);
 
   void loadPointLight(const PointLight &pointLight, uint idx);
   void loadPointLightCount(size_t count);
@@ -50,6 +52,7 @@ public:
   void render(float dt, const glm::mat4 &transform, const MeshId &meshId,
               std::map<PrimitiveId, MaterialId> primIdToMatId);
   void renderSkybox(const Texture &texture);
+  Texture equiTriangularToCubeMap(const Texture &equiTriangular);
 
   void blitToWindow();
   std::shared_ptr<Image> readPixels();

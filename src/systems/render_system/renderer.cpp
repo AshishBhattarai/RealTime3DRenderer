@@ -15,10 +15,12 @@ Renderer::Renderer(
     const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>>
         &materials,
     const Camera *camera, const shader::StageCodeMap &flatForwardShader,
-    const shader::StageCodeMap &skyboxShader)
+    const shader::StageCodeMap &skyboxShader,
+    const shader::StageCodeMap &skyboxCubeMapShader)
     : frameBuffer(width, height), meshes(meshes), materials(materials),
       projectionMatrix(1.0f), camera(camera), generalVSUBO(),
       flatForwardShader(flatForwardShader), skyboxShader(skyboxShader),
+      skyboxCubeMapShader(skyboxCubeMapShader),
       cube(RenderDefaults::getInstance().getCubeVao()) {
 
   // Setup framebuffer
@@ -71,12 +73,69 @@ void Renderer::render(float, const glm::mat4 &transform, const MeshId &meshId,
 void Renderer::renderSkybox(const Texture &texture) {
   // render skybox
   glDepthFunc(GL_LEQUAL);
-  skyboxShader.bind();
   glActiveTexture(GL_TEXTURE0 + skyboxShader.textureUnit);
-  skyboxShader.bindTexture(texture);
+  if (texture.getTarget() == GL_TEXTURE_CUBE_MAP) {
+    skyboxCubeMapShader.bind();
+    skyboxCubeMapShader.bindTexture(texture);
+  } else {
+    skyboxShader.bind();
+    skyboxShader.bindTexture(texture);
+  }
   glBindVertexArray(cube);
   glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
   glDepthFunc(GL_LESS);
+}
+
+Texture Renderer::equiTriangularToCubeMap(const Texture &equiTriangular) {
+  // setup data
+  /**
+   * you can aslo do this by rotation camera for each face too.
+   * Note: All the caputreViews are upside down, to create upside down cubemap.
+   */
+  glm::mat4 caputureViews[] = {
+      glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f),
+                  glm::vec3(0.0f, -1.0f, 0.0f)), // +X
+      glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f),
+                  glm::vec3(0.0f, -1.0f, 0.0f)), // -X
+      glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f),
+                  glm::vec3(0.0f, 0.0f, 1.0f)), // +Y
+      glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f),
+                  glm::vec3(0.0f, 0.0f, -1.0f)), // -Y
+      glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
+                  glm::vec3(0.0f, -1.0f, 0.0f)), // +Z
+      glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
+                  glm::vec3(0.0f, -1.0f, 0.0f))}; // -Z
+  glm::mat4 projection =
+      glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f); // cube ar 1:1
+
+  FrameBuffer frambuffer(512, 512);
+  frambuffer.use();
+  frambuffer.setColorAttachmentTB(GL_TEXTURE_CUBE_MAP, GL_RGB16F, GL_RGB,
+                                  GL_FLOAT);
+  frambuffer.setDepthAttachment(FrameBuffer::AttachType::RENDER_BUFFER);
+  // save state
+  GLint viewport[] = {0, 0, 0, 0};
+  glGetIntegerv(GL_VIEWPORT, viewport);
+  // draw
+  frambuffer.loadViewPort(); // 512 x 512 cube
+  generalVSUBO.setProjectionMatrix(projection);
+  generalVSUBO.setCameraPos(glm::vec3(0.0f, 0.0f, 0.0f));
+  for (uint i = 0; i < 6; ++i) {
+    // bind texture i
+    generalVSUBO.setViewMatrix(caputureViews[i]);
+    frambuffer.bindColorCubeMap(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // render
+    renderSkybox(equiTriangular);
+  }
+  glBindVertexArray(0);
+  Texture texture(frambuffer.releaseColorAttachment(), GL_TEXTURE_CUBE_MAP);
+  shader::Program::unBind();
+  // reset state
+  frambuffer.useDefault();
+  generalVSUBO.setProjectionMatrix(projectionMatrix);
+  glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+  return texture;
 }
 
 void Renderer::blitToWindow() { frameBuffer.blit(nullptr, GL_BACK); }
