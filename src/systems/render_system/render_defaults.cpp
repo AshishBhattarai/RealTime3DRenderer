@@ -15,9 +15,15 @@ RenderDefaults::RenderDefaults(const Image *checkerImage)
   const uchar black[] = {255, 255, 255, 255};
   const uchar white[] = {0, 0, 0, 0};
 
-  this->checkerTexture = Texture(*checkerImage).release();
-  this->blackTexture = Texture(Image(Buffer(black, 4, 0), 1, 1, 4)).release();
-  this->whiteTexture = Texture(Image(Buffer(white, 4, 0), 1, 1, 4)).release();
+  this->checkerTexture =
+      Texture(*checkerImage, toUnderlying(TextureFlags::DISABLE_MIPMAP))
+          .release();
+  this->blackTexture = Texture(Image(Buffer(black, 4, 0), 1, 1, 4),
+                               toUnderlying(TextureFlags::DISABLE_MIPMAP))
+                           .release();
+  this->whiteTexture = Texture(Image(Buffer(white, 4, 0), 1, 1, 4),
+                               toUnderlying(TextureFlags::DISABLE_MIPMAP))
+                           .release();
 
   // load cube
   float cubeVertices[] = {
@@ -58,13 +64,36 @@ RenderDefaults::RenderDefaults(const Image *checkerImage)
                GL_STATIC_DRAW);
 
   // set vertex attrib pointers
-  glEnableVertexAttribArray(shader::skybox::vertex::POSITION_LOC);
-  glVertexAttribPointer(shader::skybox::vertex::POSITION_LOC, 3, GL_FLOAT,
+  glEnableVertexAttribArray(shader::vertex::attribute::POSITION_LOC);
+  glVertexAttribPointer(shader::vertex::attribute::POSITION_LOC, 3, GL_FLOAT,
                         GL_FALSE, 0, (void *)0);
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glDeleteBuffers(2, vbo);
+
+  // load plane
+  float planeVertices[] = {
+      -1.0f, 1.0f,  // Top Left
+      -1.0f, -1.0f, // Bottom Left
+      1.0f,  1.0f,  // Top Right
+      1.0f,  -1.0f  // bottom Right
+  };
+  GLuint planeVbo = 0;
+  glGenVertexArrays(1, &plane);
+  glGenBuffers(1, &planeVbo);
+
+  glBindVertexArray(plane);
+  glBindBuffer(GL_ARRAY_BUFFER, planeVbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices,
+               GL_STATIC_DRAW);
+  // set vertex attribe pointers
+  glEnableVertexAttribArray(shader::vertex::attribute::POSITION_LOC);
+  glVertexAttribPointer(shader::vertex::attribute::POSITION_LOC, 2, GL_FLOAT,
+                        GL_FALSE, 0, (void *)0);
+  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glDeleteBuffers(1, &planeVbo);
 } // namespace render_system
 
 RenderDefaults::~RenderDefaults() {

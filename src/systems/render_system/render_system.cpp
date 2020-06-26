@@ -43,9 +43,18 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
                &RenderDefaults::getInstance(&config.checkerImage).getCamera(),
                config.flatForwardShader, config.skyboxShader,
                config.skyboxCubeMapShader),
-      sceneLoader(), coordinator(ecs::Coordinator::getInstance()),
-      skybox(nullptr) {
+      postProcessor(config.visualPrepShader),
+      framebuffer(config.width, config.height), sceneLoader(),
+      coordinator(ecs::Coordinator::getInstance()), skybox(nullptr) {
+  /* update projection */
   updateProjectionMatrix(config.ar);
+  /* setup framebuffer */
+  framebuffer.use();
+  framebuffer.setColorAttachmentTB(GL_TEXTURE_2D, GL_RGB16F, GL_RGB,
+                                   GL_HALF_FLOAT);
+  framebuffer.setDepthAttachment(FrameBuffer::AttachType::RENDER_BUFFER);
+  assert(framebuffer.isComplete() && "Framebuffer not complete.");
+  framebuffer.useDefault();
   /* load default materials */
   auto &renderDefaults = RenderDefaults::getInstance();
   materials.emplace(DEFAULT_MATERIAL_ID,
@@ -105,8 +114,8 @@ bool RenderSystem::setSkyBox(Image *image) {
 
 std::shared_ptr<Image> RenderSystem::update(float dt) {
   // load preRender data
+  framebuffer.use();
   renderer.preRender();
-  //  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // load lights
   uint i = 0;
@@ -135,6 +144,11 @@ std::shared_ptr<Image> RenderSystem::update(float dt) {
     auto model = coordinator.getComponent<component::Model>(entity);
     renderer.render(dt, transform, model.meshId, model.primIdToMatId);
   }
+  framebuffer.useDefault();
+
+  // post process
+  postProcessor.applyVisualPrep(framebuffer);
+
   std::shared_ptr<Image> img = renderer.readPixels();
   // Don't blit before reading the pixels.
   //  renderer.blitToWindow();

@@ -103,9 +103,5 @@ void main() {
     }
     vec3 ambient = vec3(0.03f) * material.albedo * material.ao;
     vec3 color = ambient + Lo;
-
-    // gamma correction & tonemapping(Rienhard) (do this on another pass(post-processing) later
-    color = color / (color + vec3(1.0f));
-    color = pow(color, vec3(1.0f / 2.2f));
     fragColor = vec4(color, 1.0f);
 }

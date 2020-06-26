@@ -4,6 +4,7 @@
 #include "ecs/system_manager.h"
 #include "frame_buffer.h"
 #include "point_light.h"
+#include "post_processor.h"
 #include "renderer.h"
 #include "scene.h"
 
@@ -23,6 +24,7 @@ struct RenderSystemConfig {
   const shader::StageCodeMap &flatForwardShader;
   const shader::StageCodeMap &skyboxShader;
   const shader::StageCodeMap &skyboxCubeMapShader;
+  const shader::StageCodeMap &visualPrepShader;
   int width;
   int height;
   float ar;
@@ -51,6 +53,8 @@ private:
   static constexpr float DEFAULT_FAR = 1000.0f;
 
   Renderer renderer;
+  PostProcessor postProcessor;
+  FrameBuffer framebuffer;
   SceneLoader sceneLoader;
 
   std::unordered_map<MeshId, Mesh> meshes;

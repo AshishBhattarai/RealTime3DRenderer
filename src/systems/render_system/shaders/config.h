@@ -59,9 +59,7 @@ constexpr uint INTENSITY = 3;
 #include "glsl/config.h"
 // skybox shader
 namespace skybox {
-namespace vertex {
-constexpr int POSITION_LOC = VERT_A_POSITION_LOC;
-}
+namespace vertex {}
 namespace fragment {
 constexpr int TEXTURE_LOC = FRAG_U_TEXTURE_LOC;
 }

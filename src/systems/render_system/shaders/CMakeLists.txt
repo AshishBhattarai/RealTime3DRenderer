@@ -6,4 +6,5 @@ add_library(shaders-lib
     program.cpp
     flat_forward_program.cpp
     skybox_shader.cpp
+    visual_prep.cpp
 )
