@@ -6,6 +6,7 @@
 #include "shaders/general_vs_ubo.hpp"
 #include "shaders/skybox_shader.h"
 #include "types.h"
+#include <functional>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <string>
@@ -33,8 +34,10 @@ private:
 
   shader::GeneralVSUBO generalVSUBO;
   shader::FlatForwardProgram flatForwardShader;
+  // TODO: Rename SkyboxShader to CubeMap/EnvMap shader.
   shader::SkyboxShader skyboxShader;
   shader::SkyboxShader skyboxCubeMapShader;
+  shader::SkyboxShader iblConvolutionShader;
   const GLuint cube;
 
 public:
@@ -44,15 +47,25 @@ public:
                &materials,
            const Camera *camera, const shader::StageCodeMap &flatForwardShader,
            const shader::StageCodeMap &skyboxShader,
-           const shader::StageCodeMap &skyboxCubeMapShader);
+           const shader::StageCodeMap &skyboxCubeMapShader,
+           const shader::StageCodeMap &iblConvolutionShader);
 
   void loadPointLight(const PointLight &pointLight, uint idx);
   void loadPointLightCount(size_t count);
-  void preRender();
+  void preRender(const Texture &diffuseIbl);
   void render(float dt, const glm::mat4 &transform, const MeshId &meshId,
               std::map<PrimitiveId, MaterialId> primIdToMatId);
   void renderSkybox(const Texture &texture);
+
+  Texture renderToCubeMap(int width, int height,
+                          std::function<void()> drawCall);
   Texture equiTriangularToCubeMap(const Texture &equiTriangular);
+  /**
+   * @brief convoluteCubeMap for diffuse IBL
+   * @param cubeMap
+   * @return
+   */
+  Texture convoluteCubeMap(const Texture &cubeMap);
 
   void blitToWindow();
   std::shared_ptr<Image> readPixels();

@@ -72,6 +72,7 @@ public:
    */
   GLuint release();
   void bind() const { glBindTexture(target, id); }
+  void unBind() const { glBindTexture(target, 0); }
   GLuint getId() const { return id; }
   GLenum getTarget() const { return target; }
 }; // namespace Texture

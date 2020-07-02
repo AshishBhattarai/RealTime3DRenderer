@@ -25,6 +25,7 @@ struct RenderSystemConfig {
   const shader::StageCodeMap &skyboxShader;
   const shader::StageCodeMap &skyboxCubeMapShader;
   const shader::StageCodeMap &visualPrepShader;
+  const shader::StageCodeMap &iblConvolutionShader;
   int width;
   int height;
   float ar;
@@ -66,6 +67,7 @@ private:
   ecs::Coordinator &coordinator;
   LightingSystem *lightingSystem;
   std::unique_ptr<Texture> skybox;
+  std::unique_ptr<Texture> globalDiffuseIBL;
 
   void initSubSystems();
 
@@ -83,6 +85,11 @@ public:
   }
   // TODO: Delete mesh and set all existing entites to default mesh
   bool unregisterMesh(std::string_view name);
+  /**
+   * @brief setSkyBox, Also sets the image as globalDiffuseIBL
+   * @param image
+   * @return
+   */
   bool setSkyBox(Image *image);
   std::shared_ptr<Image> update(float dt);
 

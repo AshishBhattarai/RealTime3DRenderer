@@ -16,11 +16,13 @@ Renderer::Renderer(
         &materials,
     const Camera *camera, const shader::StageCodeMap &flatForwardShader,
     const shader::StageCodeMap &skyboxShader,
-    const shader::StageCodeMap &skyboxCubeMapShader)
+    const shader::StageCodeMap &skyboxCubeMapShader,
+    const shader::StageCodeMap &iblConvolutionShader)
     : frameBuffer(width, height), meshes(meshes), materials(materials),
       projectionMatrix(1.0f), camera(camera), generalVSUBO(),
       flatForwardShader(flatForwardShader), skyboxShader(skyboxShader),
       skyboxCubeMapShader(skyboxCubeMapShader),
+      iblConvolutionShader(iblConvolutionShader),
       cube(RenderDefaults::getInstance().getCubeVao()) {
 
   // Setup framebuffer
@@ -28,7 +30,7 @@ Renderer::Renderer(
   //  frameBuffer.setColorAttachmentRB(GL_RGB);
   //  frameBuffer.setDepthAttachment(FrameBuffer::AttachType::RENDER_BUFFER);
 
-  glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
 }
@@ -42,10 +44,15 @@ void Renderer::loadPointLightCount(size_t count) {
   flatForwardShader.loadPointLightSize(count);
 }
 
-void Renderer::preRender() {
+void Renderer::preRender(const Texture &diffuseIbl) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   generalVSUBO.setViewMatrix(camera->getViewMatrix());
   generalVSUBO.setCameraPos(camera->position);
+  flatForwardShader.bind();
+  diffuseIbl.unBind();
+  glActiveTexture(GL_TEXTURE0 + shader::Program::TEX_UNIT_DIFF_IBL);
+  diffuseIbl.bind();
+  glActiveTexture(GL_TEXTURE0);
 }
 
 void Renderer::render(float, const glm::mat4 &transform, const MeshId &meshId,
@@ -86,7 +93,8 @@ void Renderer::renderSkybox(const Texture &texture) {
   glDepthFunc(GL_LESS);
 }
 
-Texture Renderer::equiTriangularToCubeMap(const Texture &equiTriangular) {
+Texture Renderer::renderToCubeMap(int width, int height,
+                                  std::function<void()> drawCall) {
   // setup data
   /**
    * you can aslo do this by rotation camera for each face too.
@@ -108,7 +116,7 @@ Texture Renderer::equiTriangularToCubeMap(const Texture &equiTriangular) {
   glm::mat4 projection =
       glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f); // cube ar 1:1
 
-  FrameBuffer frambuffer(512, 512);
+  FrameBuffer frambuffer(width, height);
   frambuffer.use();
   frambuffer.setColorAttachmentTB(GL_TEXTURE_CUBE_MAP, GL_RGB16F, GL_RGB,
                                   GL_FLOAT);
@@ -126,7 +134,7 @@ Texture Renderer::equiTriangularToCubeMap(const Texture &equiTriangular) {
     frambuffer.bindColorCubeMap(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // render
-    renderSkybox(equiTriangular);
+    drawCall();
   }
   glBindVertexArray(0);
   Texture texture(frambuffer.releaseColorAttachment(), GL_TEXTURE_CUBE_MAP);
@@ -136,6 +144,26 @@ Texture Renderer::equiTriangularToCubeMap(const Texture &equiTriangular) {
   generalVSUBO.setProjectionMatrix(projectionMatrix);
   glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
   return texture;
+}
+
+Texture Renderer::equiTriangularToCubeMap(const Texture &equiTriangular) {
+  return renderToCubeMap(
+      512, 512,
+      std::bind(&Renderer::renderSkybox, this, std::cref(equiTriangular)));
+}
+
+Texture Renderer::convoluteCubeMap(const Texture &cubeMap) {
+  return renderToCubeMap(
+      32, 32, [&cubeMap, cube = cube, &shader = iblConvolutionShader] {
+        // render cubeMap
+        glDepthFunc(GL_LEQUAL);
+        glActiveTexture(GL_TEXTURE0 + shader::SkyboxShader::textureUnit);
+        shader.bind();
+        cubeMap.bind();
+        glBindVertexArray(cube);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        glDepthFunc(GL_LESS);
+      });
 }
 
 void Renderer::blitToWindow() { frameBuffer.blit(nullptr, GL_BACK); }

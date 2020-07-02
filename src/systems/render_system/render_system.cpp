@@ -42,7 +42,7 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
     : renderer(config.width, config.height, meshes, materials,
                &RenderDefaults::getInstance(&config.checkerImage).getCamera(),
                config.flatForwardShader, config.skyboxShader,
-               config.skyboxCubeMapShader),
+               config.skyboxCubeMapShader, config.iblConvolutionShader),
       postProcessor(config.visualPrepShader),
       framebuffer(config.width, config.height), sceneLoader(),
       coordinator(ecs::Coordinator::getInstance()), skybox(nullptr) {
@@ -109,13 +109,15 @@ RenderSystem::registerGltfScene(tinygltf::Model &modelData) {
 bool RenderSystem::setSkyBox(Image *image) {
   auto equiTex = Texture(*image, toUnderlying(TextureFlags::DISABLE_MIPMAP));
   skybox = std::make_unique<Texture>(renderer.equiTriangularToCubeMap(equiTex));
+  globalDiffuseIBL =
+      std::make_unique<Texture>(renderer.convoluteCubeMap(*skybox));
   return skybox->getId() != 0;
 }
 
 std::shared_ptr<Image> RenderSystem::update(float dt) {
   // load preRender data
   framebuffer.use();
-  renderer.preRender();
+  renderer.preRender(*globalDiffuseIBL);
 
   // load lights
   uint i = 0;

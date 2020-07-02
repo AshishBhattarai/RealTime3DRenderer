@@ -22,7 +22,7 @@ void main(void)
 #else
    // dir to sphere uv
    vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
-   uv *= vec2(0.159155f, 0.31830989f);
+   uv *= vec2(0.159155f, 0.318309f);
    uv += 0.5;
    fragColor = vec4(texture(equirectangularMap, uv).xyz, 1.0f);
 #endif

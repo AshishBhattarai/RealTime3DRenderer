@@ -31,6 +31,7 @@ struct PointLight {
 layout(location = FRAG_U_MATERIAL_ALBEDO_LOC) uniform Material material;
 layout(location = FRAG_U_POINT_LIGHT0_POS) uniform PointLight pointLights[MAX_POINT_LIGHTS];
 layout(location = FRAG_U_POINT_LIGHT_SIZE) uniform int pointLightSize;
+layout(location = FRAG_U_IRRADIANCE_MAP_LOC) uniform samplerCube irradianceMap;
 
 float invSqureAttenuation(float distance, float radius) {
     return pow(clamp(1.0f - pow((distance / radius), 4.0f), 0.0f, 1.0f), 2.0f)/(distance * distance + 1.0f);
@@ -40,6 +41,12 @@ float invSqureAttenuation(float distance, float radius) {
 vec3 fresnelSchlick(float VoH, vec3 F0) {
     return F0 + (1.0f - F0) * pow(1.0f - VoH, 5.0f);
 }
+
+// fresnelSchlick that takes roughness into account for indirect lighting using irradianceMap
+vec3 fresnelSchlickRoughness(float VoH, vec3 F0, float roughness) {
+    return F0 + (max(vec3(1.0f - roughness), F0) - F0) * pow(1.0f - VoH, 5.0f);
+}
+
 
 // NDF for microfactes oriented toward halfway
 float distributionGGX(float NoH, float roughness) {
@@ -71,7 +78,13 @@ void main() {
     vec3 F0 = vec3(0.04f);
     F0 = mix(F0, material.albedo, material.metallic);
 
-    // calculate total reflected irradiance using reflectance equation
+    /**
+     * Direct lighting
+     *
+     * calculate total reflected irradiance by current fragment using
+     * reflectance equation.
+     * Where the light sources are our point lights.
+     */
     vec3 Lo = vec3(0.0f);
     for(int i = 0; i < pointLightSize; ++i) {
         // fragment radiance per pixel
@@ -96,12 +109,24 @@ void main() {
         vec3 specular = num / max(denom, 0.001f); // to prevent denom from being zero
 
         vec3 kD = vec3(1.0f) - F; // F is specular ratio
-        kD *= 1.0f - material.metallic; // metallic material dont have diffuse
 
-        // add to total irradiance Lo
+        /**
+         * Metallic material dont have diffuse.
+         * Linear blend if partly metal (pure metals have no diffuse light).
+         */
+        kD *= 1.0f - material.metallic;
+
+        // add to total outgoing radiance Lo
         Lo += (kD * material.albedo / PI + specular) * radiance * NoL;
     }
-    vec3 ambient = vec3(0.03f) * material.albedo * material.ao;
+    // apply ambient light with irradianceMap (Indirect lighting)
+    vec3 kS = fresnelSchlickRoughness(clamp(dot(viewDir, normal), 0.0f, 1.0f), F0, material.roughness);
+    vec3 kD = 1.0f - kS;
+    kD *= 1.0f - material.metallic;
+    vec3 irradiance = texture(irradianceMap, normal).rgb;
+    vec3 diffuse = kD * (irradiance * material.albedo);
+    vec3 ambient = diffuse * material.ao;
     vec3 color = ambient + Lo;
+    // set fragColor
     fragColor = vec4(color, 1.0f);
 }

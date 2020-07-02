@@ -27,6 +27,10 @@ private:
   GLuint createShader(const Buffer &data, GLenum type);
 
 public:
+  constexpr static int TEX_UNIT_START = 4;
+  // 1 - reserved for diffuse ibl
+  constexpr static int TEX_UNIT_DIFF_IBL = 1;
+
   Program(const StageCodeMap &codeMap);
 
   void bind() { glUseProgram(program); }
