@@ -8,7 +8,7 @@
 namespace render_system {
 namespace shader {
 namespace vertex {
-constexpr uint generalUBOBinding = 0;
+constexpr uint generalUBOBinding = VERT_UB_GENERAL_LOC;
 // attribute locations
 namespace attribute {
 constexpr int POSITION_LOC = VERT_A_POSITION_LOC;
@@ -18,7 +18,10 @@ constexpr int TEXCOORD0_LOC = VERT_A_TEXTCOORD0_LOC;
 } // namespace vertex
 namespace fragment {}
 
+#undef FRAGMENT_SHADER
+#undef VERTEX_SHADER
 #undef GLSL_CONFIG_H
+
 #define FORWARD_VERTEX_SHADER
 #define FORWARD_FRAGMENT_SHADER
 #include "glsl/config.h"
@@ -62,7 +65,7 @@ constexpr uint INTENSITY = 3;
 namespace skybox {
 namespace vertex {}
 namespace fragment {
-constexpr int TEXTURE_LOC = FRAG_U_TEXTURE_LOC;
+constexpr int TEXTURE_LOC = FRAG_U_ENVMAP_LOC;
 }
 } // namespace skybox
 #undef SKYBOX_VERTEX_SHADER
@@ -82,9 +85,23 @@ constexpr int TEXTURE_LOC = FRAG_U_FRAME_TEXTURE_LOC;
 } // namespace visualprep
 #undef VISUAL_PREP_VERTEX_SHADER
 #undef VISUAL_PREP_FRAGMENT_SHADER
+#undef GLSL_CONFIG_H
+
+#define SKYBOX_VERTEX_SHADER
+#define IBL_SPECULAR_CONVOLUTION_FRAGMENT_SHADER
+#include "glsl/config.h"
+namespace iblSpecularConvolution {
+namespace vertex {}
+namespace fragment {
+constexpr int ENV_MAP_LOC = FRAG_U_ENVMAP_LOC;
+constexpr int ENV_MAP_BINDING = FRAG_U_ENVMAP_BINDING;
+constexpr int ROUGHNESS_LOC = FRAG_U_ROUGHNESS_LOC;
+} // namespace fragment
+} // namespace iblSpecularConvolution
+#undef SKYBOX_VERTEX_SHADER
+#undef IBL_SPECULAR_CONVOLUTION_FRAGMENT_SHADER
 } // namespace shader
 enum class ShaderType { FORWARD_SHADER, FLAT_FORWARD_SHADER };
 } // namespace render_system
-
 #undef FRAGMENT_SHADER
 #undef VERTEX_SHADER

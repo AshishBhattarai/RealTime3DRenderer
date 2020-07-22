@@ -19,7 +19,7 @@ add_spirv_shader(skybox.frag skybox_cubemap_frag.spv "-DCUBEMAP_SKYBOX")
 add_spirv_shader(visualprep.vert visualprep_vert.spv "")
 add_spirv_shader(visualprep.frag visualprep_frag.spv "")
 add_spirv_shader(ibl_diffuse_convolution.frag ibl_diffuse_convolution_frag.spv "")
-
+add_spirv_shader(ibl_specular_convolution.frag ibl_specular_convolution_frag.spv "")
 
 ###
 # Command created by add_custom_command() is not being run when you type make.
@@ -35,4 +35,5 @@ add_custom_target(glsl-code ALL DEPENDS
     ${SHADER_OUTPUT_DIR}/visualprep_vert.spv
     ${SHADER_OUTPUT_DIR}/visualprep_frag.spv
     ${SHADER_OUTPUT_DIR}/ibl_diffuse_convolution_frag.spv
+    ${SHADER_OUTPUT_DIR}/ibl_specular_convolution_frag.spv
 )

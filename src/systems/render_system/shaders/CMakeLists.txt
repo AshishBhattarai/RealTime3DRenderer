@@ -7,4 +7,5 @@ add_library(shaders-lib
     flat_forward_program.cpp
     skybox_shader.cpp
     visual_prep.cpp
+    ibl_specular_convolution.cpp
 )

@@ -88,7 +88,8 @@ void FrameBuffer::deleteAttachment(AttachType &type, uint *buffer, uint num) {
 
 void FrameBuffer::createTextureBuffer(uint &buffer, u32 target,
                                       u32 internalFormat, u32 transferFormat,
-                                      u32 transferType, u32 texAttachment) {
+                                      u32 transferType, u32 texAttachment,
+                                      bool enableMipMap) {
   glGenTextures(1, &buffer);
   glBindTexture(target, buffer);
   // Number for images in the buffer
@@ -107,10 +108,16 @@ void FrameBuffer::createTextureBuffer(uint &buffer, u32 target,
                              buffer, 0);
     }
   }
-  glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  if (enableMipMap) {
+    glGenerateMipmap(target);
+    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  } else {
+    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  }
   glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glGenerateMipmap(target);
   if (target == GL_TEXTURE_CUBE_MAP)
     glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 }
@@ -139,7 +146,7 @@ void FrameBuffer::setColorAttachment(AttachType type, u32 texTarget,
   } else if (type == AttachType::TEXTURE_BUFFER) {
     createTextureBuffer(colorBuffers[index], texTarget, internalFormat,
                         transferFormat, transferType,
-                        GL_COLOR_ATTACHMENT0 + index);
+                        GL_COLOR_ATTACHMENT0 + index, false);
   }
   colorAttachTypes[index] = type;
   bufferFlag |= GL_COLOR_BUFFER_BIT;
@@ -148,7 +155,7 @@ void FrameBuffer::setColorAttachment(AttachType type, u32 texTarget,
 
 void FrameBuffer::setColorAttachmentTB(u32 texTarget, u32 internalFormat,
                                        u32 transferFormat, u32 transferType,
-                                       uint index) {
+                                       bool enableMipMap, uint index) {
   assert(index < MAX_COLOR_ATTACHMENTS &&
          "Color attachment index out of range.");
   assert(!colorBuffers[index] && "[WARN] - Color attachment already exists.");
@@ -156,7 +163,7 @@ void FrameBuffer::setColorAttachmentTB(u32 texTarget, u32 internalFormat,
     return;
   createTextureBuffer(colorBuffers[index], texTarget, internalFormat,
                       transferFormat, transferType,
-                      GL_COLOR_ATTACHMENT0 + index);
+                      GL_COLOR_ATTACHMENT0 + index, enableMipMap);
   colorAttachTypes[index] = AttachType::TEXTURE_BUFFER;
   bufferFlag |= GL_COLOR_BUFFER_BIT;
   validColorBuffers.insert(index);
@@ -182,7 +189,8 @@ void FrameBuffer::setDepthAttachment(AttachType type, u32 texTarget) {
     createRenderBuffer(depthBuffer, GL_DEPTH_COMPONENT24, GL_DEPTH_ATTACHMENT);
   } else if (type == AttachType::TEXTURE_BUFFER) {
     createTextureBuffer(depthBuffer, texTarget, GL_DEPTH_COMPONENT24,
-                        GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
+                        GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT,
+                        false);
   }
   depthAttachType = type;
   bufferFlag |= GL_DEPTH_BUFFER_BIT;
@@ -196,7 +204,7 @@ void FrameBuffer::setStencilAttachment(AttachType type, u32 texTarget) {
   } else if (type == AttachType::TEXTURE_BUFFER) {
     createTextureBuffer(stencilBuffer, texTarget, GL_STENCIL_INDEX8,
                         GL_STENCIL_INDEX, GL_UNSIGNED_BYTE,
-                        GL_STENCIL_ATTACHMENT);
+                        GL_STENCIL_ATTACHMENT, false);
   }
   depthAttachType = type;
   bufferFlag |= GL_STENCIL_BUFFER_BIT;
@@ -212,16 +220,16 @@ void FrameBuffer::setDepthStencilAttachment(AttachType type, u32 texTarget) {
   } else if (type == AttachType::TEXTURE_BUFFER) {
     createTextureBuffer(depthBuffer, texTarget, GL_DEPTH24_STENCIL8,
                         GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8,
-                        GL_DEPTH_STENCIL_ATTACHMENT);
+                        GL_DEPTH_STENCIL_ATTACHMENT, false);
   }
   depthAttachType = type;
   bufferFlag |= GL_DEPTH_BUFFER_BIT;
   bufferFlag |= GL_STENCIL_BUFFER_BIT;
 }
 
-void FrameBuffer::bindColorCubeMap(u32 texTarget, uint index) {
+void FrameBuffer::bindColorCubeMap(u32 texTarget, uint mipLevel, uint index) {
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index,
-                         texTarget, colorBuffers[index], 0);
+                         texTarget, colorBuffers[index], mipLevel);
 }
 
 uint FrameBuffer::releaseColorAttachment(uint index) {

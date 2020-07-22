@@ -17,12 +17,14 @@ Renderer::Renderer(
     const Camera *camera, const shader::StageCodeMap &flatForwardShader,
     const shader::StageCodeMap &skyboxShader,
     const shader::StageCodeMap &skyboxCubeMapShader,
-    const shader::StageCodeMap &iblConvolutionShader)
+    const shader::StageCodeMap &iblConvolutionShader,
+    const shader::StageCodeMap &iblSpecularConvolutionShader)
     : frameBuffer(width, height), meshes(meshes), materials(materials),
       projectionMatrix(1.0f), camera(camera), generalVSUBO(),
       flatForwardShader(flatForwardShader), skyboxShader(skyboxShader),
       skyboxCubeMapShader(skyboxCubeMapShader),
       iblConvolutionShader(iblConvolutionShader),
+      iblSpecularConvolutionShader(iblSpecularConvolutionShader),
       cube(RenderDefaults::getInstance().getCubeVao()) {
 
   // Setup framebuffer
@@ -33,6 +35,7 @@ Renderer::Renderer(
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
+  glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 }
 
 void Renderer::loadPointLight(const PointLight &pointLight, uint idx) {
@@ -93,8 +96,8 @@ void Renderer::renderSkybox(const Texture &texture) {
   glDepthFunc(GL_LESS);
 }
 
-Texture Renderer::renderToCubeMap(int width, int height,
-                                  std::function<void()> drawCall) {
+Texture Renderer::renderToCubeMap(int width, int height, uint maxMipLevels,
+                                  std::function<void(uint mipLevel)> drawCall) {
   // setup data
   /**
    * you can aslo do this by rotation camera for each face too.
@@ -119,7 +122,7 @@ Texture Renderer::renderToCubeMap(int width, int height,
   FrameBuffer frambuffer(width, height);
   frambuffer.use();
   frambuffer.setColorAttachmentTB(GL_TEXTURE_CUBE_MAP, GL_RGB16F, GL_RGB,
-                                  GL_FLOAT);
+                                  GL_FLOAT, maxMipLevels > 1);
   frambuffer.setDepthAttachment(FrameBuffer::AttachType::RENDER_BUFFER);
   // save state
   GLint viewport[] = {0, 0, 0, 0};
@@ -128,13 +131,27 @@ Texture Renderer::renderToCubeMap(int width, int height,
   frambuffer.loadViewPort(); // 512 x 512 cube
   generalVSUBO.setProjectionMatrix(projection);
   generalVSUBO.setCameraPos(glm::vec3(0.0f, 0.0f, 0.0f));
-  for (uint i = 0; i < 6; ++i) {
-    // bind texture i
-    generalVSUBO.setViewMatrix(caputureViews[i]);
-    frambuffer.bindColorCubeMap(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // render
-    drawCall();
+  // TODO: find better way do do this mipMap thingy
+  // TODO: Make a separate class dedicated for generating & convoluting cubemap
+  for (uint mip = 0; mip < maxMipLevels; ++mip) {
+    // different mipmaplevel sizes
+    uint mipWidth = width * std::pow(0.5, mip);
+    uint mipHeight = height * std::pow(0.5, mip);
+    // TODO: Add support to update buffer attachments in FrameBuffer
+    if (mip != 0) {
+      glBindRenderbuffer(GL_RENDERBUFFER, frambuffer.getDepthAttachmentId());
+      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth,
+                            mipHeight);
+      glViewport(0, 0, mipWidth, mipHeight);
+    }
+    for (uint i = 0; i < 6; ++i) {
+      // bind texture i
+      generalVSUBO.setViewMatrix(caputureViews[i]);
+      frambuffer.bindColorCubeMap(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mip);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      // render
+      drawCall(mip);
+    }
   }
   glBindVertexArray(0);
   Texture texture(frambuffer.releaseColorAttachment(), GL_TEXTURE_CUBE_MAP);
@@ -148,22 +165,47 @@ Texture Renderer::renderToCubeMap(int width, int height,
 
 Texture Renderer::equiTriangularToCubeMap(const Texture &equiTriangular) {
   return renderToCubeMap(
-      512, 512,
+      512, 512, 1,
       std::bind(&Renderer::renderSkybox, this, std::cref(equiTriangular)));
 }
 
-Texture Renderer::convoluteCubeMap(const Texture &cubeMap) {
-  return renderToCubeMap(
-      32, 32, [&cubeMap, cube = cube, &shader = iblConvolutionShader] {
-        // render cubeMap
-        glDepthFunc(GL_LEQUAL);
-        glActiveTexture(GL_TEXTURE0 + shader::SkyboxShader::textureUnit);
-        shader.bind();
-        cubeMap.bind();
-        glBindVertexArray(cube);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-        glDepthFunc(GL_LESS);
-      });
+Texture Renderer::convoluteCubeMap(const Texture &cubeMap, bool diffuse) {
+  uint prevMipMapLevel = 1000u;
+  constexpr uint maxMipLevels = 5;
+  if (diffuse)
+    return renderToCubeMap(
+        32, 32, 1,
+        [&cubeMap, cube = cube, &shader = iblConvolutionShader](uint) {
+          // render cubeMap
+          glDepthFunc(GL_LEQUAL);
+          glActiveTexture(GL_TEXTURE0 + shader::SkyboxShader::textureUnit);
+          shader.bind();
+          cubeMap.bind();
+          glBindVertexArray(cube);
+          glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+          glDepthFunc(GL_LESS);
+        });
+  else
+    return renderToCubeMap(
+        128, 128, maxMipLevels,
+        [&cubeMap, cube = cube, &shader = iblSpecularConvolutionShader,
+         &prevMipMapLevel = prevMipMapLevel](uint mipLevel) {
+          shader.bind();
+          shader.envMap(cubeMap);
+          if (mipLevel != prevMipMapLevel) {
+            prevMipMapLevel = mipLevel;
+            /**
+             * 5 MipMap Levels
+             * 0 - 0/4, 0.25 - 1/4, 0.5 - 2/4, 0.75 - 3/4, 1 - 4/4
+             */
+            shader.roughness((float)mipLevel / (float)(maxMipLevels - 1));
+          }
+          // render cubeMap
+          glDepthFunc(GL_LEQUAL);
+          glBindVertexArray(cube);
+          glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+          glDepthFunc(GL_LESS);
+        });
 }
 
 void Renderer::blitToWindow() { frameBuffer.blit(nullptr, GL_BACK); }

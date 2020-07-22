@@ -9,7 +9,7 @@
 layout(location = COLOR_ATTACHMENT0) out vec4 fragColor;
 layout(location = VERT_V_DIRECTION_LOC) in vec3 texDir;
 
-layout(location = FRAG_U_TEXTURE_LOC) uniform samplerCube envMap;
+layout(location = FRAG_U_ENVMAP_LOC) uniform samplerCube envMap;
 
 void main(void) {
     vec3 normal = normalize(texDir);
@@ -27,6 +27,8 @@ void main(void) {
             vec3 sampleVec = cartesian.x * right + cartesian.y * up + cartesian.z * normal;
             // take sample (phi, theta), formula based on render equation
             irradiance += texture(envMap, sampleVec).rgb * cos(theta) * sin(theta);
+            // cost(theta) - lambert
+            // sin(theta) - solid angle
             ++nrSamples;
         }
     }

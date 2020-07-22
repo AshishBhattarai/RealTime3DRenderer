@@ -43,7 +43,7 @@ public:
    */
   void setColorAttachmentTB(u32 texTarget, u32 internalFormat,
                             u32 transferFormat, u32 transferType,
-                            uint index = 0);
+                            bool enableMipMap = false, uint index = 0);
 
   /**
    * @brief setColorAttachment - creates render buffer attachment
@@ -66,7 +66,7 @@ public:
    * @param texTarget
    * @param index
    */
-  void bindColorCubeMap(u32 texTarget, uint index = 0);
+  void bindColorCubeMap(u32 texTarget, uint mipLevel = 0, uint index = 0);
 
   /**
    * @brief releaseColorAttachment - This method releases the ownership of color
@@ -189,7 +189,7 @@ private:
   void deleteAttachment(AttachType &type, uint *buffer, uint num);
   void createTextureBuffer(uint &buffer, u32 target, u32 internalFormat,
                            u32 transferFormat, u32 transferType,
-                           u32 texAttachment);
+                           u32 texAttachment, bool enableMipMap);
   void createRenderBuffer(uint &buffer, u32 internalFormat, u32 texAttachment);
 };
 

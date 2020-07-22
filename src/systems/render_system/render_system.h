@@ -26,6 +26,8 @@ struct RenderSystemConfig {
   const shader::StageCodeMap &skyboxCubeMapShader;
   const shader::StageCodeMap &visualPrepShader;
   const shader::StageCodeMap &iblConvolutionShader;
+  const shader::StageCodeMap &iblSpecularConvolutionShader;
+
   int width;
   int height;
   float ar;
@@ -68,6 +70,7 @@ private:
   LightingSystem *lightingSystem;
   std::unique_ptr<Texture> skybox;
   std::unique_ptr<Texture> globalDiffuseIBL;
+  std::unique_ptr<Texture> globalSpecularIBL;
 
   void initSubSystems();
 
