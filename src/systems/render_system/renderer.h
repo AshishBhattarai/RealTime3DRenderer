@@ -61,6 +61,7 @@ public:
   void renderSkybox(const Texture &texture);
 
   Texture renderToCubeMap(int width, int height, uint maxMipLevels,
+                          bool genMipMap,
                           std::function<void(uint mipLevel)> drawCall);
   Texture equiTriangularToCubeMap(const Texture &equiTriangular);
   /**

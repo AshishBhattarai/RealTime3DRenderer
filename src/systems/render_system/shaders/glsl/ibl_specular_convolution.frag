@@ -63,6 +63,14 @@ vec3 importanceSampleGGX(vec2 Xi, vec3 N, float roughness) {
     return normalize(sampleVec);
 }
 
+float distrubutionGGX(float NoH, float roughness) {
+    float r = roughness * roughness;
+    float r2 = r * r;
+    float NoH2 = NoH * NoH;
+    float d = (NoH2 * (r2 - 1.0f) + 1.0f);
+    return r2 / (d * d * PI);
+}
+
 void main() {
    vec3 N = normalize(texDir);
    vec3 R = N;
@@ -78,7 +86,17 @@ void main() {
        // check if L affects this pixel
        float NdotL = max(dot(N, L), 0.0f);
        if (NdotL > 0.0f) {
-           prefilteredColor	+= texture(envMap, L).rgb * NdotL;
+           // reduce aliasing taking mipMap of envMap base on pdf
+           float NoH = max(dot(N, H), 0.0f);
+           float HoV = max(dot(H, V), 0.0f);
+           float D = distrubutionGGX(NoH, roughness);
+           float pdf = (D * NoH / (4.0 * HoV)) + 0.0001;
+           float resolution = textureSize(envMap, 0).x; // resolution of envMap per face
+           float saTexel = 2.0 * PI / (3.0 * resolution * resolution);
+           float saSample = 1.0 / (float(SAMPLE_COUNT) * pdf + 0.0001);
+           float mipLevel = roughness == 0.0 ? 0.0 : max(0.5 * log2(saSample / saTexel), 0.0f);
+
+           prefilteredColor	+= textureLod(envMap, L, mipLevel).rgb * NdotL;
            totalWeight += NdotL;
        }
    }

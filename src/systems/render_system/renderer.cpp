@@ -97,6 +97,7 @@ void Renderer::renderSkybox(const Texture &texture) {
 }
 
 Texture Renderer::renderToCubeMap(int width, int height, uint maxMipLevels,
+                                  bool genMipMap,
                                   std::function<void(uint mipLevel)> drawCall) {
   // setup data
   /**
@@ -122,7 +123,7 @@ Texture Renderer::renderToCubeMap(int width, int height, uint maxMipLevels,
   FrameBuffer frambuffer(width, height);
   frambuffer.use();
   frambuffer.setColorAttachmentTB(GL_TEXTURE_CUBE_MAP, GL_RGB16F, GL_RGB,
-                                  GL_FLOAT, maxMipLevels > 1);
+                                  GL_FLOAT, maxMipLevels > 1 || genMipMap);
   frambuffer.setDepthAttachment(FrameBuffer::AttachType::RENDER_BUFFER);
   // save state
   GLint viewport[] = {0, 0, 0, 0};
@@ -153,6 +154,10 @@ Texture Renderer::renderToCubeMap(int width, int height, uint maxMipLevels,
       drawCall(mip);
     }
   }
+  if (genMipMap) {
+    glBindTexture(GL_TEXTURE_CUBE_MAP, frambuffer.getColorAttachmentId());
+    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+  }
   glBindVertexArray(0);
   Texture texture(frambuffer.releaseColorAttachment(), GL_TEXTURE_CUBE_MAP);
   shader::Program::unBind();
@@ -165,7 +170,7 @@ Texture Renderer::renderToCubeMap(int width, int height, uint maxMipLevels,
 
 Texture Renderer::equiTriangularToCubeMap(const Texture &equiTriangular) {
   return renderToCubeMap(
-      512, 512, 1,
+      512, 512, 1, true,
       std::bind(&Renderer::renderSkybox, this, std::cref(equiTriangular)));
 }
 
@@ -174,7 +179,7 @@ Texture Renderer::convoluteCubeMap(const Texture &cubeMap, bool diffuse) {
   constexpr uint maxMipLevels = 5;
   if (diffuse)
     return renderToCubeMap(
-        32, 32, 1,
+        32, 32, 1, false,
         [&cubeMap, cube = cube, &shader = iblConvolutionShader](uint) {
           // render cubeMap
           glDepthFunc(GL_LEQUAL);
@@ -187,7 +192,7 @@ Texture Renderer::convoluteCubeMap(const Texture &cubeMap, bool diffuse) {
         });
   else
     return renderToCubeMap(
-        128, 128, maxMipLevels,
+        128, 128, maxMipLevels, false,
         [&cubeMap, cube = cube, &shader = iblSpecularConvolutionShader,
          &prevMipMapLevel = prevMipMapLevel](uint mipLevel) {
           shader.bind();
