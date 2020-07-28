@@ -192,6 +192,7 @@ class Display;
 class Input {
 public:
   struct KeyEvent {
+    // TODO: Convert these to enum
     int key, code, action, modifiers;
     double time;
 

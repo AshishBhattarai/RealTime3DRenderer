@@ -157,12 +157,13 @@ void App::run() {
 
 void App::runRenderLoop(std::string_view renderOutput) {
   display.showWindow();
-  FrameQueue frameQueue;
+  //  FrameQueue frameQueue;
   // create & start rtspClient
-  RtspClient rtspClient(display.getWidth(), display.getHeight(), frameQueue,
-                        renderOutput, true);
-  assert(rtspClient.start());
+  //  RtspClient rtspClient(display.getWidth(), display.getHeight(), frameQueue,
+  //                        renderOutput, true);
+  //  assert(rtspClient.start());
 
+  int envMap = 0;
   float ltf, lt, ct, dt = 0.0f;
   int frameCnt = 0;
   ltf = lt = ct = display.getTime(); // time in seconds
@@ -183,7 +184,7 @@ void App::runRenderLoop(std::string_view renderOutput) {
     processInput(dt);
     worldSystem->update(dt);
     auto img = renderSystem->update(dt);
-    frameQueue.pushBack(img);
+    //    frameQueue.pushBack(img);
     //    if (input.getKey(INPUT_KEY_H)) {
     //      // screenshot
     //      asio::post(threadPool, [image = img, time = display.getTime()]() {
@@ -193,6 +194,35 @@ void App::runRenderLoop(std::string_view renderOutput) {
     //            1000)).c_str());
     //      });
     //    }
+    input.addKeyCallback(INPUT_KEY_H, [&envMap, &renderSystem = renderSystem](
+                                          const Input::KeyEvent &keyEvent) {
+      // change env
+      if (keyEvent.action == INPUT_PRESS) {
+        Image skybox;
+        switch (envMap) {
+        case 0:
+          Loaders::loadImage(
+              skybox, "resources/skybox/HDR_111_Parking_Lot_2.hdr", true);
+          break;
+        case 1:
+          Loaders::loadImage(skybox, "resources/skybox/Factory_Catwalk_2k.hdr",
+                             true);
+          break;
+
+        case 2:
+          Loaders::loadImage(skybox, "resources/skybox/kloppenheim_02_2k.hdr",
+                             true);
+          break;
+
+        default:
+          Loaders::loadImage(
+              skybox, "resources/skybox/14-Hamarikyu_Bridge_B.hdr", true);
+          envMap = -1;
+        }
+        envMap++;
+        renderSystem->setSkyBox(&skybox);
+      }
+    });
     auto err = glGetError();
     if (err != GL_NO_ERROR)
       CSLOG("OpenGL ERROR:", err);
@@ -200,7 +230,7 @@ void App::runRenderLoop(std::string_view renderOutput) {
     input.update();
   }
   CSLOG("Closing renderer..");
-}
+} // namespace app
 
 App::~App() {
   DEBUG_SLOG("App destroyed.");

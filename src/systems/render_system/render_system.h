@@ -27,6 +27,7 @@ struct RenderSystemConfig {
   const shader::StageCodeMap &visualPrepShader;
   const shader::StageCodeMap &iblConvolutionShader;
   const shader::StageCodeMap &iblSpecularConvolutionShader;
+  const shader::StageCodeMap &iblBrdfIntegrationShader;
 
   int width;
   int height;

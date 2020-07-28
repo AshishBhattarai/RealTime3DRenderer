@@ -17,7 +17,8 @@ render_system::RenderSystem *Construct::newRenderSystem(int width, int height) {
       Loaders::loadImage(checkerImage, "resources/defaults/checker.bmp");
   Buffer flatForwardVertex, flatForwardFragment, skyboxVertex, skyboxFragment,
       skyboxCubeMapFragment, visualPrepVertex, visualPrepFragment,
-      iblConvolutionFragment, iblSpecularConvolutionFragment;
+      iblConvolutionFragment, iblSpecularConvolutionFragment,
+      iblBrdfIntegrationFragment;
   status = Loaders::loadBinaryFile(flatForwardVertex,
                                    "shaders/flat_forward_vert.spv");
   status = Loaders::loadBinaryFile(flatForwardFragment,
@@ -34,6 +35,8 @@ render_system::RenderSystem *Construct::newRenderSystem(int width, int height) {
                                    "shaders/ibl_diffuse_convolution_frag.spv");
   status = Loaders::loadBinaryFile(iblSpecularConvolutionFragment,
                                    "shaders/ibl_specular_convolution_frag.spv");
+  status = Loaders::loadBinaryFile(iblBrdfIntegrationFragment,
+                                   "shaders/ibl_brdf_integration_map.spv");
 
   return new RenderSystem(
       {checkerImage,
@@ -55,6 +58,9 @@ render_system::RenderSystem *Construct::newRenderSystem(int width, int height) {
        shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, skyboxVertex},
                             {shader::ShaderStage::FRAGMENT_SHADER,
                              iblSpecularConvolutionFragment}},
+       shader::StageCodeMap{
+           {shader::ShaderStage::VERTEX_SHADER, visualPrepVertex},
+           {shader::ShaderStage::FRAGMENT_SHADER, iblBrdfIntegrationFragment}},
        width, height, width / (float)height});
 } // namespace app
 } // namespace app

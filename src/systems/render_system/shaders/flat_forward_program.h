@@ -2,6 +2,7 @@
 
 #include "../mesh.h"
 #include "../point_light.h"
+#include "../texture.h"
 #include "config.h"
 #include "program.h"
 #include <glm/gtc/type_ptr.hpp>
@@ -47,5 +48,9 @@ public:
                 material.roughtness);
     glUniform1f(forward::fragment::uniform::PBR_AO_LOC, material.ao);
   }
+
+  void loadIrradianceMap(const Texture &tex);
+  void loadPrefilteredMap(const Texture &tex);
+  void loadBrdfIntegrationMap(const Texture &tex);
 };
 } // namespace render_system::shader

@@ -31,7 +31,10 @@ struct PointLight {
 layout(location = FRAG_U_MATERIAL_ALBEDO_LOC) uniform Material material;
 layout(location = FRAG_U_POINT_LIGHT0_POS) uniform PointLight pointLights[MAX_POINT_LIGHTS];
 layout(location = FRAG_U_POINT_LIGHT_SIZE) uniform int pointLightSize;
-layout(location = FRAG_U_IRRADIANCE_MAP_LOC) uniform samplerCube irradianceMap;
+
+layout(binding = FRAG_U_IRRADIANCE_MAP_BND) uniform samplerCube irradianceMap;
+layout(binding = FRAG_U_PREFILTERED_MAP_BND) uniform samplerCube prefilteredMap;
+layout(binding = FRAG_U_BRDF_INTEGRATION_MAP_BND) uniform sampler2D brdfIntegrationMap;
 
 float invSqureAttenuation(float distance, float radius) {
     return pow(clamp(1.0f - pow((distance / radius), 4.0f), 0.0f, 1.0f), 2.0f)/(distance * distance + 1.0f);
@@ -73,11 +76,13 @@ float geometrySmith(float NoV, float NoL, float roughness) {
 void main() {
     vec3 normal = normalize(fs_in.normal);
     vec3 viewDir = normalize(fs_in.camPos - fs_in.worldPos);
+    vec3 R = reflect(-viewDir, normal); // reflect viewDir on normal
 
     // calculate surface reflection at zero incidence
     vec3 F0 = vec3(0.04f);
     F0 = mix(F0, material.albedo, material.metallic);
 
+    float NoV = max(dot(normal, viewDir), 0.0f);
     /**
      * Direct lighting
      *
@@ -96,7 +101,6 @@ void main() {
         vec3 radiance = pointLights[i].color * pointLights[i].intensity * attenuation;
 
         // apply cook-torrance brdf (D*F*G)/(4(Wo.n)*(Wi*n)
-        float NoV = max(dot(normal, viewDir), 0.0f);
         float NoL = max(dot(normal, lightDir), 0.0f);
 
         float roughness = max(material.roughness, 0.05f);
@@ -119,13 +123,19 @@ void main() {
         // add to total outgoing radiance Lo
         Lo += (kD * material.albedo / PI + specular) * radiance * NoL;
     }
-    // apply ambient light with irradianceMap (Indirect lighting)
+    // apply ambient light with IBL (Indirect lighting)
     vec3 kS = fresnelSchlickRoughness(clamp(dot(viewDir, normal), 0.0f, 1.0f), F0, material.roughness);
     vec3 kD = 1.0f - kS;
     kD *= 1.0f - material.metallic;
     vec3 irradiance = texture(irradianceMap, normal).rgb;
     vec3 diffuse = kD * (irradiance * material.albedo);
-    vec3 ambient = diffuse * material.ao;
+
+    const float MAX_REFLECTION_LOD = 4.0f; // max mipLevel for prefilteredMap
+    vec3 prefilteredColor = textureLod(prefilteredMap, R, material.roughness * MAX_REFLECTION_LOD).rgb;
+    vec2 envBRDF = texture(brdfIntegrationMap, vec2(NoV, material.roughness)).rg;
+    vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
+
+    vec3 ambient = (diffuse + specular) * material.ao;
     vec3 color = ambient + Lo;
     // set fragColor
     fragColor = vec4(color, 1.0f);

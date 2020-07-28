@@ -117,7 +117,6 @@ void FrameBuffer::createTextureBuffer(uint &buffer, u32 target,
   glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glGenerateMipmap(target);
   if (target == GL_TEXTURE_CUBE_MAP)
     glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 }

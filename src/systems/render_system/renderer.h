@@ -40,7 +40,13 @@ private:
   shader::SkyboxShader skyboxCubeMapShader;
   shader::SkyboxShader iblConvolutionShader;
   shader::IBLSpecularConvolution iblSpecularConvolutionShader;
+  shader::Program iblBrdfIntegrationShader;
+
+  // shape vaos
   const GLuint cube;
+  const GLuint plane;
+
+  Texture brdfIntegrationMap;
 
 public:
   Renderer(int width, int height,
@@ -51,11 +57,12 @@ public:
            const shader::StageCodeMap &skyboxShader,
            const shader::StageCodeMap &skyboxCubeMapShader,
            const shader::StageCodeMap &iblConvolutionShader,
-           const shader::StageCodeMap &iblSpecularConvolutionShader);
+           const shader::StageCodeMap &iblSpecularConvolutionShader,
+           const shader::StageCodeMap &iblBrdfIntegrationShader);
 
   void loadPointLight(const PointLight &pointLight, uint idx);
   void loadPointLightCount(size_t count);
-  void preRender(const Texture &diffuseIbl);
+  void preRender(const Texture &diffuseIbl, const Texture &specularIbl);
   void render(float dt, const glm::mat4 &transform, const MeshId &meshId,
               std::map<PrimitiveId, MaterialId> primIdToMatId);
   void renderSkybox(const Texture &texture);
@@ -71,6 +78,12 @@ public:
    * @return
    */
   Texture convoluteCubeMap(const Texture &cubeMap, bool diffuse);
+
+  /**
+   * @brief generateBDRFIntegrationMap - Generates a brdf integration map.
+   * @return map in 2D texture
+   */
+  Texture generateBRDFIntegrationMap();
 
   void blitToWindow();
   std::shared_ptr<Image> readPixels();

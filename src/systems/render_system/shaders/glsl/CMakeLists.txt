@@ -20,6 +20,8 @@ add_spirv_shader(visualprep.vert visualprep_vert.spv "")
 add_spirv_shader(visualprep.frag visualprep_frag.spv "")
 add_spirv_shader(ibl_diffuse_convolution.frag ibl_diffuse_convolution_frag.spv "")
 add_spirv_shader(ibl_specular_convolution.frag ibl_specular_convolution_frag.spv "")
+add_spirv_shader(ibl_brdf_integration_map.frag ibl_brdf_integration_map.spv "")
+
 
 ###
 # Command created by add_custom_command() is not being run when you type make.
@@ -36,4 +38,5 @@ add_custom_target(glsl-code ALL DEPENDS
     ${SHADER_OUTPUT_DIR}/visualprep_frag.spv
     ${SHADER_OUTPUT_DIR}/ibl_diffuse_convolution_frag.spv
     ${SHADER_OUTPUT_DIR}/ibl_specular_convolution_frag.spv
+    ${SHADER_OUTPUT_DIR}/ibl_brdf_integration_map.spv
 )

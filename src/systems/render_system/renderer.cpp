@@ -7,6 +7,7 @@
 #include "renderable_entity.h"
 #include "shaders/general_vs_ubo.hpp"
 #include <glm/gtc/matrix_transform.hpp>
+#include <limits>
 
 namespace render_system {
 
@@ -18,14 +19,18 @@ Renderer::Renderer(
     const shader::StageCodeMap &skyboxShader,
     const shader::StageCodeMap &skyboxCubeMapShader,
     const shader::StageCodeMap &iblConvolutionShader,
-    const shader::StageCodeMap &iblSpecularConvolutionShader)
+    const shader::StageCodeMap &iblSpecularConvolutionShader,
+    const shader::StageCodeMap &iblBrdfIntegrationShader)
     : frameBuffer(width, height), meshes(meshes), materials(materials),
       projectionMatrix(1.0f), camera(camera), generalVSUBO(),
       flatForwardShader(flatForwardShader), skyboxShader(skyboxShader),
       skyboxCubeMapShader(skyboxCubeMapShader),
       iblConvolutionShader(iblConvolutionShader),
       iblSpecularConvolutionShader(iblSpecularConvolutionShader),
-      cube(RenderDefaults::getInstance().getCubeVao()) {
+      iblBrdfIntegrationShader(iblBrdfIntegrationShader),
+      cube(RenderDefaults::getInstance().getCubeVao()),
+      plane(RenderDefaults::getInstance().getPlaneVao()),
+      brdfIntegrationMap(generateBRDFIntegrationMap()) {
 
   // Setup framebuffer
   //  frameBuffer.use();
@@ -47,15 +52,15 @@ void Renderer::loadPointLightCount(size_t count) {
   flatForwardShader.loadPointLightSize(count);
 }
 
-void Renderer::preRender(const Texture &diffuseIbl) {
+void Renderer::preRender(const Texture &diffuseIbl,
+                         const Texture &specularIbl) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   generalVSUBO.setViewMatrix(camera->getViewMatrix());
   generalVSUBO.setCameraPos(camera->position);
   flatForwardShader.bind();
-  diffuseIbl.unBind();
-  glActiveTexture(GL_TEXTURE0 + shader::Program::TEX_UNIT_DIFF_IBL);
-  diffuseIbl.bind();
-  glActiveTexture(GL_TEXTURE0);
+  flatForwardShader.loadIrradianceMap(diffuseIbl);
+  flatForwardShader.loadBrdfIntegrationMap(brdfIntegrationMap);
+  flatForwardShader.loadPrefilteredMap(specularIbl);
 }
 
 void Renderer::render(float, const glm::mat4 &transform, const MeshId &meshId,
@@ -135,11 +140,12 @@ Texture Renderer::renderToCubeMap(int width, int height, uint maxMipLevels,
   // TODO: find better way do do this mipMap thingy
   // TODO: Make a separate class dedicated for generating & convoluting cubemap
   for (uint mip = 0; mip < maxMipLevels; ++mip) {
-    // different mipmaplevel sizes
-    uint mipWidth = width * std::pow(0.5, mip);
-    uint mipHeight = height * std::pow(0.5, mip);
     // TODO: Add support to update buffer attachments in FrameBuffer
     if (mip != 0) {
+      // different mipmaplevel sizes
+      uint mipWidth = width * std::pow(0.5, mip);
+      uint mipHeight = height * std::pow(0.5, mip);
+
       glBindRenderbuffer(GL_RENDERBUFFER, frambuffer.getDepthAttachmentId());
       glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth,
                             mipHeight);
@@ -175,7 +181,7 @@ Texture Renderer::equiTriangularToCubeMap(const Texture &equiTriangular) {
 }
 
 Texture Renderer::convoluteCubeMap(const Texture &cubeMap, bool diffuse) {
-  uint prevMipMapLevel = 1000u;
+  uint prevMipLevel = std::numeric_limits<uint>::max();
   constexpr uint maxMipLevels = 5;
   if (diffuse)
     return renderToCubeMap(
@@ -194,11 +200,11 @@ Texture Renderer::convoluteCubeMap(const Texture &cubeMap, bool diffuse) {
     return renderToCubeMap(
         128, 128, maxMipLevels, false,
         [&cubeMap, cube = cube, &shader = iblSpecularConvolutionShader,
-         &prevMipMapLevel = prevMipMapLevel](uint mipLevel) {
+         &prevMipLevel = prevMipLevel](uint mipLevel) {
           shader.bind();
           shader.envMap(cubeMap);
-          if (mipLevel != prevMipMapLevel) {
-            prevMipMapLevel = mipLevel;
+          if (mipLevel != prevMipLevel) {
+            prevMipLevel = mipLevel;
             /**
              * 5 MipMap Levels
              * 0 - 0/4, 0.25 - 1/4, 0.5 - 2/4, 0.75 - 3/4, 1 - 4/4
@@ -211,6 +217,29 @@ Texture Renderer::convoluteCubeMap(const Texture &cubeMap, bool diffuse) {
           glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
           glDepthFunc(GL_LESS);
         });
+}
+
+Texture Renderer::generateBRDFIntegrationMap() {
+  FrameBuffer framebuffer(512, 512);
+  framebuffer.use();
+  framebuffer.setColorAttachmentTB(GL_TEXTURE_2D, GL_RG16F, GL_RG, GL_FLOAT);
+
+  // TODO: do this inside Framebuffer class ??
+  GLint viewport[] = {0, 0, 0, 0};
+  glGetIntegerv(GL_VIEWPORT, viewport);
+  framebuffer.loadViewPort();
+
+  // generate
+  glDisable(GL_DEPTH_TEST);
+  iblBrdfIntegrationShader.bind();
+  glClear(GL_COLOR_BUFFER_BIT);
+  glBindVertexArray(plane);
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  glEnable(GL_DEPTH_TEST);
+
+  //  framebuffer.useDefault();
+  glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+  return Texture(framebuffer.releaseColorAttachment(), GL_TEXTURE_2D);
 }
 
 void Renderer::blitToWindow() { frameBuffer.blit(nullptr, GL_BACK); }

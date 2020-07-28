@@ -2,10 +2,22 @@
 
 namespace render_system::shader {
 FlatForwardProgram::FlatForwardProgram(const StageCodeMap &codeMap)
-    : Program(codeMap) {
-  bind();
-  glUniform1i(shader::forward::fragment::uniform::PBR_IRRADIANCE_MAP_LOC,
-              Program::TEX_UNIT_DIFF_IBL);
-  unBind();
+    : Program(codeMap) {}
+
+void FlatForwardProgram::loadIrradianceMap(const Texture &tex) {
+  glActiveTexture(GL_TEXTURE0 +
+                  forward::fragment::uniform::PBR_IRRADIANCE_MAP_BND);
+  tex.bind();
+}
+
+void FlatForwardProgram::loadPrefilteredMap(const Texture &tex) {
+  glActiveTexture(GL_TEXTURE0 +
+                  forward::fragment::uniform::PBR_PREFILETERED_MAP_BND);
+  tex.bind();
+}
+void FlatForwardProgram::loadBrdfIntegrationMap(const Texture &tex) {
+  glActiveTexture(GL_TEXTURE0 +
+                  forward::fragment::uniform::PBR_BRDF_INTEGRATION_MAP_BND);
+  tex.bind();
 }
 } // namespace render_system::shader
