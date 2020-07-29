@@ -30,7 +30,7 @@ using namespace render_system;
 namespace app {
 App::App(int, char **)
     : threadPool(NUM_THREADS), commandServer(8003, 4),
-      display("App", 1024, 720), input(display), construct(),
+      display("App", 1366, 768), input(display), construct(),
       coordinator(ecs::Coordinator::getInstance()),
       worldSystem(new world_system::WorldSystem()),
       renderSystem(
@@ -96,19 +96,6 @@ App::App(int, char **)
     }
   }
 
-  glm::vec3 lightPositions[] = {
-      glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(10.0f, 10.0f, 10.0f),
-      glm::vec3(-10.0f, -10.0f, 10.0f), glm::vec3(10.0f, -10.0f, 10.0f)};
-
-  for (uint i = 0;
-       i < render_system::shader::forward::fragment::PointLight::MAX; ++i) {
-    glm::vec3 lightPosition = lightPositions[i];
-    lightPosition += glm::vec3(sin(display.getTime() * 5.0) * 5.0, 0.0, 0.0);
-    world_system::WorldObject &testLight =
-        worldSystem->createWorldObject(component::Transform(lightPosition));
-    testLight.addComponent<component::Light>(component::Light(
-        glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
-  }
   GLint size;
   glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &size);
   std::cout << "UBO MB: " << size / 1024 << std::endl;
@@ -163,6 +150,17 @@ void App::runRenderLoop(std::string_view renderOutput) {
   //                        renderOutput, true);
   //  assert(rtspClient.start());
 
+  glm::vec3 lightPositions[] = {glm::vec3(0.0f, 0.0f, 0.0f),
+                                glm::vec3(0.0f, 0.0f, 0.0f)};
+  world_system::WorldObject &testLight1 =
+      worldSystem->createWorldObject(component::Transform(lightPositions[0]));
+  testLight1.addComponent<component::Light>(component::Light(
+      glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
+  world_system::WorldObject &testLight2 =
+      worldSystem->createWorldObject(component::Transform(lightPositions[0]));
+  testLight2.addComponent<component::Light>(component::Light(
+      glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
+
   int envMap = 0;
   float ltf, lt, ct, dt = 0.0f;
   int frameCnt = 0;
@@ -172,6 +170,14 @@ void App::runRenderLoop(std::string_view renderOutput) {
     ct = display.getTime();
     dt = ct - lt;
     lt = display.getTime();
+
+    // rotate light
+    lightPositions[0] =
+        glm::vec3(10 * cos(display.getTime()), 0, 10 * sin(display.getTime()));
+    lightPositions[1] = glm::vec3(16 * sin(display.getTime()), 0,
+                                  16 * cos(display.getTime()) - 10);
+    testLight1.getTransform().position(lightPositions[0]);
+    testLight2.getTransform().position(lightPositions[1]);
 
     // calculate FPS
     if (ct - ltf >= 1) {
