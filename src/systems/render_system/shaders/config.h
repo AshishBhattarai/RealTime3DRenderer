@@ -43,9 +43,9 @@ constexpr int POINT_LIGHT_SIZE_LOC = FRAG_U_POINT_LIGHT_SIZE;
 constexpr int POINT_LIGHT_LOC[MAX_POINT_LIGHTS] = {
     FRAG_U_POINT_LIGHT0_POS, FRAG_U_POINT_LIGHT1_POS, FRAG_U_POINT_LIGHT2_POS,
     FRAG_U_POINT_LIGHT3_POS};
-constexpr int PBR_IRRADIANCE_MAP_BND = FRAG_U_IRRADIANCE_MAP_BND;
-constexpr uint PBR_PREFILETERED_MAP_BND = FRAG_U_PREFILTERED_MAP_BND;
-constexpr uint PBR_BRDF_INTEGRATION_MAP_BND = FRAG_U_BRDF_INTEGRATION_MAP_BND;
+constexpr int PBR_IRRADIANCE_MAP_UNIT = FRAG_U_IRRADIANCE_MAP_BND;
+constexpr uint PBR_PREFILETERED_MAP_UNIT = FRAG_U_PREFILTERED_MAP_BND;
+constexpr uint PBR_BRDF_INTEGRATION_MAP_UNIT = FRAG_U_BRDF_INTEGRATION_MAP_BND;
 } // namespace uniform
 namespace PointLight {
 constexpr uint MAX = MAX_POINT_LIGHTS;
@@ -67,7 +67,7 @@ constexpr uint INTENSITY = 3;
 namespace skybox {
 namespace vertex {}
 namespace fragment {
-constexpr int TEXTURE_LOC = FRAG_U_ENVMAP_LOC;
+constexpr int TEXTURE_UNIT = FRAG_U_ENVMAP_BND;
 }
 } // namespace skybox
 #undef SKYBOX_VERTEX_SHADER
@@ -82,7 +82,7 @@ namespace vertex {}
 namespace fragment {
 constexpr int EXPOSURE_LOC = FRAG_U_EXPOSURE_LOC;
 constexpr int GAMMA_LOC = FRAG_U_GAMMA_LOC;
-constexpr int TEXTURE_LOC = FRAG_U_FRAME_TEXTURE_LOC;
+constexpr int TEXTURE_UNIT = FRAG_U_FRAME_TEXTURE_BND;
 } // namespace fragment
 } // namespace visualprep
 #undef VISUAL_PREP_VERTEX_SHADER
@@ -95,8 +95,7 @@ constexpr int TEXTURE_LOC = FRAG_U_FRAME_TEXTURE_LOC;
 namespace iblSpecularConvolution {
 namespace vertex {}
 namespace fragment {
-constexpr int ENV_MAP_LOC = FRAG_U_ENVMAP_LOC;
-constexpr int ENV_MAP_BINDING = FRAG_U_ENVMAP_BINDING;
+constexpr int ENV_MAP_UNIT = FRAG_U_ENVMAP_BND;
 constexpr int ROUGHNESS_LOC = FRAG_U_ROUGHNESS_LOC;
 } // namespace fragment
 } // namespace iblSpecularConvolution

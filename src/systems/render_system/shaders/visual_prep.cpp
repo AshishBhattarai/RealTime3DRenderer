@@ -1,13 +1,18 @@
 #include "visual_prep.h"
+#include "../texture.h"
 #include "config.h"
 
 namespace render_system::shader {
 VisualPrep::VisualPrep(const StageCodeMap &codeMap) : Program(codeMap) {
   bind();
-  glUniform1i(visualprep::fragment::TEXTURE_LOC, TEXTURE_UNIT);
   setExposure(DEFAULT_EXPOSURE);
   setGamma(DEFAULT_GAMMA);
   unBind();
+}
+
+void VisualPrep::setTexture(const Texture &texture) {
+  glActiveTexture(GL_TEXTURE0 + visualprep::fragment::TEXTURE_UNIT);
+  texture.bind();
 }
 
 void VisualPrep::setExposure(float exposure) {

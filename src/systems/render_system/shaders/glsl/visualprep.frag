@@ -8,7 +8,7 @@ layout (location = VERT_V_TEX_COORDS_LOC) in vec2 texCoord;
 
 layout (location = FRAG_U_EXPOSURE_LOC) uniform float exposure;
 layout (location = FRAG_U_GAMMA_LOC) uniform float gamma;
-layout (location = FRAG_U_FRAME_TEXTURE_LOC) uniform sampler2D frameTexture;
+layout (binding = FRAG_U_FRAME_TEXTURE_BND) uniform sampler2D frameTexture;
 
 void main(void) {
    vec3 color = texture(frameTexture, texCoord).xyz;

@@ -2,9 +2,10 @@
 #include "config.h"
 
 namespace render_system::shader {
-SkyboxShader::SkyboxShader(const StageCodeMap &codeMap) : Program(codeMap) {
-  bind();
-  glUniform1i(shader::skybox::fragment::TEXTURE_LOC, textureUnit);
-  unBind();
+SkyboxShader::SkyboxShader(const StageCodeMap &codeMap) : Program(codeMap) {}
+
+void SkyboxShader::bindTexture(const Texture &texture) {
+  glActiveTexture(GL_TEXTURE0 + skybox::fragment::TEXTURE_UNIT);
+  texture.bind();
 }
 } // namespace render_system::shader

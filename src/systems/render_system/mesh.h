@@ -9,12 +9,15 @@
 #include <string>
 #include <vector>
 
+/**
+ * Data structure for material & meshs loaded on the GPU.
+ * App(module) should have its own representation of material & mesh for editor.
+ */
 namespace render_system {
 
 /**
  * These structs shouldn't be accessable from outside the render system
  */
-
 struct BaseMaterial {
   const MaterialId id;
   const ShaderType shaderType;
@@ -49,13 +52,12 @@ struct Material : BaseMaterial {
  * User constructor to create it validates
  */
 struct Primitive {
-  const GLuint
-      vao; // can be used as primitive id(local id not global primitive id)
-  const GLenum mode; // Render mode
-  const GLenum indexType;
-  const GLsizei indexCount;
+  // can be used as primitive id(local id not global primitive id)
+  const GLuint vao;
+  const GLenum mode;         // Render mode GL_TRIANGLES ...
+  const GLenum indexType;    // indices type GL_UNSIGNED_INT generally
+  const GLsizei indexCount;  // indices count
   const GLvoid *indexOffset; // Index buffer offset;
-  /* primitive_id VAO + SOME OFFEST ?*/
 };
 
 struct Mesh {

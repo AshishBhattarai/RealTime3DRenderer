@@ -11,6 +11,6 @@ private:
 public:
   PostProcessor(const shader::StageCodeMap &visualPrep);
 
-  void applyVisualPrep(const FrameBuffer &frameBuffer);
+  void applyVisualPrep(const Texture &texture);
 };
 } // namespace render_system

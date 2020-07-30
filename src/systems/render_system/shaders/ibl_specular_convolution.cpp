@@ -7,8 +7,7 @@ IBLSpecularConvolution::IBLSpecularConvolution(const StageCodeMap &stageCodeMap)
     : Program(stageCodeMap) {}
 
 void IBLSpecularConvolution::envMap(const Texture &texture) {
-  glActiveTexture(GL_TEXTURE0 +
-                  iblSpecularConvolution::fragment::ENV_MAP_BINDING);
+  glActiveTexture(GL_TEXTURE0 + iblSpecularConvolution::fragment::ENV_MAP_UNIT);
   texture.bind();
 }
 

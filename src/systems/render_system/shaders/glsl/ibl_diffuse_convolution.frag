@@ -9,7 +9,7 @@
 layout(location = COLOR_ATTACHMENT0) out vec4 fragColor;
 layout(location = VERT_V_DIRECTION_LOC) in vec3 texDir;
 
-layout(location = FRAG_U_ENVMAP_LOC) uniform samplerCube envMap;
+layout(binding = FRAG_U_ENVMAP_BND) uniform samplerCube envMap;
 
 void main(void) {
     vec3 normal = normalize(texDir);

@@ -52,19 +52,24 @@ void Renderer::loadPointLightCount(size_t count) {
   flatForwardShader.loadPointLightSize(count);
 }
 
-void Renderer::preRender(const Texture &diffuseIbl,
-                         const Texture &specularIbl) {
+void Renderer::preRender() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // TODO: global / gener ubos handled by render_system (data)
   generalVSUBO.setViewMatrix(camera->getViewMatrix());
   generalVSUBO.setCameraPos(camera->position);
+}
+
+void Renderer::preRenderMesh(const Texture &diffuseIbl,
+                             const Texture &specularIbl) {
   flatForwardShader.bind();
   flatForwardShader.loadIrradianceMap(diffuseIbl);
   flatForwardShader.loadBrdfIntegrationMap(brdfIntegrationMap);
   flatForwardShader.loadPrefilteredMap(specularIbl);
 }
 
-void Renderer::render(float, const glm::mat4 &transform, const MeshId &meshId,
-                      std::map<PrimitiveId, MaterialId> primIdToMatId) {
+void Renderer::renderMesh(float, const glm::mat4 &transform,
+                          const MeshId &meshId,
+                          std::map<PrimitiveId, MaterialId> primIdToMatId) {
   // fetch mesh
   const auto &mesh = meshes.at(meshId);
   for (size_t i = 0; i < mesh.primitives.size(); ++i) {
@@ -189,9 +194,8 @@ Texture Renderer::convoluteCubeMap(const Texture &cubeMap, bool diffuse) {
         [&cubeMap, cube = cube, &shader = iblConvolutionShader](uint) {
           // render cubeMap
           glDepthFunc(GL_LEQUAL);
-          glActiveTexture(GL_TEXTURE0 + shader::SkyboxShader::textureUnit);
           shader.bind();
-          cubeMap.bind();
+          shader.bindTexture(cubeMap);
           glBindVertexArray(cube);
           glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
           glDepthFunc(GL_LESS);

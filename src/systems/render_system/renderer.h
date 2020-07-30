@@ -24,6 +24,22 @@ struct PointLight;
 class Camera;
 class Texture;
 
+struct RendererConfig {
+  const int width;
+  const int height;
+  const std::unordered_map<MeshId, Mesh> &meshes;
+  const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>>
+      &materials;
+  const Camera *camera;
+  const shader::StageCodeMap &forwardShaderCode;
+  const shader::StageCodeMap &skyboxEquiShaderCode; // equirectangularMap
+  const shader::StageCodeMap &skyboxCubeMapShader;
+  /* These will go to pre-processor  */
+  const shader::StageCodeMap &iblConvolutionShader;
+  const shader::StageCodeMap &iblSpecularConvolutionShader;
+  const shader::StageCodeMap &iblBrdfIntegrationShader;
+};
+
 class Renderer {
 private:
   FrameBuffer frameBuffer;
@@ -62,9 +78,10 @@ public:
 
   void loadPointLight(const PointLight &pointLight, uint idx);
   void loadPointLightCount(size_t count);
-  void preRender(const Texture &diffuseIbl, const Texture &specularIbl);
-  void render(float dt, const glm::mat4 &transform, const MeshId &meshId,
-              std::map<PrimitiveId, MaterialId> primIdToMatId);
+  void preRender();
+  void preRenderMesh(const Texture &diffuseIbl, const Texture &specularIbl);
+  void renderMesh(float dt, const glm::mat4 &transform, const MeshId &meshId,
+                  std::map<PrimitiveId, MaterialId> primIdToMatId);
   void renderSkybox(const Texture &texture);
 
   Texture renderToCubeMap(int width, int height, uint maxMipLevels,

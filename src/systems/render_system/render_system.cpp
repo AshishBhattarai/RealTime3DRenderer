@@ -52,8 +52,7 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
   updateProjectionMatrix(config.ar);
   /* setup framebuffer */
   framebuffer.use();
-  framebuffer.setColorAttachmentTB(GL_TEXTURE_2D, GL_RGB16F, GL_RGB,
-                                   GL_HALF_FLOAT);
+  framebuffer.setColorAttachmentTB(GL_TEXTURE_2D, GL_RGB16F, GL_RGB, GL_FLOAT);
   framebuffer.setDepthAttachment(FrameBuffer::AttachType::RENDER_BUFFER);
   assert(framebuffer.isComplete() && "Framebuffer not complete.");
   framebuffer.useDefault();
@@ -121,7 +120,7 @@ bool RenderSystem::setSkyBox(Image *image) {
 std::shared_ptr<Image> RenderSystem::update(float dt) {
   // load preRender data
   framebuffer.use();
-  renderer.preRender(*globalDiffuseIBL, *globalSpecularIBL);
+  renderer.preRender();
 
   // load lights
   uint i = 0;
@@ -144,16 +143,20 @@ std::shared_ptr<Image> RenderSystem::update(float dt) {
   }
 
   // render entites
+  renderer.preRenderMesh(*globalDiffuseIBL, *globalSpecularIBL);
   for (EntityId entity : this->getEntites()) {
     auto transform =
         coordinator.getComponent<component::Transform>(entity).transformMat;
     auto model = coordinator.getComponent<component::Model>(entity);
-    renderer.render(dt, transform, model.meshId, model.primIdToMatId);
+    renderer.renderMesh(dt, transform, model.meshId, model.primIdToMatId);
   }
-  framebuffer.useDefault();
 
   // post process
-  postProcessor.applyVisualPrep(framebuffer);
+  Texture frameTexture =
+      Texture(framebuffer.getColorAttachmentId(), GL_TEXTURE_2D);
+  framebuffer.useDefault();
+  postProcessor.applyVisualPrep(frameTexture);
+  frameTexture.release(); // this is a hack, reThink??
 
   std::shared_ptr<Image> img = renderer.readPixels();
   // Don't blit before reading the pixels.

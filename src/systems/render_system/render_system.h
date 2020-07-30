@@ -49,6 +49,15 @@ struct SceneRegisterReturn {
   const std::vector<std::map<MaterialId, std::string>> matIdToNameMap;
 };
 
+/**
+ * @brief The RenderSystem class
+ * This mainly hold the GPU data(mesh, material) and connects renderer to other
+ * systems
+ *
+ * Contains everything required to load & render a scene.
+ * Not responsible for managing secens.
+ * Managing multiple scene should be done through the app.
+ */
 class RenderSystem : ecs::System<RenderSystem> {
 private:
   class LightingSystem;
@@ -64,8 +73,6 @@ private:
   std::unordered_map<MeshId, Mesh> meshes;
   std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>> materials;
   //  std::unordered_map<ecs::Entity, size_t> entityToIndex;
-  std::unordered_map<MeshId, size_t> meshIdToIndex;
-  std::unordered_map<MeshId, size_t> materialIdToIndex;
 
   ecs::Coordinator &coordinator;
   LightingSystem *lightingSystem;
@@ -81,13 +88,15 @@ public:
 
   // returns map of mesh name to id
   SceneRegisterReturn registerGltfScene(tinygltf::Model &modelData);
+
+  // register a new material of type T
   template <typename T, typename... Args>
   MaterialId registerMaterial(ShaderType shaderType, Args... args) {
     auto id = sceneLoader.generateMaterialId();
     materials.emplace(id, std::unique_ptr<T>(new T{{id, shaderType}, args...}));
     return id;
   }
-  // TODO: Delete mesh and set all existing entites to default mesh
+  // TODO: Delete mesh and set all existing entites to default mesh & material
   bool unregisterMesh(std::string_view name);
   /**
    * @brief setSkyBox, Also sets the image as globalDiffuseIBL

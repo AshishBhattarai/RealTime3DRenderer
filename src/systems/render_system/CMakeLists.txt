@@ -10,6 +10,7 @@ add_library(render-system-lib
     texture.cpp
     frame_buffer.cpp
     post_processor.cpp
+    pre_processor.cpp
 
     #non cpp files
     render_system_model.qmodel

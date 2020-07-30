@@ -10,6 +10,8 @@ namespace render_system {
 /** TODO: option Mipmaps for texture attachmnet,
  *	since framebuffer mipmap needs to generated each time we update the
  *  buffer, its better to create a function for mipmap generation
+ *
+ * TODO: Store texture paramters?
  **/
 class FrameBuffer {
 public:

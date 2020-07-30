@@ -9,9 +9,9 @@ layout(location = COLOR_ATTACHMENT0) out vec4 fragColor;
 layout(location = VERT_V_DIRECTION_LOC) in vec3 texDir;
 
 #ifdef CUBEMAP_SKYBOX
-layout(location = FRAG_U_ENVMAP_LOC) uniform samplerCube cubeMap;
+layout(binding = FRAG_U_ENVMAP_BND) uniform samplerCube cubeMap;
 #else
-layout(location = FRAG_U_ENVMAP_LOC) uniform sampler2D equirectangularMap;
+layout(binding = FRAG_U_ENVMAP_BND) uniform sampler2D equirectangularMap;
 #endif
 
 void main(void)
