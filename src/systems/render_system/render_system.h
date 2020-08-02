@@ -67,8 +67,8 @@ private:
   static constexpr float DEFAULT_NEAR = 0.1f;
   static constexpr float DEFAULT_FAR = 1000.0f;
 
-  Renderer renderer;
   PreProcessor preProcessor;
+  Renderer renderer;
   PostProcessor postProcessor;
   FrameBuffer framebuffer;
   SceneLoader sceneLoader;

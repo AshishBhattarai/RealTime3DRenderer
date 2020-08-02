@@ -1,7 +1,7 @@
 #version 460 core
 #extension GL_GOOGLE_include_directive: require
 
-#define SKYBOX_FRAGMENT_SHADER
+#define CUBEMAP_FRAGMENT_SHADER
 #include "config.h"
 #define PI 3.1415926538f
 #define SAMPLE_DELTA 0.025f

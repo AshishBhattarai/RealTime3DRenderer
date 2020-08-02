@@ -39,12 +39,15 @@ void RenderSystem::initSubSystems() {
 }
 
 RenderSystem::RenderSystem(const RenderSystemConfig &config)
-    : renderer(config.width, config.height, meshes, materials,
-               &RenderDefaults::getInstance(&config.checkerImage).getCamera(),
-               config.flatForwardShader, config.skyboxShader,
-               config.iblConvolutionShader, config.iblSpecularConvolutionShader,
-               config.iblBrdfIntegrationShader),
-      preProcessor(config.cubemapShader, config.equirectangularShader),
+    : preProcessor(config.cubemapShader, config.equirectangularShader,
+                   config.iblConvolutionShader,
+                   config.iblSpecularConvolutionShader,
+                   config.iblBrdfIntegrationShader, config.checkerImage),
+      renderer(RendererConfig{
+          config.width, config.height, meshes, materials,
+          &RenderDefaults::getInstance(&config.checkerImage).getCamera(),
+          config.flatForwardShader, config.skyboxShader,
+          preProcessor.generateBRDFIntegrationMap()}),
       postProcessor(config.visualPrepShader),
       framebuffer(config.width, config.height), sceneLoader(),
       coordinator(ecs::Coordinator::getInstance()), skybox(nullptr) {
@@ -112,9 +115,9 @@ bool RenderSystem::setSkyBox(Image *image) {
   skybox =
       std::make_unique<Texture>(preProcessor.equirectangularToCubemap(equiTex));
   globalDiffuseIBL =
-      std::make_unique<Texture>(renderer.convoluteCubeMap(*skybox, true));
+      std::make_unique<Texture>(preProcessor.generateIrradianceMap(*skybox));
   globalSpecularIBL =
-      std::make_unique<Texture>(renderer.convoluteCubeMap(*skybox, false));
+      std::make_unique<Texture>(preProcessor.generatePreFilteredMap(*skybox));
   return skybox->getId() != 0;
 }
 

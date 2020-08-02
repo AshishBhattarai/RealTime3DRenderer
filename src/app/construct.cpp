@@ -67,9 +67,9 @@ render_system::RenderSystem *Construct::newRenderSystem(int width, int height) {
            {shader::ShaderStage::VERTEX_SHADER, visualPrepVertex},
            {shader::ShaderStage::FRAGMENT_SHADER, visualPrepFragment}},
        shader::StageCodeMap{
-           {shader::ShaderStage::VERTEX_SHADER, skyboxVertex},
+           {shader::ShaderStage::VERTEX_SHADER, cubemapVertex},
            {shader::ShaderStage::FRAGMENT_SHADER, iblConvolutionFragment}},
-       shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, skyboxVertex},
+       shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, cubemapVertex},
                             {shader::ShaderStage::FRAGMENT_SHADER,
                              iblSpecularConvolutionFragment}},
        shader::StageCodeMap{

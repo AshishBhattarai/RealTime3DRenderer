@@ -1,14 +1,14 @@
 #pragma once
-#include "program.h"
+#include "cubemap.h"
 
 namespace render_system {
 class Texture;
 namespace shader {
-class IBLSpecularConvolution : public Program {
+class IBLSpecularConvolution : public Cubemap {
 public:
   IBLSpecularConvolution(const StageCodeMap &codeMap);
-  void envMap(const Texture &texture);
-  void roughness(float roughness);
+  void loadTexture(const Texture &texture);
+  void loadRoughness(float roughness);
 };
 } // namespace shader
 } // namespace render_system
