@@ -5,6 +5,7 @@
 #include "frame_buffer.h"
 #include "point_light.h"
 #include "post_processor.h"
+#include "pre_processor.h"
 #include "renderer.h"
 #include "scene.h"
 
@@ -23,7 +24,8 @@ struct RenderSystemConfig {
   const Image &checkerImage; // can be removed after RenderSystem construction
   const shader::StageCodeMap &flatForwardShader;
   const shader::StageCodeMap &skyboxShader;
-  const shader::StageCodeMap &skyboxCubeMapShader;
+  const shader::StageCodeMap &cubemapShader;
+  const shader::StageCodeMap &equirectangularShader;
   const shader::StageCodeMap &visualPrepShader;
   const shader::StageCodeMap &iblConvolutionShader;
   const shader::StageCodeMap &iblSpecularConvolutionShader;
@@ -66,6 +68,7 @@ private:
   static constexpr float DEFAULT_FAR = 1000.0f;
 
   Renderer renderer;
+  PreProcessor preProcessor;
   PostProcessor postProcessor;
   FrameBuffer framebuffer;
   SceneLoader sceneLoader;

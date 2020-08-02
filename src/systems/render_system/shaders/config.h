@@ -7,6 +7,9 @@
 
 namespace render_system {
 namespace shader {
+/**
+ * Common vertex & fragment shader stuff
+ */
 namespace vertex {
 constexpr uint generalUBOBinding = VERT_UB_GENERAL_LOC;
 // attribute locations
@@ -22,6 +25,9 @@ namespace fragment {}
 #undef VERTEX_SHADER
 #undef GLSL_CONFIG_H
 
+/**
+ * Renderer shaders
+ */
 #define FORWARD_VERTEX_SHADER
 #define FORWARD_FRAGMENT_SHADER
 #include "glsl/config.h"
@@ -73,6 +79,9 @@ constexpr int TEXTURE_UNIT = FRAG_U_ENVMAP_BND;
 #undef SKYBOX_VERTEX_SHADER
 #undef SKYBOX_FRAGMENT_SHADER
 
+/**
+ * Post-processor shaders
+ */
 #define VISUAL_PREP_VERTEX_SHADER
 #define VISUAL_PREP_FRAGMENT_SHADER
 #undef GLSL_CONFIG_H
@@ -89,7 +98,26 @@ constexpr int TEXTURE_UNIT = FRAG_U_FRAME_TEXTURE_BND;
 #undef VISUAL_PREP_FRAGMENT_SHADER
 #undef GLSL_CONFIG_H
 
-#define SKYBOX_VERTEX_SHADER
+/**
+ * Pre-processor shaders
+ */
+#define CUBEMAP_VERTEX_SHADER
+#define CUBEMAP_FRAGMENT_SHADER
+#include "glsl/config.h"
+// cubemap
+namespace cubemap {
+namespace vertex {
+constexpr int PROJECTION_MAT_LOC = VERT_U_PROJECTION_MAT_LOC;
+constexpr int VIEW_MAT_LOC = VERT_U_VIEW_MAT_LOC;
+} // namespace vertex
+namespace fragment {
+constexpr int TEXTURE_UNIT = FRAG_U_ENVMAP_BND;
+}
+} // namespace cubemap
+#undef CUBEMAP_FRAGMENT_SHADER
+#undef GLSL_CONFIG_H
+
+#define CUBEMAP_VERTEX_SHADER
 #define IBL_SPECULAR_CONVOLUTION_FRAGMENT_SHADER
 #include "glsl/config.h"
 namespace iblSpecularConvolution {
@@ -99,7 +127,7 @@ constexpr int ENV_MAP_UNIT = FRAG_U_ENVMAP_BND;
 constexpr int ROUGHNESS_LOC = FRAG_U_ROUGHNESS_LOC;
 } // namespace fragment
 } // namespace iblSpecularConvolution
-#undef SKYBOX_VERTEX_SHADER
+#undef CUBEMAP_VERTEX_SHADER
 #undef IBL_SPECULAR_CONVOLUTION_FRAGMENT_SHADER
 } // namespace shader
 enum class ShaderType { FORWARD_SHADER, FLAT_FORWARD_SHADER };

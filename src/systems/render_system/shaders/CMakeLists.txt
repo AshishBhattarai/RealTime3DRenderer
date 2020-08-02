@@ -8,4 +8,5 @@ add_library(shaders-lib
     skybox_shader.cpp
     visual_prep.cpp
     ibl_specular_convolution.cpp
+    cubemap.cpp
 )

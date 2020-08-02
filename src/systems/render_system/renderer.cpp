@@ -16,14 +16,13 @@ Renderer::Renderer(
     const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>>
         &materials,
     const Camera *camera, const shader::StageCodeMap &flatForwardShader,
-    const shader::StageCodeMap &skyboxShader,
     const shader::StageCodeMap &skyboxCubeMapShader,
     const shader::StageCodeMap &iblConvolutionShader,
     const shader::StageCodeMap &iblSpecularConvolutionShader,
     const shader::StageCodeMap &iblBrdfIntegrationShader)
     : frameBuffer(width, height), meshes(meshes), materials(materials),
       projectionMatrix(1.0f), camera(camera), generalVSUBO(),
-      flatForwardShader(flatForwardShader), skyboxShader(skyboxShader),
+      flatForwardShader(flatForwardShader),
       skyboxCubeMapShader(skyboxCubeMapShader),
       iblConvolutionShader(iblConvolutionShader),
       iblSpecularConvolutionShader(iblSpecularConvolutionShader),
@@ -93,14 +92,8 @@ void Renderer::renderMesh(float, const glm::mat4 &transform,
 void Renderer::renderSkybox(const Texture &texture) {
   // render skybox
   glDepthFunc(GL_LEQUAL);
-  glActiveTexture(GL_TEXTURE0 + skyboxShader.textureUnit);
-  if (texture.getTarget() == GL_TEXTURE_CUBE_MAP) {
-    skyboxCubeMapShader.bind();
-    skyboxCubeMapShader.bindTexture(texture);
-  } else {
-    skyboxShader.bind();
-    skyboxShader.bindTexture(texture);
-  }
+  skyboxCubeMapShader.bind();
+  skyboxCubeMapShader.bindTexture(texture);
   glBindVertexArray(cube);
   glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
   glDepthFunc(GL_LESS);
@@ -109,7 +102,6 @@ void Renderer::renderSkybox(const Texture &texture) {
 Texture Renderer::renderToCubeMap(int width, int height, uint maxMipLevels,
                                   bool genMipMap,
                                   std::function<void(uint mipLevel)> drawCall) {
-  // setup data
   /**
    * you can aslo do this by rotation camera for each face too.
    * Note: All the caputreViews are upside down, to create upside down cubemap.

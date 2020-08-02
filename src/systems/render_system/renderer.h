@@ -52,7 +52,6 @@ private:
   shader::GeneralVSUBO generalVSUBO;
   shader::FlatForwardProgram flatForwardShader;
   // TODO: Rename SkyboxShader to CubeMap/EnvMap shader.
-  shader::SkyboxShader skyboxShader;
   shader::SkyboxShader skyboxCubeMapShader;
   shader::SkyboxShader iblConvolutionShader;
   shader::IBLSpecularConvolution iblSpecularConvolutionShader;
@@ -70,7 +69,6 @@ public:
            const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>>
                &materials,
            const Camera *camera, const shader::StageCodeMap &flatForwardShader,
-           const shader::StageCodeMap &skyboxShader,
            const shader::StageCodeMap &skyboxCubeMapShader,
            const shader::StageCodeMap &iblConvolutionShader,
            const shader::StageCodeMap &iblSpecularConvolutionShader,

@@ -42,9 +42,9 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
     : renderer(config.width, config.height, meshes, materials,
                &RenderDefaults::getInstance(&config.checkerImage).getCamera(),
                config.flatForwardShader, config.skyboxShader,
-               config.skyboxCubeMapShader, config.iblConvolutionShader,
-               config.iblSpecularConvolutionShader,
+               config.iblConvolutionShader, config.iblSpecularConvolutionShader,
                config.iblBrdfIntegrationShader),
+      preProcessor(config.cubemapShader, config.equirectangularShader),
       postProcessor(config.visualPrepShader),
       framebuffer(config.width, config.height), sceneLoader(),
       coordinator(ecs::Coordinator::getInstance()), skybox(nullptr) {
@@ -109,7 +109,8 @@ RenderSystem::registerGltfScene(tinygltf::Model &modelData) {
 
 bool RenderSystem::setSkyBox(Image *image) {
   auto equiTex = Texture(*image, toUnderlying(TextureFlags::DISABLE_MIPMAP));
-  skybox = std::make_unique<Texture>(renderer.equiTriangularToCubeMap(equiTex));
+  skybox =
+      std::make_unique<Texture>(preProcessor.equirectangularToCubemap(equiTex));
   globalDiffuseIBL =
       std::make_unique<Texture>(renderer.convoluteCubeMap(*skybox, true));
   globalSpecularIBL =

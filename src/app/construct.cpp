@@ -15,18 +15,19 @@ render_system::RenderSystem *Construct::newRenderSystem(int width, int height) {
   Image checkerImage;
   bool status =
       Loaders::loadImage(checkerImage, "resources/defaults/checker.bmp");
-  Buffer flatForwardVertex, flatForwardFragment, skyboxVertex, skyboxFragment,
-      skyboxCubeMapFragment, visualPrepVertex, visualPrepFragment,
-      iblConvolutionFragment, iblSpecularConvolutionFragment,
-      iblBrdfIntegrationFragment;
+  Buffer flatForwardVertex, flatForwardFragment, skyboxVertex, cubemapVertex,
+      cubemapFragment, equirectangularFragment, visualPrepVertex,
+      visualPrepFragment, iblConvolutionFragment,
+      iblSpecularConvolutionFragment, iblBrdfIntegrationFragment;
   status = Loaders::loadBinaryFile(flatForwardVertex,
                                    "shaders/flat_forward_vert.spv");
   status = Loaders::loadBinaryFile(flatForwardFragment,
                                    "shaders/flat_forward_frag.spv");
   status = Loaders::loadBinaryFile(skyboxVertex, "shaders/skybox_vert.spv");
-  status = Loaders::loadBinaryFile(skyboxFragment, "shaders/skybox_frag.spv");
-  status = Loaders::loadBinaryFile(skyboxCubeMapFragment,
-                                   "shaders/skybox_cubemap_frag.spv");
+  status = Loaders::loadBinaryFile(cubemapVertex, "shaders/cubemap_vert.spv");
+  status = Loaders::loadBinaryFile(cubemapFragment, "shaders/cubemap_frag.spv");
+  status = Loaders::loadBinaryFile(equirectangularFragment,
+                                   "shaders/equirectangular_frag.spv");
   status =
       Loaders::loadBinaryFile(visualPrepVertex, "shaders/visualprep_vert.spv");
   status = Loaders::loadBinaryFile(visualPrepFragment,
@@ -40,15 +41,28 @@ render_system::RenderSystem *Construct::newRenderSystem(int width, int height) {
 
   return new RenderSystem(
       {checkerImage,
+       /**
+        * const shader::StageCodeMap &flatForwardShader;
+        * const shader::StageCodeMap &skyboxShader;
+        * const shader::StageCodeMap &cubemapShader;
+        * const shader::StageCodeMap &equirectangularShader;
+        * const shader::StageCodeMap &visualPrepShader;
+        * const shader::StageCodeMap &iblConvolutionShader;
+        * const shader::StageCodeMap &iblSpecularConvolutionShader;
+        * const shader::StageCodeMap &iblBrdfIntegrationShader;
+        */
        shader::StageCodeMap{
            {shader::ShaderStage::VERTEX_SHADER, flatForwardVertex},
            {shader::ShaderStage::FRAGMENT_SHADER, flatForwardFragment}},
        shader::StageCodeMap{
            {shader::ShaderStage::VERTEX_SHADER, skyboxVertex},
-           {shader::ShaderStage::FRAGMENT_SHADER, skyboxFragment}},
+           {shader::ShaderStage::FRAGMENT_SHADER, cubemapFragment}},
        shader::StageCodeMap{
-           {shader::ShaderStage::VERTEX_SHADER, skyboxVertex},
-           {shader::ShaderStage::FRAGMENT_SHADER, skyboxCubeMapFragment}},
+           {shader::ShaderStage::VERTEX_SHADER, cubemapVertex},
+           {shader::ShaderStage::FRAGMENT_SHADER, cubemapFragment}},
+       shader::StageCodeMap{
+           {shader::ShaderStage::VERTEX_SHADER, cubemapVertex},
+           {shader::ShaderStage::FRAGMENT_SHADER, equirectangularFragment}},
        shader::StageCodeMap{
            {shader::ShaderStage::VERTEX_SHADER, visualPrepVertex},
            {shader::ShaderStage::FRAGMENT_SHADER, visualPrepFragment}},
