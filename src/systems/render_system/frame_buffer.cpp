@@ -1,4 +1,5 @@
 #include "frame_buffer.h"
+#include "core/buffer.h"
 #include <cassert>
 #include <glad/glad.h>
 
@@ -242,40 +243,38 @@ uint FrameBuffer::releaseColorAttachment(uint index) {
   return textureId;
 }
 
-Buffer FrameBuffer::readPixels(int &nrChannels, int &width, int &height,
-                               u32 fromBuffer) {
+Image FrameBuffer::readPixels(u32 fromColorBuffer) {
   assert(isComplete() && "Framebuffers must be complete before use.");
-  height = this->height;
-  width = this->width;
-  nrChannels = 4;
+  int height = this->height;
+  int width = this->width;
+  int nrChannels = 4;
   // add padding, to create 4-byte alignment
   int stride = Buffer::align(nrChannels * width, 4);
   int bufferSize = stride * height;
   Buffer buffer(bufferSize, 4);
-  glNamedFramebufferReadBuffer(fbo, fromBuffer);
+  glNamedFramebufferReadBuffer(fbo, fromColorBuffer);
   glPixelStorei(GL_PACK_ALIGNMENT, 4); // alignment for each pixel in memory
   glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data());
-  return buffer;
+  return Image(std::move(buffer), width, height, nrChannels);
 }
 
-Buffer FrameBuffer::readPixelsWindow(int &nrChannels, int &width, int &height,
-                                     u32 fromBuffer) {
+Image FrameBuffer::readPixelsWindow(u32 fromColorBuffer) {
   int viewPort[4] = {};
   glGetIntegerv(GL_VIEWPORT, viewPort);
-  width = viewPort[2];
-  height = viewPort[3];
-  nrChannels = 4;
+  int width = viewPort[2];
+  int height = viewPort[3];
+  int nrChannels = 4;
   int stride = Buffer::align(nrChannels * width, 4);
   int bufferSize = stride * height;
   Buffer buffer(bufferSize, 4);
-  glNamedFramebufferReadBuffer(0, fromBuffer);
+  glNamedFramebufferReadBuffer(0, fromColorBuffer);
   glPixelStorei(GL_PACK_ALIGNMENT, 4); // alignment for each pixel in memory
   glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data());
-  return buffer;
+  return Image(std::move(buffer), width, height, nrChannels);
 }
 
-void FrameBuffer::blit(FrameBuffer *toFrameBuffer, u32 toBuffer,
-                       u32 fromBuffer) {
+void FrameBuffer::blit(FrameBuffer *toFrameBuffer, u32 toColorBuffer,
+                       u32 fromColorBuffer) {
   assert(isComplete() && "Framebuffers must be complete before use.");
   int toWidth = 0;
   int toHeight = 0;
@@ -296,14 +295,14 @@ void FrameBuffer::blit(FrameBuffer *toFrameBuffer, u32 toBuffer,
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
   }
   use(UseType::READ);
-  glDrawBuffer(toBuffer);
-  glReadBuffer(fromBuffer);
+  glDrawBuffer(toColorBuffer);
+  glReadBuffer(fromColorBuffer);
   glBlitFramebuffer(0, 0, width, height, 0, 0, toWidth, toHeight, bufferFlag,
                     GL_NEAREST);
 }
 
-void FrameBuffer::blitWindow(const FrameBuffer &toFrameBuffer, u32 toBuffer,
-                             u32 fromBuffer) {
+void FrameBuffer::blitWindow(const FrameBuffer &toFrameBuffer,
+                             u32 toColorBuffer, u32 fromColorBuffer) {
   assert(toFrameBuffer.isComplete() &&
          "Framebuffers must be complete before use.");
   int toWidth = toFrameBuffer.width;
@@ -314,8 +313,8 @@ void FrameBuffer::blitWindow(const FrameBuffer &toFrameBuffer, u32 toBuffer,
   int width = viewPort[2];
   int height = viewPort[3];
   toFrameBuffer.use(UseType::DRAW);
-  glNamedFramebufferReadBuffer(0, fromBuffer);
-  glDrawBuffer(toBuffer);
+  glNamedFramebufferReadBuffer(0, fromColorBuffer);
+  glDrawBuffer(toColorBuffer);
   glBlitFramebuffer(0, 0, width, height, 0, 0, toWidth, toHeight, bufferFlag,
                     GL_NEAREST);
 }

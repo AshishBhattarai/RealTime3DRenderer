@@ -1,5 +1,5 @@
 #pragma once
-#include "core/buffer.h"
+#include "core/image.h"
 #include "types.h"
 #include <array>
 #include <cassert>
@@ -132,11 +132,10 @@ public:
    * @param buffer -> output buffer
    * @param width -> output image width
    * @param height -> output image height
-   * @param fromBuffer - Default GL_COLOR_ATTACHMENT0
+   * @param fromColorBuffer - Default GL_COLOR_ATTACHMENT0
    * @return
    */
-  Buffer readPixels(int &nrChannels, int &width, int &height,
-                    u32 fromBuffer = 0x8CE0);
+  Image readPixels(u32 fromColorBuffer = 0x8CE0);
 
   /**
    * Read pixels from default framebuffer ie window
@@ -147,8 +146,7 @@ public:
    * @param height
    * @return
    */
-  static Buffer readPixelsWindow(int &nrChannels, int &width, int &height,
-                                 u32 fromBuffer = 0x0404);
+  static Image readPixelsWindow(u32 fromColorBuffer = 0x0404);
 
   /**
    * @brief blit
@@ -157,7 +155,8 @@ public:
    * @param fromBuffer - default GL_COLOR_ATTACHMENT0
    * @return
    */
-  void blit(FrameBuffer *toFrameBuffer, u32 toBuffer, u32 fromBuffer = 0x8CE0);
+  void blit(FrameBuffer *toFrameBuffer, u32 toColorBuffer,
+            u32 fromColorBuffer = 0x8CE0);
 
   /**
    * @brief blitWindow - blit from window (default framebuffer)
@@ -165,8 +164,8 @@ public:
    * @param toBuffer
    * @param fromBuffer - default GL_BACK
    */
-  static void blitWindow(const FrameBuffer &toFrameBuffer, u32 toBuffer,
-                         u32 fromBuffer = 0x0404);
+  static void blitWindow(const FrameBuffer &toFrameBuffer, u32 toColorBuffer,
+                         u32 fromColorBuffer = 0x0404);
 
 private:
   uint fbo;

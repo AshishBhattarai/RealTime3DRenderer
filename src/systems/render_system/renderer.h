@@ -38,7 +38,6 @@ struct RendererConfig {
 
 class Renderer {
 private:
-  FrameBuffer frameBuffer;
   const std::unordered_map<MeshId, Mesh> &meshes;
   const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>>
       &materials;
@@ -58,17 +57,26 @@ private:
 public:
   Renderer(RendererConfig config);
 
+  void updateProjectionMatrix(float ar, float fov, float near, float far);
+  void setCamera(const Camera *camera) { this->camera = camera; }
   void loadPointLight(const PointLight &pointLight, uint idx);
   void loadPointLightCount(size_t count);
   void preRender();
+  /**
+   * @brief preRenderMesh - call before calling renderMesh to set pbr ibl.
+   * @param diffuseIbl
+   * @param specularIbl
+   */
   void preRenderMesh(const Texture &diffuseIbl, const Texture &specularIbl);
+  /**
+   * @brief renderMesh
+   * @param dt
+   * @param transform
+   * @param meshId
+   * @param primIdToMatId
+   */
   void renderMesh(float dt, const glm::mat4 &transform, const MeshId &meshId,
                   std::map<PrimitiveId, MaterialId> primIdToMatId);
   void renderSkybox(const Texture &texture);
-
-  void blitToWindow();
-  std::shared_ptr<Image> readPixels();
-  void updateProjectionMatrix(float ar, float fov, float near, float far);
-  void setCamera(const Camera *camera) { this->camera = camera; }
 };
 } // namespace render_system

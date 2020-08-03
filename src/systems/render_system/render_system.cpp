@@ -162,10 +162,7 @@ std::shared_ptr<Image> RenderSystem::update(float dt) {
   postProcessor.applyVisualPrep(frameTexture);
   frameTexture.release(); // this is a hack, reThink??
 
-  std::shared_ptr<Image> img = renderer.readPixels();
-  // Don't blit before reading the pixels.
-  //  renderer.blitToWindow();
-  return img;
+  return std::make_shared<Image>(FrameBuffer::readPixelsWindow());
 }
 
 } // namespace render_system
