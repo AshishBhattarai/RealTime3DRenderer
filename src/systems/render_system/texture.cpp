@@ -7,18 +7,17 @@
 namespace render_system {
 
 Texture::Texture(const Image &image, short flags)
-    : id(0), target(GL_TEXTURE_2D), isDefault(false) {
+    : id(0), target(GL_TEXTURE_2D) {
   assert(image.getBuffer() && "Invalid buffer data.");
   if (!image.getBuffer()) {
     CSLOG("LOAD_TEXTURE failed invalid image.");
     return;
   }
-
   loadTexture({&image}, flags);
 }
 
 Texture::Texture(const std::array<const Image *, 6> images, short flags)
-    : id(0), target(GL_TEXTURE_CUBE_MAP), isDefault(false) {
+    : id(0), target(GL_TEXTURE_CUBE_MAP) {
 #ifndef NDEBUG
   for (auto image : images)
     assert(image && "All images should be valid.");
@@ -38,7 +37,7 @@ Texture &Texture::operator=(Texture &&texture) {
 }
 
 Texture::~Texture() {
-  if (!isDefault && id) {
+  if (id) {
     glBindTexture(target, 0);
     glDeleteTextures(1, &id);
   }
@@ -102,6 +101,8 @@ void Texture::loadTexture(const std::vector<const Image *> &images,
   glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  if (target == GL_TEXTURE_CUBE_MAP)
+    glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
   glBindTexture(target, 0);
 }
 

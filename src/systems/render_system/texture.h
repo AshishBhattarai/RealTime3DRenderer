@@ -20,10 +20,8 @@ enum class TextureFlags : short { NONE = 0x0000, DISABLE_MIPMAP = 0x0002 };
 class Texture : NonCopyable {
 private:
   static constexpr uint CUBE_MAP_IMAGES_SIZE = 6;
-
   GLuint id;
   GLenum target;
-  bool isDefault;
 
   /**
    * @brief loadTexture
