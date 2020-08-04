@@ -32,8 +32,7 @@ public:
                const shader::StageCodeMap &equirectangularShader,
                const shader::StageCodeMap &iblDiffuseConvolutionShader,
                const shader::StageCodeMap &iblSpecularConvolutionShader,
-               const shader::StageCodeMap &iblBRDFIntegrationShader,
-               const Image &checkerImage); // TEMP checkerImage
+               const shader::StageCodeMap &iblBRDFIntegrationShader);
 
   Texture equirectangularToCubemap(const Texture &equirectangular);
   Texture generateIrradianceMap(const Texture &envmap);

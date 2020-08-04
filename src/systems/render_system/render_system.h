@@ -66,6 +66,7 @@ private:
   static constexpr float DEFAULT_FOV = 75.0f;
   static constexpr float DEFAULT_NEAR = 0.1f;
   static constexpr float DEFAULT_FAR = 1000.0f;
+  const bool status;
 
   PreProcessor preProcessor;
   Renderer renderer;
@@ -84,6 +85,8 @@ private:
   std::unique_ptr<Texture> globalSpecularIBL;
 
   void initSubSystems();
+  // init render_system related singletons
+  bool initSingletons(const Image &checkerImage);
 
 public:
   RenderSystem(const RenderSystemConfig &config);

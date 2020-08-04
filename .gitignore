@@ -1,6 +1,5 @@
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
-
 *~
 *.autosave
 *.a
@@ -35,6 +34,7 @@ Thumbs.db
 /.qmake.cache
 /.qmake.stash
 CMakeLists.txt.user
+_vimrc_local.vim
 
 # qtcreator generated files
 *.pro.user*

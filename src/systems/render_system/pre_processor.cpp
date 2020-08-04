@@ -9,14 +9,13 @@ PreProcessor::PreProcessor(
     const shader::StageCodeMap &equirectangularShader,
     const shader::StageCodeMap &iblDiffuseConvolutionShader,
     const shader::StageCodeMap &iblSpecularConvolutionShader,
-    const shader::StageCodeMap &iblBRDFIntegrationShader,
-    const Image &checkerImage)
+    const shader::StageCodeMap &iblBRDFIntegrationShader)
     : cubemapShader(cubemapShader),
       equirectangularShader(equirectangularShader),
       iblDiffuseConvolutionShader(iblDiffuseConvolutionShader),
       iblSpecularConvolutionShader(iblSpecularConvolutionShader),
       iblBRDFIntegrationShader(iblBRDFIntegrationShader) {
-  cube = RenderDefaults::getInstance(&checkerImage).getCubeVao();
+  cube = RenderDefaults::getInstance().getCubeVao();
   plane = RenderDefaults::getInstance().getPlaneVao();
 }
 

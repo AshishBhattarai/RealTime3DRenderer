@@ -38,16 +38,22 @@ void RenderSystem::initSubSystems() {
   lightingSystem = new LightingSystem();
 }
 
+bool RenderSystem::initSingletons(const Image &checkerImage) {
+  /* init RenderDefaults */
+  RenderDefaults::getInstance(&checkerImage);
+  return true;
+}
+
 RenderSystem::RenderSystem(const RenderSystemConfig &config)
-    : preProcessor(config.cubemapShader, config.equirectangularShader,
+    : status(initSingletons(config.checkerImage)),
+      preProcessor(config.cubemapShader, config.equirectangularShader,
                    config.iblConvolutionShader,
                    config.iblSpecularConvolutionShader,
-                   config.iblBrdfIntegrationShader, config.checkerImage),
-      renderer(RendererConfig{
-          config.width, config.height, meshes, materials,
-          &RenderDefaults::getInstance(&config.checkerImage).getCamera(),
-          config.flatForwardShader, config.skyboxShader,
-          preProcessor.generateBRDFIntegrationMap()}),
+                   config.iblBrdfIntegrationShader),
+      renderer(RendererConfig{config.width, config.height, meshes, materials,
+                              &RenderDefaults::getInstance().getCamera(),
+                              config.flatForwardShader, config.skyboxShader,
+                              preProcessor.generateBRDFIntegrationMap()}),
       postProcessor(config.visualPrepShader),
       framebuffer(config.width, config.height), sceneLoader(),
       coordinator(ecs::Coordinator::getInstance()), skybox(nullptr) {
