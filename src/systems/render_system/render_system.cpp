@@ -4,12 +4,14 @@
 #include "components/model.h"
 #include "components/transform.h"
 #include "core/image.h"
+#include "default_primitives_renderer.h"
 #include "ecs/coordinator.h"
 #include "render_defaults.h"
 #include "renderable_entity.h"
 #include "scene.h"
 #include "shaders/config.h"
 #include "utils/slogger.h"
+#include "default_primitives_renderer.h"
 
 namespace render_system {
 
@@ -26,10 +28,8 @@ class RenderSystem::LightingSystem : ecs::System<LightingSystem> {
  * i) LightSystem
  */
 void RenderSystem::initSubSystems() {
-  ecs::ComponentFamily lightFamily =
-      coordinator.getComponentFamily<component::Light>();
-  ecs::ComponentFamily transformFamily =
-      coordinator.getComponentFamily<component::Transform>();
+  ecs::ComponentFamily lightFamily = coordinator.getComponentFamily<component::Light>();
+  ecs::ComponentFamily transformFamily = coordinator.getComponentFamily<component::Transform>();
   ecs::Signature sig;
   sig.set(lightFamily, true);
   sig.set(transformFamily, true);
@@ -40,23 +40,20 @@ void RenderSystem::initSubSystems() {
 
 bool RenderSystem::initSingletons(const Image &checkerImage) {
   /* init RenderDefaults */
-  RenderDefaults::getInstance(&checkerImage);
+  auto &renderDefaults = RenderDefaults::getInstance(&checkerImage);
+  DefaultPrimitivesRenderer::getInstance(&renderDefaults.getCube(), &renderDefaults.getPlane());
   return true;
 }
 
 RenderSystem::RenderSystem(const RenderSystemConfig &config)
     : status(initSingletons(config.checkerImage)),
-      preProcessor(config.cubemapShader, config.equirectangularShader,
-                   config.iblConvolutionShader,
-                   config.iblSpecularConvolutionShader,
-                   config.iblBrdfIntegrationShader),
+      preProcessor(config.cubemapShader, config.equirectangularShader, config.iblConvolutionShader,
+                   config.iblSpecularConvolutionShader, config.iblBrdfIntegrationShader),
       renderer(RendererConfig{config.width, config.height, meshes, materials,
-                              &RenderDefaults::getInstance().getCamera(),
-                              config.flatForwardShader, config.skyboxShader,
-                              preProcessor.generateBRDFIntegrationMap()}),
-      postProcessor(config.visualPrepShader),
-      framebuffer(config.width, config.height), sceneLoader(),
-      coordinator(ecs::Coordinator::getInstance()), skybox(nullptr) {
+                              &RenderDefaults::getInstance().getCamera(), config.flatForwardShader,
+                              config.skyboxShader, preProcessor.generateBRDFIntegrationMap()}),
+      postProcessor(config.visualPrepShader), framebuffer(config.width, config.height),
+      sceneLoader(), coordinator(ecs::Coordinator::getInstance()), skybox(nullptr) {
   /* update projection */
   updateProjectionMatrix(config.ar);
   /* setup framebuffer */
@@ -67,20 +64,18 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
   framebuffer.useDefault();
   /* load default materials */
   auto &renderDefaults = RenderDefaults::getInstance();
-  materials.emplace(DEFAULT_MATERIAL_ID,
-                    std::unique_ptr<Material>(new Material(
-                        {{DEFAULT_MATERIAL_ID, ShaderType::FORWARD_SHADER},
-                         renderDefaults.getCheckerTexture(),
-                         renderDefaults.getBlackTexture(),
-                         renderDefaults.getBlackTexture(),
-                         renderDefaults.getBlackTexture(),
-                         renderDefaults.getBlackTexture()})));
-  materials.emplace(DEFAULT_FLAT_MATERIAL_ID,
-                    std::unique_ptr<FlatMaterial>(new FlatMaterial(
-                        {BaseMaterial{DEFAULT_FLAT_MATERIAL_ID,
-                                      ShaderType::FLAT_FORWARD_SHADER},
-                         glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
-                         glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0, 1.0f})));
+  materials.emplace(DEFAULT_MATERIAL_ID, std::unique_ptr<Material>(new Material(
+                                             {{DEFAULT_MATERIAL_ID, ShaderType::FORWARD_SHADER},
+                                              renderDefaults.getCheckerTexture(),
+                                              renderDefaults.getBlackTexture(),
+                                              renderDefaults.getBlackTexture(),
+                                              renderDefaults.getBlackTexture(),
+                                              renderDefaults.getBlackTexture()})));
+  materials.emplace(
+      DEFAULT_FLAT_MATERIAL_ID,
+      std::unique_ptr<FlatMaterial>(new FlatMaterial(
+          {BaseMaterial{DEFAULT_FLAT_MATERIAL_ID, ShaderType::FLAT_FORWARD_SHADER},
+           glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0, 1.0f})));
 
   /* Register & init helper systems(sub-systems) */
   initSubSystems();
@@ -95,8 +90,7 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
 
 RenderSystem::~RenderSystem() { delete lightingSystem; }
 
-SceneRegisterReturn
-RenderSystem::registerGltfScene(tinygltf::Model &modelData) {
+SceneRegisterReturn RenderSystem::registerGltfScene(tinygltf::Model &modelData) {
   auto sceneData = sceneLoader.loadScene(modelData);
   std::vector<MeshId> ids;
   std::vector<uint> numPrimitives;
@@ -118,12 +112,9 @@ RenderSystem::registerGltfScene(tinygltf::Model &modelData) {
 
 bool RenderSystem::setSkyBox(Image *image) {
   auto equiTex = Texture(*image, toUnderlying(TextureFlags::DISABLE_MIPMAP));
-  skybox =
-      std::make_unique<Texture>(preProcessor.equirectangularToCubemap(equiTex));
-  globalDiffuseIBL =
-      std::make_unique<Texture>(preProcessor.generateIrradianceMap(*skybox));
-  globalSpecularIBL =
-      std::make_unique<Texture>(preProcessor.generatePreFilteredMap(*skybox));
+  skybox = std::make_unique<Texture>(preProcessor.equirectangularToCubemap(equiTex));
+  globalDiffuseIBL = std::make_unique<Texture>(preProcessor.generateIrradianceMap(*skybox));
+  globalSpecularIBL = std::make_unique<Texture>(preProcessor.generatePreFilteredMap(*skybox));
   return skybox->getId() != 0;
 }
 
@@ -135,13 +126,11 @@ std::shared_ptr<Image> RenderSystem::update(float dt) {
   // load lights
   uint i = 0;
   for (EntityId entity : lightingSystem->getEntites()) {
-    if (i == shader::forward::fragment::PointLight::MAX)
-      break;
-    const auto &transfrom =
-        coordinator.getComponent<component::Transform>(entity);
+    if (i == shader::forward::fragment::PointLight::MAX) break;
+    const auto &transfrom = coordinator.getComponent<component::Transform>(entity);
     const auto &light = coordinator.getComponent<component::Light>(entity);
-    PointLight pointLight(&transfrom.transformMat[3], &light.color,
-                          &light.range, &light.intensity, entity);
+    PointLight pointLight(&transfrom.transformMat[3], &light.color, &light.range, &light.intensity,
+                          entity);
     renderer.loadPointLight(pointLight, i);
     ++i;
   }
@@ -155,15 +144,13 @@ std::shared_ptr<Image> RenderSystem::update(float dt) {
   // render entites
   renderer.preRenderMesh(*globalDiffuseIBL, *globalSpecularIBL);
   for (EntityId entity : this->getEntites()) {
-    auto transform =
-        coordinator.getComponent<component::Transform>(entity).transformMat;
+    auto transform = coordinator.getComponent<component::Transform>(entity).transformMat;
     auto model = coordinator.getComponent<component::Model>(entity);
     renderer.renderMesh(dt, transform, model.meshId, model.primIdToMatId);
   }
 
   // post process
-  Texture frameTexture =
-      Texture(framebuffer.getColorAttachmentId(), GL_TEXTURE_2D);
+  Texture frameTexture = Texture(framebuffer.getColorAttachmentId(), GL_TEXTURE_2D);
   framebuffer.useDefault();
   postProcessor.applyVisualPrep(frameTexture);
   frameTexture.release(); // this is a hack, reThink??

@@ -19,17 +19,19 @@ private:
   // 1x1 black & white textures;
   GLuint blackTexture;
   GLuint whiteTexture;
-  // 1x1 cube model vao
-  GLuint cube;
-  // 1x1 plane
-  GLuint plane;
-
   Camera camera;
+  // 1x1 cube model vao
+  Primitive cube;
+  // 1x1 plane
+  Primitive plane;
 
   RenderDefaults(const Image *checkerImage);
   ~RenderDefaults();
 
-  GLuint loadTexture(const uchar *data, int width, int height, GLenum format);
+  Primitive loadPrimitive(const float *vertices, uint verticesCount, uint dim, const uint *indices,
+                          uint indicesCount, GLenum mode);
+  Primitive loadCube();
+  Primitive loadPlane();
 
 public:
   static RenderDefaults &getInstance(const Image *checkerImage = nullptr) {
@@ -39,8 +41,8 @@ public:
   GLuint getCheckerTexture() const { return checkerTexture; }
   GLuint getWhiteTexture() const { return whiteTexture; }
   GLuint getBlackTexture() const { return blackTexture; }
-  GLuint getCubeVao() const { return cube; }
-  GLuint getPlaneVao() const { return plane; }
+  const Primitive& getCube() const { return cube; }
+  const Primitive& getPlane() const { return plane; }
   const Camera &getCamera() const { return camera; }
 };
 

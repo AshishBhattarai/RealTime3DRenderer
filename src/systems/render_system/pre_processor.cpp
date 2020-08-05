@@ -1,26 +1,21 @@
 #include "pre_processor.h"
+#include "default_primitives_renderer.h"
 #include "frame_buffer.h"
 #include "render_defaults.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace render_system {
-PreProcessor::PreProcessor(
-    const shader::StageCodeMap &cubemapShader,
-    const shader::StageCodeMap &equirectangularShader,
-    const shader::StageCodeMap &iblDiffuseConvolutionShader,
-    const shader::StageCodeMap &iblSpecularConvolutionShader,
-    const shader::StageCodeMap &iblBRDFIntegrationShader)
-    : cubemapShader(cubemapShader),
-      equirectangularShader(equirectangularShader),
+PreProcessor::PreProcessor(const shader::StageCodeMap &cubemapShader,
+                           const shader::StageCodeMap &equirectangularShader,
+                           const shader::StageCodeMap &iblDiffuseConvolutionShader,
+                           const shader::StageCodeMap &iblSpecularConvolutionShader,
+                           const shader::StageCodeMap &iblBRDFIntegrationShader)
+    : cubemapShader(cubemapShader), equirectangularShader(equirectangularShader),
       iblDiffuseConvolutionShader(iblDiffuseConvolutionShader),
       iblSpecularConvolutionShader(iblSpecularConvolutionShader),
-      iblBRDFIntegrationShader(iblBRDFIntegrationShader) {
-  cube = RenderDefaults::getInstance().getCubeVao();
-  plane = RenderDefaults::getInstance().getPlaneVao();
-}
+      iblBRDFIntegrationShader(iblBRDFIntegrationShader) {}
 
-Texture PreProcessor::renderToCubeMap(int width, int height, uint maxMipLevels,
-                                      bool genMipMap,
+Texture PreProcessor::renderToCubeMap(int width, int height, uint maxMipLevels, bool genMipMap,
                                       shader::Cubemap *const shader,
                                       std::function<void(uint)> preDrawCall) {
   /**
@@ -39,14 +34,13 @@ Texture PreProcessor::renderToCubeMap(int width, int height, uint maxMipLevels,
       glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
                   glm::vec3(0.0f, -1.0f, 0.0f)), // +Z
       glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
-                  glm::vec3(0.0f, -1.0f, 0.0f))}; // -Z
-  glm::mat4 projection =
-      glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f); // cube ar 1:1
+                  glm::vec3(0.0f, -1.0f, 0.0f))};                                  // -Z
+  glm::mat4 projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f); // cube ar 1:1
 
   FrameBuffer frambuffer(width, height);
   frambuffer.use();
-  frambuffer.setColorAttachmentTB(GL_TEXTURE_CUBE_MAP, GL_RGB16F, GL_RGB,
-                                  GL_FLOAT, maxMipLevels > 1 || genMipMap);
+  frambuffer.setColorAttachmentTB(GL_TEXTURE_CUBE_MAP, GL_RGB16F, GL_RGB, GL_FLOAT,
+                                  maxMipLevels > 1 || genMipMap);
   frambuffer.setDepthAttachment(FrameBuffer::AttachType::RENDER_BUFFER);
   // save state
   GLint viewport[] = {0, 0, 0, 0};
@@ -64,8 +58,7 @@ Texture PreProcessor::renderToCubeMap(int width, int height, uint maxMipLevels,
       uint mipHeight = height * std::pow(0.5, mip);
 
       glBindRenderbuffer(GL_RENDERBUFFER, frambuffer.getDepthAttachmentId());
-      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth,
-                            mipHeight);
+      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
       glViewport(0, 0, mipWidth, mipHeight);
     }
     for (uint i = 0; i < 6; ++i) {
@@ -76,8 +69,7 @@ Texture PreProcessor::renderToCubeMap(int width, int height, uint maxMipLevels,
       preDrawCall(mip);
       // render cubeMap
       glDepthFunc(GL_LEQUAL);
-      glBindVertexArray(cube);
-      glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+      DefaultPrimitivesRenderer::getInstance().drawCube();
       glDepthFunc(GL_LESS);
     }
   }
@@ -95,21 +87,19 @@ Texture PreProcessor::renderToCubeMap(int width, int height, uint maxMipLevels,
 }
 
 Texture PreProcessor::equirectangularToCubemap(const Texture &equirectangular) {
-  return renderToCubeMap(
-      512, 512, 1, true, &equirectangularShader,
-      [&shader = equirectangularShader, &texture = equirectangular](uint) {
-        /* pre draw call */
-        shader.loadTexture(texture);
-      });
+  return renderToCubeMap(512, 512, 1, true, &equirectangularShader,
+                         [&shader = equirectangularShader, &texture = equirectangular](uint) {
+                           /* pre draw call */
+                           shader.loadTexture(texture);
+                         });
 }
 
 Texture PreProcessor::generateIrradianceMap(const Texture &envmap) {
-  return renderToCubeMap(
-      32, 32, 1, false, &iblDiffuseConvolutionShader,
-      [&shader = iblDiffuseConvolutionShader, &texture = envmap](uint) {
-        /* pre draw call */
-        shader.loadTexture(texture);
-      });
+  return renderToCubeMap(32, 32, 1, false, &iblDiffuseConvolutionShader,
+                         [&shader = iblDiffuseConvolutionShader, &texture = envmap](uint) {
+                           /* pre draw call */
+                           shader.loadTexture(texture);
+                         });
 }
 
 Texture PreProcessor::generatePreFilteredMap(const Texture &envmap) {
@@ -117,8 +107,7 @@ Texture PreProcessor::generatePreFilteredMap(const Texture &envmap) {
   constexpr uint maxMipLevels = 5;
   return renderToCubeMap(
       128, 128, maxMipLevels, false, &iblSpecularConvolutionShader,
-      [&shader = iblSpecularConvolutionShader, &texture = envmap,
-       &prevMipLevel](uint mipLevel) {
+      [&shader = iblSpecularConvolutionShader, &texture = envmap, &prevMipLevel](uint mipLevel) {
         /* pre draw call */
         shader.loadTexture(texture);
         if (mipLevel != prevMipLevel) {
@@ -144,12 +133,9 @@ Texture PreProcessor::generateBRDFIntegrationMap() {
   framebuffer.loadViewPort();
 
   // generate
-  glDisable(GL_DEPTH_TEST);
   iblBRDFIntegrationShader.bind();
   glClear(GL_COLOR_BUFFER_BIT);
-  glBindVertexArray(plane);
-  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-  glEnable(GL_DEPTH_TEST);
+  DefaultPrimitivesRenderer::getInstance().drawPlane();
 
   //  framebuffer.useDefault();
   glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);

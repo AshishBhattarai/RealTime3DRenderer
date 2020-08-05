@@ -7,6 +7,7 @@
 #include "renderable_entity.h"
 #include "shaders/general_vs_ubo.hpp"
 #include <glm/gtc/matrix_transform.hpp>
+#include "default_primitives_renderer.h"
 #include <limits>
 
 namespace render_system {
@@ -16,8 +17,6 @@ Renderer::Renderer(RendererConfig config)
       projectionMatrix(1.0f), camera(config.camera), generalVSUBO(),
       flatForwardShader(config.flatForwardShader),
       skyboxCubeMapShader(config.skyboxCubeMapShader),
-      cube(RenderDefaults::getInstance().getCubeVao()),
-      plane(RenderDefaults::getInstance().getPlaneVao()),
       brdfIntegrationMap(std::move(config.brdfIntegrationMap)) {
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -78,8 +77,7 @@ void Renderer::renderSkybox(const Texture &texture) {
   glDepthFunc(GL_LEQUAL);
   skyboxCubeMapShader.bind();
   skyboxCubeMapShader.bindTexture(texture);
-  glBindVertexArray(cube);
-  glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+  DefaultPrimitivesRenderer::getInstance().drawCube();
   glDepthFunc(GL_LESS);
 }
 

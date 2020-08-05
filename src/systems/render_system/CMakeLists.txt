@@ -11,6 +11,7 @@ add_library(render-system-lib
     frame_buffer.cpp
     post_processor.cpp
     pre_processor.cpp
+    default_primitives_renderer.cpp
 
     #non cpp files
     render_system_model.qmodel

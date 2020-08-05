@@ -6,7 +6,6 @@ namespace render_system {
 class PostProcessor {
 private:
   shader::VisualPrep visualPrep;
-  GLuint plane;
 
 public:
   PostProcessor(const shader::StageCodeMap &visualPrep);

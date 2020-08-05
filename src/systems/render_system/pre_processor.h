@@ -21,10 +21,8 @@ private:
   shader::IBLSpecularConvolution iblSpecularConvolutionShader;
   shader::Program iblBRDFIntegrationShader;
 
-  GLuint cube, plane; // temp
-
-  Texture renderToCubeMap(int width, int height, uint maxMipLevels,
-                          bool genMipMap, shader::Cubemap *const shader,
+  Texture renderToCubeMap(int width, int height, uint maxMipLevels, bool genMipMap,
+                          shader::Cubemap *const shader,
                           std::function<void(uint mipLevel)> preDrawCall);
 
 public:

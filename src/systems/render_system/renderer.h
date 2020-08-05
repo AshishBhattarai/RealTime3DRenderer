@@ -28,8 +28,7 @@ struct RendererConfig {
   const int width;
   const int height;
   const std::unordered_map<MeshId, Mesh> &meshes;
-  const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>>
-      &materials;
+  const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>> &materials;
   const Camera *camera;
   const shader::StageCodeMap &flatForwardShader;
   const shader::StageCodeMap &skyboxCubeMapShader;
@@ -39,18 +38,13 @@ struct RendererConfig {
 class Renderer {
 private:
   const std::unordered_map<MeshId, Mesh> &meshes;
-  const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>>
-      &materials;
+  const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>> &materials;
   glm::mat4 projectionMatrix;
   const Camera *camera;
 
   shader::GeneralVSUBO generalVSUBO;
   shader::FlatForwardProgram flatForwardShader;
   shader::SkyboxShader skyboxCubeMapShader;
-
-  // shape vaos
-  const GLuint cube;
-  const GLuint plane;
 
   Texture brdfIntegrationMap;
 

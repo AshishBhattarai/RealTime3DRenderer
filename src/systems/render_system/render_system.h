@@ -60,7 +60,7 @@ struct SceneRegisterReturn {
  * Not responsible for managing secens.
  * Managing multiple scene should be done through the app.
  */
-class RenderSystem : ecs::System<RenderSystem> {
+class RenderSystem : NonCopyable, ecs::System<RenderSystem> {
 private:
   class LightingSystem;
   static constexpr float DEFAULT_FOV = 75.0f;
