@@ -13,7 +13,6 @@ namespace render_system {
  * Specifies texture properties
  *
  * NONE indicates LDR RGB texture?? re do this
- * TODO: Remove the default thingy.
  */
 enum class TextureFlags : short { NONE = 0x0000, DISABLE_MIPMAP = 0x0002 };
 

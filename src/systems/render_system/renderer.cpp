@@ -36,7 +36,7 @@ void Renderer::loadPointLightCount(size_t count) {
 
 void Renderer::preRender() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  // TODO: global / gener ubos handled by render_system (data)
+  // TODO: global / gener ubos handled by render_system (data) ??
   generalVSUBO.setViewMatrix(camera->getViewMatrix());
   generalVSUBO.setCameraPos(camera->position);
 }
