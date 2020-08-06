@@ -2,23 +2,12 @@
 #extension GL_GOOGLE_include_directive: require
 #define VISUAL_PREP_FRAGMENT_SHADER
 #include "config.h"
+#include "math_constants.h"
+#include "brdf.h"
 #include "ibl_specular_common.h"
 
 layout (location = COLOR_ATTACHMENT0) out vec2 fragColor;
 layout (location = VERT_V_TEX_COORDS_LOC) in vec2 texCoord;
-
-// Geometry Function for microfacets shadowing & masking
-float geometrySchlickGGX(float NoV, float roughness) {
-    float r = roughness;
-    float k = (r * r) / 2.0f;
-    return NoV / (NoV * (1.0f - k) + k);
-}
-
-float geometrySmith(float NoV, float NoL, float roughness) {
-    float ggxL = geometrySchlickGGX(NoL, roughness);
-    float ggxV = geometrySchlickGGX(NoV, roughness);
-    return ggxL * ggxV;
-}
 
 void main() {
     float NoV = texCoord.x;
@@ -42,7 +31,7 @@ void main() {
 
         if(NoL > 0.0) {
             // apply equation
-            float G = geometrySmith(max(dot(N, V), 0.0f), NoL, roughness);
+            float G = geometrySmithIBL(max(dot(N, V), 0.0f), NoL, roughness);
             float G_Vis = (G * VoH) / (NoH * NoV); // (G*v.h)/(n.h*v.n)
             float Fc = pow(1.0f - VoH, 5.0f); // a, F without F0
             result.x += (1.0 - Fc) * G_Vis;

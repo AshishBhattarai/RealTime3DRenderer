@@ -1,7 +1,6 @@
 #ifndef IBL_SPECULAR_COMMON_H
 #define IBL_SPECULAR_COMMON_H
 
-#define PI 3.1415926538f
 #define SAMPLE_COUNT 1024u
 
 /**

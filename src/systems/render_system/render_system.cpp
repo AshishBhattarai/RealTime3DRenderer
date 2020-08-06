@@ -11,7 +11,6 @@
 #include "scene.h"
 #include "shaders/config.h"
 #include "utils/slogger.h"
-#include "default_primitives_renderer.h"
 
 namespace render_system {
 
