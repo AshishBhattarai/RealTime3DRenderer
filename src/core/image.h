@@ -13,12 +13,15 @@ private:
   bool isHDR;
 
 public:
-  explicit Image(Buffer &&buffer, int width, int height, int numChannels,
-                 bool isHDR = false)
-      : buffer(std::move(buffer)), width(width), height(height),
-        numChannels(numChannels), isHDR(isHDR) {}
+  explicit Image(Buffer &&buffer, int width, int height, int numChannels, bool isHDR = false)
+      : buffer(std::move(buffer)), width(width), height(height), numChannels(numChannels),
+        isHDR(isHDR) {}
 
   Image() = default;
+
+  Image(const Image &image)
+      : Image(Buffer(*image.getBuffer()), image.width, image.height, image.numChannels,
+              image.isHDR) {}
 
   Image(Image &&image) {
     this->buffer = std::move(image.buffer);
@@ -39,7 +42,6 @@ public:
     return *this;
   }
 
-  Image(Image &) = delete;
   Image &operator=(Image &) = delete;
 
   ~Image() {
@@ -47,7 +49,7 @@ public:
     height = 0;
   }
 
-  const Buffer *getBuffer() const { return &buffer; }
+  const Buffer *const getBuffer() const { return &buffer; }
   int getWidth() const { return width; }
   int getHeight() const { return height; }
   int getNumChannels() const { return numChannels; }

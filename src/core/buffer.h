@@ -8,29 +8,29 @@
  *
  * Represents data buffer. Can be use to store content of binary files.
  */
-class Buffer : NonCopyable {
+class Buffer {
 private:
   uchar *buf;
   size_t size;
   uint alignment;
 
 public:
-  explicit Buffer(size_t size, uint alignment = 0)
-      : size(size), alignment(alignment) {
+  explicit Buffer(size_t size, uint alignment = 0) : size(size), alignment(alignment) {
     this->buf = new uchar[size];
   }
 
-  explicit Buffer(const uchar *data, size_t size, uint alignment = 0)
-      : Buffer(size, alignment) {
+  explicit Buffer(const uchar *data, size_t size, uint alignment = 0) : Buffer(size, alignment) {
     if (data && (data + (size - 1)))
       memcpy((void *)this->buf, (void *)data, size);
     else {
-      delete buf;
+      delete[] buf;
       this->size = 0;
     }
   }
 
   Buffer() = default;
+
+  Buffer(const Buffer &buffer) : Buffer(buffer.data(), buffer.size, buffer.alignment) {}
 
   Buffer(Buffer &&buffer) {
     this->buf = buffer.buf;
@@ -50,18 +50,16 @@ public:
     return *this;
   }
 
-  Buffer(Buffer &) = delete;
   Buffer &operator=(Buffer &) = delete;
 
   ~Buffer() {
-    if (buf)
-      delete buf;
+    if (buf) delete[] buf;
     size = 0;
   }
 
   bool isValid() const { return buf != nullptr; }
-  uchar *data() { return buf; }
-  const uchar *data() const { return buf; }
+  const uchar *const data() const { return buf; }
+  uchar * data() { return buf; } // TODO: better way to modify buffer content [[unsafe]]
   size_t getSize() const { return size; }
   uint getAlignment() const { return alignment; }
   void clear() { memset(buf, 0, size); }
