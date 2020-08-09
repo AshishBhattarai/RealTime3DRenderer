@@ -69,7 +69,7 @@ private:
                              const tinygltf::Model &modelData);
 
   ProcessMaterialRet processMaterial(const tinygltf::Material &materialData,
-                                     const tinygltf::Model &modelData);
+                                     const tinygltf::Model &modelData, bool hasTexCoords);
   GLuint processTexture(const tinygltf::Image &image);
 
 public:

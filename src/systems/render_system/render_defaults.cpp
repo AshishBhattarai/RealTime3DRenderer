@@ -7,22 +7,11 @@
 
 namespace render_system {
 RenderDefaults::RenderDefaults(const Image *checkerImage)
-    : checkerTexture(0), blackTexture(0), whiteTexture(0), camera(glm::vec3(0, 0, -10.0f)),
-      cube(loadCube()), plane(loadPlane()) {
+    : checkerImage(*checkerImage), blackImage(Buffer(black, 4), 1, 1, 4),
+      whiteImage(Buffer(white, 4), 1, 1, 4), camera(glm::vec3(0, 0, -10.0f)), cube(loadCube()),
+      plane(loadPlane()) {
 
   assert(checkerImage && "Invalid checker image received.");
-
-  const uchar black[] = {255, 255, 255, 255};
-  const uchar white[] = {0, 0, 0, 0};
-
-  this->checkerTexture =
-      Texture(*checkerImage, toUnderlying(TextureFlags::DISABLE_MIPMAP)).release();
-  this->blackTexture =
-      Texture(Image(Buffer(black, 4, 0), 1, 1, 4), toUnderlying(TextureFlags::DISABLE_MIPMAP))
-          .release();
-  this->whiteTexture =
-      Texture(Image(Buffer(white, 4, 0), 1, 1, 4), toUnderlying(TextureFlags::DISABLE_MIPMAP))
-          .release();
 } // namespace render_system
 
 Primitive RenderDefaults::loadCube() {
@@ -93,17 +82,11 @@ Primitive RenderDefaults::loadPrimitive(const float *vertices, uint verticesCoun
   if (indices)
     return {vao, mode, GL_UNSIGNED_INT, (GLsizei)indicesCount, (void *)0};
   else
-    return {vao, mode, 0, (GLsizei)verticesCount/2, (void *)0};
+    return {vao, mode, 0, (GLsizei)verticesCount / 2, (void *)0};
 }
 
 RenderDefaults::~RenderDefaults() {
-  glDeleteTextures(1, &checkerTexture);
-  glDeleteTextures(1, &blackTexture);
-  glDeleteTextures(1, &whiteTexture);
   glDeleteVertexArrays(1, &cube.vao);
   glDeleteVertexArrays(1, &plane.vao);
-  checkerTexture = 0;
-  blackTexture = 0;
-  whiteTexture = 0;
 }
 } // namespace render_system

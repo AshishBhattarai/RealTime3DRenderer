@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "shaders/config.h"
+#include "texture.h"
 #include <cassert>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -38,11 +39,11 @@ struct FlatMaterial : BaseMaterial {
  * Normal texture based materials
  */
 struct Material : BaseMaterial {
-  const GLuint albedo;
-  const GLuint metallicRoughness; // R - Metallic, G - Roughtness
-  const GLuint ao;
-  const GLuint normal;
-  const GLuint emission;
+  const Texture albedo;
+  const Texture metallicRoughness; // R - Metallic, G - Roughtness
+  const Texture ao;
+  const Texture normal;
+  const Texture emission;
   //  std::unique_ptr<FlatMaterial> flatMaterial;
 };
 

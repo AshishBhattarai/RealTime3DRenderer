@@ -30,6 +30,10 @@ Texture::Texture(Texture &&texture) : id(texture.id), target(texture.target) {
 }
 
 Texture &Texture::operator=(Texture &&texture) {
+  if (id) {
+    glBindTexture(target, 0);
+    glDeleteTextures(1, &id);
+  }
   this->id = texture.id;
   this->target = texture.target;
   texture.id = 0;

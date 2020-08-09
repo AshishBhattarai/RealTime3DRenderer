@@ -65,11 +65,11 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
   auto &renderDefaults = RenderDefaults::getInstance();
   materials.emplace(DEFAULT_MATERIAL_ID, std::unique_ptr<Material>(new Material(
                                              {{DEFAULT_MATERIAL_ID, ShaderType::FORWARD_SHADER},
-                                              renderDefaults.getCheckerTexture(),
-                                              renderDefaults.getBlackTexture(),
-                                              renderDefaults.getBlackTexture(),
-                                              renderDefaults.getBlackTexture(),
-                                              renderDefaults.getBlackTexture()})));
+					     std::move(renderDefaults.createCheckerTexture()),
+                                              std::move(renderDefaults.createBlackTexture()),
+                                              std::move(renderDefaults.createBlackTexture()),
+                                              std::move(renderDefaults.createBlackTexture()),
+                                              std::move(renderDefaults.createBlackTexture())})));
   materials.emplace(
       DEFAULT_FLAT_MATERIAL_ID,
       std::unique_ptr<FlatMaterial>(new FlatMaterial(
