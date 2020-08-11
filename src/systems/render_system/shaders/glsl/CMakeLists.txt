@@ -11,8 +11,10 @@ function(add_spirv_shader INPUT_FILE OUTPUT_FILE BUILD_OPTIONS)
     )
 endfunction()
 
-add_spirv_shader(flat_forward.vert flat_forward_vert.spv "")
-add_spirv_shader(flat_forward.frag flat_forward_frag.spv "")
+add_spirv_shader(forward_material.vert flat_forward_material_vert.spv "")
+add_spirv_shader(forward_material.frag flat_forward_material_frag.spv "")
+add_spirv_shader(forward_material.vert texture_forward_material_vert.spv "-DTEXTURE_MATERIAL")
+add_spirv_shader(forward_material.frag texture_forward_material_frag.spv "-DTEXTURE_MATERIAL")
 add_spirv_shader(skybox.vert skybox_vert.spv "")
 add_spirv_shader(cubemap.vert cubemap_vert.spv "")
 add_spirv_shader(cubemap.frag cubemap_frag.spv "")
@@ -23,17 +25,18 @@ add_spirv_shader(ibl_diffuse_convolution.frag ibl_diffuse_convolution_frag.spv "
 add_spirv_shader(ibl_specular_convolution.frag ibl_specular_convolution_frag.spv "")
 add_spirv_shader(ibl_brdf_integration_map.frag ibl_brdf_integration_map.spv "")
 
-
 ###
 # Command created by add_custom_command() is not being run when you type make.
 # You need to add_custom_target() with ALL keyword and make it depend on file,
 # which is produced by command
 ###
 add_custom_target(glsl-code ALL DEPENDS
-    ${SHADER_OUTPUT_DIR}/flat_forward_vert.spv
-    ${SHADER_OUTPUT_DIR}/flat_forward_frag.spv
+    ${SHADER_OUTPUT_DIR}/flat_forward_material_vert.spv
+    ${SHADER_OUTPUT_DIR}/flat_forward_material_frag.spv
+    ${SHADER_OUTPUT_DIR}/texture_forward_material_vert.spv
+    ${SHADER_OUTPUT_DIR}/texture_forward_material_frag.spv
     ${SHADER_OUTPUT_DIR}/skybox_vert.spv
-   ${SHADER_OUTPUT_DIR}/cubemap_vert.spv
+    ${SHADER_OUTPUT_DIR}/cubemap_vert.spv
     ${SHADER_OUTPUT_DIR}/cubemap_frag.spv
     ${SHADER_OUTPUT_DIR}/equirectangular_frag.spv
     ${SHADER_OUTPUT_DIR}/visualprep_vert.spv

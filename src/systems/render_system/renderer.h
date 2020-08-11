@@ -2,7 +2,7 @@
 
 #include "common.h"
 #include "frame_buffer.h"
-#include "shaders/flat_forward_program.h"
+#include "shaders/flat_forward_material.h"
 #include "shaders/general_vs_ubo.hpp"
 #include "shaders/ibl_specular_convolution.h"
 #include "shaders/skybox_shader.h"
@@ -43,7 +43,7 @@ private:
   const Camera *camera;
 
   shader::GeneralVSUBO generalVSUBO;
-  shader::FlatForwardProgram flatForwardShader;
+  shader::FlatForwardMaterial flatForwardMaterial;
   shader::SkyboxShader skyboxCubeMapShader;
 
   Texture brdfIntegrationMap;

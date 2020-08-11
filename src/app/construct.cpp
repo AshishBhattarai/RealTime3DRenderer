@@ -20,9 +20,9 @@ render_system::RenderSystem *Construct::newRenderSystem(int width, int height) {
       visualPrepFragment, iblConvolutionFragment,
       iblSpecularConvolutionFragment, iblBrdfIntegrationFragment;
   status = Loaders::loadBinaryFile(flatForwardVertex,
-                                   "shaders/flat_forward_vert.spv");
+                                   "shaders/flat_forward_material_vert.spv");
   status = Loaders::loadBinaryFile(flatForwardFragment,
-                                   "shaders/flat_forward_frag.spv");
+                                   "shaders/flat_forward_material_frag.spv");
   status = Loaders::loadBinaryFile(skyboxVertex, "shaders/skybox_vert.spv");
   status = Loaders::loadBinaryFile(cubemapVertex, "shaders/cubemap_vert.spv");
   status = Loaders::loadBinaryFile(cubemapFragment, "shaders/cubemap_frag.spv");

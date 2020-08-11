@@ -15,7 +15,7 @@ namespace render_system {
 Renderer::Renderer(RendererConfig config)
     : meshes(config.meshes), materials(config.materials),
       projectionMatrix(1.0f), camera(config.camera), generalVSUBO(),
-      flatForwardShader(config.flatForwardShader),
+      flatForwardMaterial(config.flatForwardShader),
       skyboxCubeMapShader(config.skyboxCubeMapShader),
       brdfIntegrationMap(std::move(config.brdfIntegrationMap)) {
 
@@ -26,12 +26,12 @@ Renderer::Renderer(RendererConfig config)
 }
 
 void Renderer::loadPointLight(const PointLight &pointLight, uint idx) {
-  flatForwardShader.bind();
-  flatForwardShader.loadPointLight(pointLight, idx);
+  flatForwardMaterial.bind();
+  flatForwardMaterial.loadPointLight(pointLight, idx);
 }
 
 void Renderer::loadPointLightCount(size_t count) {
-  flatForwardShader.loadPointLightSize(count);
+  flatForwardMaterial.loadPointLightSize(count);
 }
 
 void Renderer::preRender() {
@@ -43,10 +43,10 @@ void Renderer::preRender() {
 
 void Renderer::preRenderMesh(const Texture &diffuseIbl,
                              const Texture &specularIbl) {
-  flatForwardShader.bind();
-  flatForwardShader.loadIrradianceMap(diffuseIbl);
-  flatForwardShader.loadBrdfIntegrationMap(brdfIntegrationMap);
-  flatForwardShader.loadPrefilteredMap(specularIbl);
+  flatForwardMaterial.bind();
+  flatForwardMaterial.loadIrradianceMap(diffuseIbl);
+  flatForwardMaterial.loadBrdfIntegrationMap(brdfIntegrationMap);
+  flatForwardMaterial.loadPrefilteredMap(specularIbl);
 }
 
 void Renderer::renderMesh(float, const glm::mat4 &transform,
@@ -61,10 +61,10 @@ void Renderer::renderMesh(float, const glm::mat4 &transform,
     // set entity specific data
     const auto &material = materials.at(primIdToMatId[i]);
     if (material->shaderType == ShaderType::FLAT_FORWARD_SHADER) {
-      flatForwardShader.bind();
-      flatForwardShader.loadMaterial(
+      flatForwardMaterial.bind();
+      flatForwardMaterial.loadMaterial(
           *static_cast<FlatMaterial *>(material.get()));
-      flatForwardShader.loadTransformMatrix(transform);
+      flatForwardMaterial.loadTransformMatrix(transform);
     }
     // draw
     glDrawElements(primitive.mode, primitive.indexCount, primitive.indexType,

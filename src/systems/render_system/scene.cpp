@@ -267,6 +267,7 @@ SceneLoader::ProcessMaterialRet SceneLoader::processMaterial(const tinygltf::Mat
   if (metallicRoughnessTextureIndex != -1) {
     const tinygltf::Image &metallicRoughnessImage =
         modelData.images[modelData.textures[metallicRoughnessTextureIndex].source];
+    /* Packed metallicRoughness, R - Metallic G - Roughness*/
     metallicRoughness = Texture(processTexture(metallicRoughnessImage), GL_TEXTURE_2D);
   } else
     metallicRoughness = renderDefault.createBlackTexture();
