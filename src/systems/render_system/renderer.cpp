@@ -65,7 +65,13 @@ void Renderer::renderMesh(float, const glm::mat4 &transform,
       flatForwardMaterial.loadMaterial(
           *static_cast<FlatMaterial *>(material.get()));
       flatForwardMaterial.loadTransformMatrix(transform);
+    } /*else {
+      textureForwardMaterial.bind();
+      textureForwardMaterial.loadMaterial(
+          *static_cast<FlatMaterial *>(material.get()));
+      textureForwardMaterial.loadTransformMatrix(transform);
     }
+    */
     // draw
     glDrawElements(primitive.mode, primitive.indexCount, primitive.indexType,
                    primitive.indexOffset);

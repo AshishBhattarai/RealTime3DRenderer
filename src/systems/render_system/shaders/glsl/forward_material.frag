@@ -28,7 +28,6 @@ struct PointLight {
 struct Material {
   sampler2D albedo;
   sampler2D metallicRoughness;
-  sampler2D roughness;
   sampler2D ao;
 };
 #else

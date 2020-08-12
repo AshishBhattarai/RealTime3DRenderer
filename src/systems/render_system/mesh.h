@@ -38,7 +38,7 @@ struct FlatMaterial : BaseMaterial {
 /**
  * Normal texture based materials
  */
-struct Material : BaseMaterial {
+struct TextureMaterial : BaseMaterial {
   const Texture albedo;
   const Texture metallicRoughness; // R - Metallic, G - Roughtness
   const Texture ao;

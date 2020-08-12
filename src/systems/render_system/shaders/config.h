@@ -41,17 +41,26 @@ constexpr int TRANSFORMATION_LOC = VERT_U_TRANSFORMATION_LOC;
 } // namespace vertex
 namespace fragment {
 namespace uniform {
+constexpr int POINT_LIGHT_SIZE_LOC = FRAG_U_POINT_LIGHT_SIZE;
+constexpr int POINT_LIGHT_LOC[MAX_POINT_LIGHTS] = {FRAG_U_POINT_LIGHT0_POS, FRAG_U_POINT_LIGHT1_POS,
+                                                   FRAG_U_POINT_LIGHT2_POS,
+                                                   FRAG_U_POINT_LIGHT3_POS};
+constexpr uint PBR_IRRADIANCE_MAP_UNIT = FRAG_U_IRRADIANCE_MAP_BND;
+constexpr uint PBR_PREFILETERED_MAP_UNIT = FRAG_U_PREFILTERED_MAP_BND;
+constexpr uint PBR_BRDF_INTEGRATION_MAP_UNIT = FRAG_U_BRDF_INTEGRATION_MAP_BND;
+/* only for forward flat material shader */
+namespace flat {
 constexpr int PBR_ALBEDO_LOC = FRAG_U_MATERIAL_ALBEDO_LOC;
 constexpr int PBR_METALLIC_LOC = FRAG_U_MATERIAL_METALLIC_LOC;
 constexpr int PBR_ROUGHNESS_LOC = FRAG_U_MATERIAL_ROUGHNESS_LOC;
 constexpr int PBR_AO_LOC = FRAG_U_MATERIAL_AO_LOC;
-constexpr int POINT_LIGHT_SIZE_LOC = FRAG_U_POINT_LIGHT_SIZE;
-constexpr int POINT_LIGHT_LOC[MAX_POINT_LIGHTS] = {
-    FRAG_U_POINT_LIGHT0_POS, FRAG_U_POINT_LIGHT1_POS, FRAG_U_POINT_LIGHT2_POS,
-    FRAG_U_POINT_LIGHT3_POS};
-constexpr int PBR_IRRADIANCE_MAP_UNIT = FRAG_U_IRRADIANCE_MAP_BND;
-constexpr uint PBR_PREFILETERED_MAP_UNIT = FRAG_U_PREFILTERED_MAP_BND;
-constexpr uint PBR_BRDF_INTEGRATION_MAP_UNIT = FRAG_U_BRDF_INTEGRATION_MAP_BND;
+} // namespace flat
+/* only for forward textured material shader */
+namespace textured {
+constexpr uint PBR_ALBEDO_BND = FRAG_U_MATERIAL_ALBEDO_BND;
+constexpr uint PBR_METALLIC_ROUGHNESS_BND = FRAG_U_MATERIAL_METALLIC_ROUGHNESS_BND;
+constexpr uint PBR_AO_BND = FRAG_U_MATERIAL_AO_BND;
+} // namespace textured
 } // namespace uniform
 namespace PointLight {
 constexpr uint MAX = MAX_POINT_LIGHTS;

@@ -1,14 +1,19 @@
 #pragma once
 
-#include "../mesh.h"
-#include "../point_light.h"
-#include "../texture.h"
-#include "config.h"
 #include "program.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp>
 
-namespace render_system::shader {
+namespace render_system {
+struct Mesh;
+struct PointLight;
+struct FlatMaterial;
+class Texture;
+namespace shader {
+/**
+ * @brief
+ * FlatForwardMaterial is a shader for forward colored material rendering.
+ */
 class FlatForwardMaterial : public Program {
 public:
   FlatForwardMaterial(const StageCodeMap &codeMap);
@@ -22,4 +27,5 @@ public:
   void loadPrefilteredMap(const Texture &tex);
   void loadBrdfIntegrationMap(const Texture &tex);
 };
-} // namespace render_system::shader
+} // namespace shader
+} // namespace render_system

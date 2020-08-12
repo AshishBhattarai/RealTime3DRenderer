@@ -36,7 +36,7 @@ struct RenderSystemConfig {
   float ar;
 };
 
-struct SceneRegisterReturn {
+struct ModelRegisterReturn {
   const std::string sceneName;
 
   /**
@@ -93,7 +93,7 @@ public:
   ~RenderSystem();
 
   // returns map of mesh name to id
-  SceneRegisterReturn registerGltfScene(tinygltf::Model &modelData);
+  ModelRegisterReturn registerGltfModel(tinygltf::Model &modelData);
 
   // register a new material of type T
   template <typename T, typename... Args>

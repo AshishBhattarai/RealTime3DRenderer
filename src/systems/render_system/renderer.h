@@ -21,6 +21,7 @@ namespace render_system {
 struct Mesh;
 struct RenderableEntity;
 struct PointLight;
+struct BaseMaterial;
 class Camera;
 class Texture;
 

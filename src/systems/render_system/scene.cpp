@@ -281,7 +281,7 @@ SceneLoader::ProcessMaterialRet SceneLoader::processMaterial(const tinygltf::Mat
   if (!hasTexCoord)
     return {materialData.name, std::unique_ptr<BaseMaterial>(flatMaterial.release())};
   else
-    return {materialData.name, std::unique_ptr<Material>(new Material(
+    return {materialData.name, std::unique_ptr<BaseMaterial>(new TextureMaterial(
                                    {{loadedMaterialCount++, ShaderType::FORWARD_SHADER},
                                     std::move(albedo),
                                     std::move(metallicRoughness),

@@ -1,4 +1,8 @@
 #include "flat_forward_material.h"
+#include "../mesh.h"
+#include "../point_light.h"
+#include "../texture.h"
+#include "config.h"
 
 namespace render_system::shader {
 FlatForwardMaterial::FlatForwardMaterial(const StageCodeMap &codeMap) : Program(codeMap) {}
@@ -29,10 +33,11 @@ void FlatForwardMaterial::loadPointLightSize(int size) {
 }
 
 void FlatForwardMaterial::loadMaterial(const FlatMaterial &material) {
-  glUniform3fv(forward::fragment::uniform::PBR_ALBEDO_LOC, 1, glm::value_ptr(material.albedo));
-  glUniform1f(forward::fragment::uniform::PBR_METALLIC_LOC, material.metallic);
-  glUniform1f(forward::fragment::uniform::PBR_ROUGHNESS_LOC, material.roughtness);
-  glUniform1f(forward::fragment::uniform::PBR_AO_LOC, material.ao);
+  glUniform3fv(forward::fragment::uniform::flat::PBR_ALBEDO_LOC, 1,
+               glm::value_ptr(material.albedo));
+  glUniform1f(forward::fragment::uniform::flat::PBR_METALLIC_LOC, material.metallic);
+  glUniform1f(forward::fragment::uniform::flat::PBR_ROUGHNESS_LOC, material.roughtness);
+  glUniform1f(forward::fragment::uniform::flat::PBR_AO_LOC, material.ao);
 }
 
 void FlatForwardMaterial::loadIrradianceMap(const Texture &tex) {

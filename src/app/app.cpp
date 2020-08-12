@@ -29,12 +29,10 @@ using namespace render_system;
 
 namespace app {
 App::App(int, char **)
-    : threadPool(NUM_THREADS), commandServer(8003, 4),
-      display("App", 1366, 768), input(display), construct(),
-      coordinator(ecs::Coordinator::getInstance()),
+    : threadPool(NUM_THREADS), commandServer(8003, 4), display("App", 1366, 768), input(display),
+      construct(), coordinator(ecs::Coordinator::getInstance()),
       worldSystem(new world_system::WorldSystem()),
-      renderSystem(
-          construct.newRenderSystem(display.getWidth(), display.getHeight())),
+      renderSystem(construct.newRenderSystem(display.getWidth(), display.getHeight())),
       camera(new Camera(glm::vec3(0.0f, 0.0f, 0.0f))) {
   DEBUG_SLOG("App constructed.");
   //  input.setCursorStatus(INPUT_CURSOR_DISABLED);
@@ -44,28 +42,27 @@ App::App(int, char **)
 
   // load skybox
   Image skybox;
-  Loaders::loadImage(skybox, "resources/skybox/14-Hamarikyu_Bridge_B.hdr",
-                     true);
+  Loaders::loadImage(skybox, "resources/skybox/14-Hamarikyu_Bridge_B.hdr", true);
   renderSystem->setSkyBox(&skybox);
 
   // load model
   tinygltf::Model model;
   Loaders::loadModel(model, "resources/meshes/sphere.gltf");
+  tinygltf::Model helmet;
+  Loaders::loadModel(helmet, "resources/meshes/FlightHelmet/FlightHelmet.gltf");
 
-  input.addKeyCallback(
-      INPUT_KEY_ESCAPE, [&display = display](const Input::KeyEvent &event) {
-        if (event.action) {
-          DEBUG_SLOG("KEY PRESSED: ", event.key, "TIME: ", event.time);
-          display.setShouldClose(true);
-        }
-      });
-  input.addKeyCallback(
-      INPUT_KEY_Q, [&input = input](const Input::KeyEvent &event) {
-        if (event.action) {
-          DEBUG_SLOG("KEY PRESSED: ", event.key, "TIME: ", event.time);
-          input.toggleCursorMode();
-        }
-      });
+  input.addKeyCallback(INPUT_KEY_ESCAPE, [&display = display](const Input::KeyEvent &event) {
+    if (event.action) {
+      DEBUG_SLOG("KEY PRESSED: ", event.key, "TIME: ", event.time);
+      display.setShouldClose(true);
+    }
+  });
+  input.addKeyCallback(INPUT_KEY_Q, [&input = input](const Input::KeyEvent &event) {
+    if (event.action) {
+      DEBUG_SLOG("KEY PRESSED: ", event.key, "TIME: ", event.time);
+      input.toggleCursorMode();
+    }
+  });
 
   input.addCursorCallback([&camera = camera](const Input::CursorPos &dt) {
     camera->processRotation(dt.xPos, dt.yPos);
@@ -76,7 +73,7 @@ App::App(int, char **)
   float spacing = 2.5f;
 
   // Add world objects
-  auto regScene = renderSystem->registerGltfScene(model);
+  ModelRegisterReturn regScene = renderSystem->registerGltfModel(model);
   PrimitiveId primId = regScene.numPrimitives.front() - 1;
   for (int i = 0; i < nrRow; ++i) {
     float metallic = i / (float)nrRow;
@@ -88,13 +85,16 @@ App::App(int, char **)
 
       component::Model model = {regScene.meshIds.front(), {{primId, matId}}};
 
-      world_system::WorldObject &worldObject =
-          worldSystem->createWorldObject(component::Transform(
-              glm::vec3((j - (nrCOl / 2.0f)) * spacing,
-                        (i - (nrRow / 2.0f)) * spacing, -10.0f)));
+      world_system::WorldObject &worldObject = worldSystem->createWorldObject(component::Transform(
+          glm::vec3((j - (nrCOl / 2.0f)) * spacing, (i - (nrRow / 2.0f)) * spacing, -10.0f)));
       worldObject.addComponent<component::Model>(model);
     }
   }
+  ModelRegisterReturn helmetModel = renderSystem->registerGltfModel(helmet);
+  world_system::WorldObject &helmetObject =
+      worldSystem->createWorldObject(component::Transform(glm::vec3(0.0f, 0.0f, 10.0f)));
+  helmetObject.addComponent<component::Model>(
+      {helmetModel.meshIds.front(), helmetModel.primIdToMatId.front()});
 
   GLint size;
   glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &size);
@@ -103,8 +103,7 @@ App::App(int, char **)
   std::cout << "SSBO MB: " << size / 1024 << std::endl;
 
   auto err = glGetError();
-  if (err != GL_NO_ERROR)
-    CSLOG("OpenGL ERROR:", err);
+  if (err != GL_NO_ERROR) CSLOG("OpenGL ERROR:", err);
 } // namespace app
 
 void App::processInput(float dt) {
@@ -150,16 +149,15 @@ void App::runRenderLoop(std::string_view renderOutput) {
   //                        renderOutput, true);
   //  assert(rtspClient.start());
 
-  glm::vec3 lightPositions[] = {glm::vec3(0.0f, 0.0f, 0.0f),
-                                glm::vec3(0.0f, 0.0f, 0.0f)};
+  glm::vec3 lightPositions[] = {glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f)};
   world_system::WorldObject &testLight1 =
       worldSystem->createWorldObject(component::Transform(lightPositions[0]));
-  testLight1.addComponent<component::Light>(component::Light(
-      glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
+  testLight1.addComponent<component::Light>(
+      component::Light(glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
   world_system::WorldObject &testLight2 =
       worldSystem->createWorldObject(component::Transform(lightPositions[0]));
-  testLight2.addComponent<component::Light>(component::Light(
-      glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
+  testLight2.addComponent<component::Light>(
+      component::Light(glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
 
   int envMap = 0;
   float ltf, lt, ct, dt = 0.0f;
@@ -172,10 +170,8 @@ void App::runRenderLoop(std::string_view renderOutput) {
     lt = display.getTime();
 
     // rotate light
-    lightPositions[0] =
-        glm::vec3(10 * cos(display.getTime()), 0, 10 * sin(display.getTime()));
-    lightPositions[1] = glm::vec3(16 * sin(display.getTime()), 0,
-                                  16 * cos(display.getTime()) - 10);
+    lightPositions[0] = glm::vec3(10 * cos(display.getTime()), 0, 10 * sin(display.getTime()));
+    lightPositions[1] = glm::vec3(16 * sin(display.getTime()), 0, 16 * cos(display.getTime()) - 10);
     testLight1.getTransform().position(lightPositions[0]);
     testLight2.getTransform().position(lightPositions[1]);
 
@@ -200,38 +196,33 @@ void App::runRenderLoop(std::string_view renderOutput) {
     //            1000)).c_str());
     //      });
     //    }
-    input.addKeyCallback(INPUT_KEY_H, [&envMap, &renderSystem = renderSystem](
-                                          const Input::KeyEvent &keyEvent) {
-      // change env
-      if (keyEvent.action == INPUT_PRESS) {
-        Image skybox;
-        switch (envMap) {
-        case 0:
-          Loaders::loadImage(
-              skybox, "resources/skybox/HDR_111_Parking_Lot_2.hdr", true);
-          break;
-        case 1:
-          Loaders::loadImage(skybox, "resources/skybox/Factory_Catwalk_2k.hdr",
-                             true);
-          break;
+    input.addKeyCallback(
+        INPUT_KEY_H, [&envMap, &renderSystem = renderSystem](const Input::KeyEvent &keyEvent) {
+          // change env
+          if (keyEvent.action == INPUT_PRESS) {
+            Image skybox;
+            switch (envMap) {
+            case 0:
+              Loaders::loadImage(skybox, "resources/skybox/HDR_111_Parking_Lot_2.hdr", true);
+              break;
+            case 1:
+              Loaders::loadImage(skybox, "resources/skybox/Factory_Catwalk_2k.hdr", true);
+              break;
 
-        case 2:
-          Loaders::loadImage(skybox, "resources/skybox/kloppenheim_02_2k.hdr",
-                             true);
-          break;
+            case 2:
+              Loaders::loadImage(skybox, "resources/skybox/kloppenheim_02_2k.hdr", true);
+              break;
 
-        default:
-          Loaders::loadImage(
-              skybox, "resources/skybox/14-Hamarikyu_Bridge_B.hdr", true);
-          envMap = -1;
-        }
-        envMap++;
-        renderSystem->setSkyBox(&skybox);
-      }
-    });
+            default:
+              Loaders::loadImage(skybox, "resources/skybox/14-Hamarikyu_Bridge_B.hdr", true);
+              envMap = -1;
+            }
+            envMap++;
+            renderSystem->setSkyBox(&skybox);
+          }
+        });
     auto err = glGetError();
-    if (err != GL_NO_ERROR)
-      CSLOG("OpenGL ERROR:", err);
+    if (err != GL_NO_ERROR) CSLOG("OpenGL ERROR:", err);
     display.update();
     input.update();
   }

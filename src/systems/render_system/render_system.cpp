@@ -63,7 +63,7 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
   framebuffer.useDefault();
   /* load default materials */
   auto &renderDefaults = RenderDefaults::getInstance();
-  materials.emplace(DEFAULT_MATERIAL_ID, std::unique_ptr<Material>(new Material(
+  materials.emplace(DEFAULT_MATERIAL_ID, std::unique_ptr<BaseMaterial>(new TextureMaterial(
                                              {{DEFAULT_MATERIAL_ID, ShaderType::FORWARD_SHADER},
 					     std::move(renderDefaults.createCheckerTexture()),
                                               std::move(renderDefaults.createBlackTexture()),
@@ -89,7 +89,7 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
 
 RenderSystem::~RenderSystem() { delete lightingSystem; }
 
-SceneRegisterReturn RenderSystem::registerGltfScene(tinygltf::Model &modelData) {
+ModelRegisterReturn RenderSystem::registerGltfModel(tinygltf::Model &modelData) {
   auto sceneData = sceneLoader.loadScene(modelData);
   std::vector<MeshId> ids;
   std::vector<uint> numPrimitives;
