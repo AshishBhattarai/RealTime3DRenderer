@@ -6,6 +6,8 @@
 #include "shaders/general_vs_ubo.hpp"
 #include "shaders/ibl_specular_convolution.h"
 #include "shaders/skybox_shader.h"
+#include "shaders/texture_forward_material.h"
+#include "systems/render_system/shaders/program.h"
 #include "types.h"
 #include <functional>
 #include <glm/glm.hpp>
@@ -32,6 +34,7 @@ struct RendererConfig {
   const std::unordered_map<MaterialId, std::unique_ptr<BaseMaterial>> &materials;
   const Camera *camera;
   const shader::StageCodeMap &flatForwardShader;
+  const shader::StageCodeMap &textureForwardShader;
   const shader::StageCodeMap &skyboxCubeMapShader;
   Texture brdfIntegrationMap;
 };
@@ -45,6 +48,7 @@ private:
 
   shader::GeneralVSUBO generalVSUBO;
   shader::FlatForwardMaterial flatForwardMaterial;
+  shader::TextureForwardMaterial textureForwardMaterial;
   shader::SkyboxShader skyboxCubeMapShader;
 
   Texture brdfIntegrationMap;

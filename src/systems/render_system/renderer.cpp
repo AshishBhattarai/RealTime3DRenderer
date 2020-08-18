@@ -2,20 +2,21 @@
 #include "camera.h"
 #include "components/transform.h"
 #include "core/image.h"
+#include "default_primitives_renderer.h"
 #include "mesh.h"
 #include "render_defaults.h"
 #include "renderable_entity.h"
 #include "shaders/general_vs_ubo.hpp"
+#include "utils/slogger.h"
 #include <glm/gtc/matrix_transform.hpp>
-#include "default_primitives_renderer.h"
 #include <limits>
 
 namespace render_system {
 
 Renderer::Renderer(RendererConfig config)
-    : meshes(config.meshes), materials(config.materials),
-      projectionMatrix(1.0f), camera(config.camera), generalVSUBO(),
-      flatForwardMaterial(config.flatForwardShader),
+    : meshes(config.meshes), materials(config.materials), projectionMatrix(1.0f),
+      camera(config.camera), generalVSUBO(), flatForwardMaterial(config.flatForwardShader),
+      textureForwardMaterial(config.textureForwardShader),
       skyboxCubeMapShader(config.skyboxCubeMapShader),
       brdfIntegrationMap(std::move(config.brdfIntegrationMap)) {
 
@@ -26,12 +27,18 @@ Renderer::Renderer(RendererConfig config)
 }
 
 void Renderer::loadPointLight(const PointLight &pointLight, uint idx) {
+  // TODO: Light to lit material fs ubo ??
   flatForwardMaterial.bind();
   flatForwardMaterial.loadPointLight(pointLight, idx);
+  textureForwardMaterial.bind();
+  textureForwardMaterial.loadPointLight(pointLight, idx);
 }
 
 void Renderer::loadPointLightCount(size_t count) {
+  flatForwardMaterial.bind();
   flatForwardMaterial.loadPointLightSize(count);
+  textureForwardMaterial.bind();
+  textureForwardMaterial.loadPointLightSize(count);
 }
 
 void Renderer::preRender() {
@@ -41,16 +48,20 @@ void Renderer::preRender() {
   generalVSUBO.setCameraPos(camera->position);
 }
 
-void Renderer::preRenderMesh(const Texture &diffuseIbl,
-                             const Texture &specularIbl) {
+void Renderer::preRenderMesh(const Texture &diffuseIbl, const Texture &specularIbl) {
+  // TODO: env maps to lit material fs ubo ??
   flatForwardMaterial.bind();
   flatForwardMaterial.loadIrradianceMap(diffuseIbl);
   flatForwardMaterial.loadBrdfIntegrationMap(brdfIntegrationMap);
   flatForwardMaterial.loadPrefilteredMap(specularIbl);
+  textureForwardMaterial.bind();
+  textureForwardMaterial.loadIrradianceMap(diffuseIbl);
+  textureForwardMaterial.loadBrdfIntegrationMap(brdfIntegrationMap);
+  textureForwardMaterial.loadPrefilteredMap(specularIbl);
+  textureForwardMaterial.unBind();
 }
 
-void Renderer::renderMesh(float, const glm::mat4 &transform,
-                          const MeshId &meshId,
+void Renderer::renderMesh(float, const glm::mat4 &transform, const MeshId &meshId,
                           std::map<PrimitiveId, MaterialId> primIdToMatId) {
   // fetch mesh
   const auto &mesh = meshes.at(meshId);
@@ -59,19 +70,16 @@ void Renderer::renderMesh(float, const glm::mat4 &transform,
     const Primitive &primitive = mesh.primitives[i];
     glBindVertexArray(primitive.vao);
     // set entity specific data
-    const auto &material = materials.at(primIdToMatId[i]);
+    const auto &material = materials.at(primIdToMatId[primitive.vao]);
     if (material->shaderType == ShaderType::FLAT_FORWARD_SHADER) {
       flatForwardMaterial.bind();
-      flatForwardMaterial.loadMaterial(
-          *static_cast<FlatMaterial *>(material.get()));
+      flatForwardMaterial.loadMaterial(*static_cast<FlatMaterial *>(material.get()));
       flatForwardMaterial.loadTransformMatrix(transform);
-    } /*else {
+    } else {
       textureForwardMaterial.bind();
-      textureForwardMaterial.loadMaterial(
-          *static_cast<FlatMaterial *>(material.get()));
+      textureForwardMaterial.loadMaterial(*static_cast<TextureMaterial *>(material.get()));
       textureForwardMaterial.loadTransformMatrix(transform);
     }
-    */
     // draw
     glDrawElements(primitive.mode, primitive.indexCount, primitive.indexType,
                    primitive.indexOffset);
@@ -87,8 +95,7 @@ void Renderer::renderSkybox(const Texture &texture) {
   glDepthFunc(GL_LESS);
 }
 
-void Renderer::updateProjectionMatrix(float ar, float fov, float near,
-                                      float far) {
+void Renderer::updateProjectionMatrix(float ar, float fov, float near, float far) {
   projectionMatrix = glm::perspective(glm::radians(fov), ar, near, far);
   generalVSUBO.setProjectionMatrix(projectionMatrix);
 }

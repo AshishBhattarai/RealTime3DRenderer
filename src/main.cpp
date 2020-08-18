@@ -1,3 +1,4 @@
+#include <cstdlib>
 #define DISABLE_TEST
 
 #include "app/app.h"

@@ -35,7 +35,7 @@ namespace render_system {
  */
 
 uint SceneLoader::loadedMeshCount = 1;
-uint SceneLoader::loadedMaterialCount = 2;
+uint SceneLoader::loadedMaterialCount = DEFAULT_MATERIAL_ID + 1;
 
 Scene SceneLoader::loadScene(tinygltf::Model &modelData) {
   const tinygltf::Scene &scene = modelData.scenes[modelData.defaultScene];
@@ -132,9 +132,6 @@ SceneLoader::ProcessMeshRet SceneLoader::processMesh(const std::map<int, GLuint>
       if (attrib.first.compare("TEXCOORD_0") == 0) {
         vaa = shader::vertex::attribute::TEXCOORD0_LOC;
         hasTexCoords = true;
-      } else if (hasTexCoords) {
-        message = "Invalid mesh data, some contain texcoords and some don't.";
-        success = false;
       }
 
       if (vaa > -1) {
@@ -313,7 +310,7 @@ GLuint SceneLoader::processTexture(const tinygltf::Image &image) {
 
   GLenum type = GL_UNSIGNED_BYTE;
   if (image.bits == 9)
-    ;
+    type = GL_RGB9_E5;
   else if (image.bits == 16)
     type = GL_UNSIGNED_SHORT;
 

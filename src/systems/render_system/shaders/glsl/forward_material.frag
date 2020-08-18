@@ -24,13 +24,7 @@ struct PointLight {
   float intensity; // lumen
 };
 
-#ifdef TEXTURE_MATERIAL
-struct Material {
-  sampler2D albedo;
-  sampler2D metallicRoughness;
-  sampler2D ao;
-};
-#else
+#ifndef TEXTURE_MATERIAL
 struct Material {
   vec3 albedo;
   float metallic;
@@ -40,7 +34,16 @@ struct Material {
 #endif
 
 /* Material and light */
+#ifdef TEXTURE_MATERIAL
+// Opaque types such as sampler cannot be inside struct
+layout(binding = FRAG_U_MATERIAL_ALBEDO_BND) uniform sampler2D material_albedo;
+layout(binding = FRAG_U_MATERIAL_METALLIC_ROUGHNESS_BND) uniform sampler2D material_metallicRoughness;
+layout(binding = FRAG_U_MATERIAL_AO_BND) uniform sampler2D material_ao;
+layout(binding = FRAG_U_MATERIAL_NORMAL_BND) uniform sampler2D material_normal;
+layout(binding = FRAG_U_MATERIAL_EMISSION_BND) uniform sampler2D material_emission;
+#else
 layout(location = FRAG_U_MATERIAL_ALBEDO_LOC) uniform Material material;
+#endif
 layout(location = FRAG_U_POINT_LIGHT0_POS) uniform PointLight pointLights[MAX_POINT_LIGHTS];
 layout(location = FRAG_U_POINT_LIGHT_SIZE) uniform int pointLightSize;
 
@@ -55,24 +58,48 @@ float invSqureAttenuation(float distance, float radius) {
          (distance * distance + 1.0f);
 }
 
-void main() {
-  vec3 N = normalize(fs_in.normal);
-  vec3 V = normalize(fs_in.camPos - fs_in.worldPos);
-  vec3 R = reflect(-V, N); // reflect viewDir on normal
+#ifdef TEXTURE_MATERIAL
+// tangent-normals hax, bad performance
+vec3 getNormalFromMap() {
+    vec3 tangentNormal = texture(material_normal, fs_in.texCoord).xyz * 2.0 - 1.0;
 
+    vec3 Q1  = dFdx(fs_in.worldPos);
+    vec3 Q2  = dFdy(fs_in.worldPos);
+    vec2 st1 = dFdx(fs_in.texCoord);
+    vec2 st2 = dFdy(fs_in.texCoord);
+
+    vec3 N   = normalize(fs_in.normal);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
+    mat3 TBN = mat3(T, B, N);
+
+    return normalize(TBN * tangentNormal);
+}
+#endif
+
+void main() {
   // sample texture
 #ifdef TEXTURE_MATERIAL
-  vec3 albedo = texture(material.albedo, fs_in.texCoord).rgb;
-  vec3 metallicRoughness = texture(material.metallicRoughness, fs_in.texCoord).rgb;
-  float metallic = metallicRoughness.r;
+  vec3 albedo = texture(material_albedo, fs_in.texCoord).rgb;
+  vec3 metallicRoughness = texture(material_metallicRoughness, fs_in.texCoord).rgb;
+  vec3 emission = texture(material_emission, fs_in.texCoord).rgb;
+  /* https://github.com/KhronosGroup/glTF-Sample-Models/issues/54 */
+  float metallic = metallicRoughness.b;
   float roughness = metallicRoughness.g;
-  vec3 ao = texture(material.metallicRoughness, fs_in.texCoord).rgb;
+  // https://github.com/KhronosGroup/glTF/issues/857#issuecomment-290530762
+  float ao = texture(material_ao, fs_in.texCoord).r;
+  vec3 N = getNormalFromMap();
 #else
   vec3 albedo = material.albedo;
   float metallic = material.metallic;
   float roughness = material.roughness;
   float ao = material.ao;
+  const vec3 emission = vec3(0, 0, 0);
+  vec3 N = normalize(fs_in.normal);
 #endif
+
+  vec3 V = normalize(fs_in.camPos - fs_in.worldPos);
+  vec3 R = reflect(-V, N); // reflect viewDir on normal
 
   // calculate surface reflection at zero incidence
   vec3 F0 = vec3(0.04f);
@@ -134,8 +161,7 @@ void main() {
   vec2 envBRDF = texture(brdfIntegrationMap, vec2(NoV, roughness)).rg;
   vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
   vec3 ambient = (diffuse + specular) * ao;
-
   // combine direct and indirect language
-  vec3 color = ambient + Lo;
+  vec3 color = ambient + emission + Lo;
   fragColor = vec4(color, 1.0f);
 }

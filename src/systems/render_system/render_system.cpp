@@ -50,7 +50,8 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
                    config.iblSpecularConvolutionShader, config.iblBrdfIntegrationShader),
       renderer(RendererConfig{config.width, config.height, meshes, materials,
                               &RenderDefaults::getInstance().getCamera(), config.flatForwardShader,
-                              config.skyboxShader, preProcessor.generateBRDFIntegrationMap()}),
+                              config.textureForwardShader, config.skyboxShader,
+                              preProcessor.generateBRDFIntegrationMap()}),
       postProcessor(config.visualPrepShader), framebuffer(config.width, config.height),
       sceneLoader(), coordinator(ecs::Coordinator::getInstance()), skybox(nullptr) {
   /* update projection */
@@ -65,9 +66,9 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
   auto &renderDefaults = RenderDefaults::getInstance();
   materials.emplace(DEFAULT_MATERIAL_ID, std::unique_ptr<BaseMaterial>(new TextureMaterial(
                                              {{DEFAULT_MATERIAL_ID, ShaderType::FORWARD_SHADER},
-					     std::move(renderDefaults.createCheckerTexture()),
-                                              std::move(renderDefaults.createBlackTexture()),
-                                              std::move(renderDefaults.createBlackTexture()),
+                                              std::move(renderDefaults.createCheckerTexture()),
+                                              std::move(renderDefaults.createWhiteTexture()),
+                                              std::move(renderDefaults.createWhiteTexture()),
                                               std::move(renderDefaults.createBlackTexture()),
                                               std::move(renderDefaults.createBlackTexture())})));
   materials.emplace(

@@ -57,9 +57,11 @@ constexpr int PBR_AO_LOC = FRAG_U_MATERIAL_AO_LOC;
 } // namespace flat
 /* only for forward textured material shader */
 namespace textured {
-constexpr uint PBR_ALBEDO_BND = FRAG_U_MATERIAL_ALBEDO_BND;
-constexpr uint PBR_METALLIC_ROUGHNESS_BND = FRAG_U_MATERIAL_METALLIC_ROUGHNESS_BND;
-constexpr uint PBR_AO_BND = FRAG_U_MATERIAL_AO_BND;
+constexpr uint PBR_ALBEDO_UNIT = FRAG_U_MATERIAL_ALBEDO_BND;
+constexpr uint PBR_METALLIC_ROUGHNESS_UNIT = FRAG_U_MATERIAL_METALLIC_ROUGHNESS_BND;
+constexpr uint PBR_AO_UNIT = FRAG_U_MATERIAL_AO_BND;
+constexpr uint PBR_MATERIAL_NORMAL_BND = FRAG_U_MATERIAL_NORMAL_BND;
+constexpr uint PBR_MATERIAL_EMISSION_BND = FRAG_U_MATERIAL_EMISSION_BND;
 } // namespace textured
 } // namespace uniform
 namespace PointLight {

@@ -49,7 +49,7 @@ App::App(int, char **)
   tinygltf::Model model;
   Loaders::loadModel(model, "resources/meshes/sphere.gltf");
   tinygltf::Model helmet;
-  Loaders::loadModel(helmet, "resources/meshes/FlightHelmet/FlightHelmet.gltf");
+  Loaders::loadModel(helmet, "resources/meshes/DamagedHelmet.gltf");
 
   input.addKeyCallback(INPUT_KEY_ESCAPE, [&display = display](const Input::KeyEvent &event) {
     if (event.action) {
@@ -72,9 +72,6 @@ App::App(int, char **)
   int nrCOl = 7;
   float spacing = 2.5f;
 
-  // Add world objects
-  ModelRegisterReturn regScene = renderSystem->registerGltfModel(model);
-  PrimitiveId primId = regScene.numPrimitives.front() - 1;
   for (int i = 0; i < nrRow; ++i) {
     float metallic = i / (float)nrRow;
     for (int j = 0; j < nrCOl; ++j) {
@@ -82,6 +79,10 @@ App::App(int, char **)
       MaterialId matId = renderSystem->registerMaterial<FlatMaterial>(
           ShaderType::FLAT_FORWARD_SHADER, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
           glm::vec3(0.0f, 0.0f, 0.0f), metallic, roughness, 1.0f);
+
+      // Add world objects
+      ModelRegisterReturn regScene = renderSystem->registerGltfModel(model);
+      PrimitiveId primId = regScene.primIdToMatId.front().begin()->first;
 
       component::Model model = {regScene.meshIds.front(), {{primId, matId}}};
 
@@ -92,9 +93,10 @@ App::App(int, char **)
   }
   ModelRegisterReturn helmetModel = renderSystem->registerGltfModel(helmet);
   world_system::WorldObject &helmetObject =
-      worldSystem->createWorldObject(component::Transform(glm::vec3(0.0f, 0.0f, 10.0f)));
+      worldSystem->createWorldObject(component::Transform(glm::vec3(0.0f, 0.0f, -8.0f), glm::vec3(90.0f, 0.0f, 0.0f)));
   helmetObject.addComponent<component::Model>(
       {helmetModel.meshIds.front(), helmetModel.primIdToMatId.front()});
+
 
   GLint size;
   glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &size);

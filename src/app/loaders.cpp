@@ -13,6 +13,7 @@
 
 namespace app::Loaders {
 bool loadModel(tinygltf::Model &model, const char *fileName) {
+  stbi_set_flip_vertically_on_load(false);
   tinygltf::TinyGLTF loader;
   std::string err;
   std::string warn;

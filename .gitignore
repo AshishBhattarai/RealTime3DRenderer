@@ -34,7 +34,10 @@ Thumbs.db
 /.qmake.cache
 /.qmake.stash
 CMakeLists.txt.user
+compile_commands.json
 _vimrc_local.vim
+build.sh
+.clangd/
 
 # qtcreator generated files
 *.pro.user*

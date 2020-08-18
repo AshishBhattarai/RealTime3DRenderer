@@ -23,6 +23,7 @@ class Camera;
 struct RenderSystemConfig {
   const Image &checkerImage; // can be removed after RenderSystem construction
   const shader::StageCodeMap &flatForwardShader;
+  const shader::StageCodeMap &textureForwardShader;
   const shader::StageCodeMap &skyboxShader;
   const shader::StageCodeMap &cubemapShader;
   const shader::StageCodeMap &equirectangularShader;

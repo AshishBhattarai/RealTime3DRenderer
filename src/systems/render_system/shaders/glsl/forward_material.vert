@@ -35,6 +35,6 @@ void main() {
     vs_out.texCoord = texCoord;
 #endif
     vs_out.worldPos = worldPos.xyz;
-    vs_out.normal = mat3(transformation) * normal;
+    vs_out.normal = mat3(transpose(inverse(transformation))) * normal;
     vs_out.camPos = cameraPosition.xyz;
 }
