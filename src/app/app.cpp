@@ -51,15 +51,15 @@ App::App(int, char **)
   tinygltf::Model helmet;
   Loaders::loadModel(helmet, "resources/meshes/DamagedHelmet.gltf");
 
-  input.addKeyCallback(INPUT_KEY_ESCAPE, [&display = display](const Input::KeyEvent &event) {
-    if (event.action) {
-      DEBUG_SLOG("KEY PRESSED: ", event.key, "TIME: ", event.time);
+  input.addKeyCallback(Input::Key::ESCAPE, [&display = display](const Input::KeyEvent &event) {
+    if (event.action == Input::Action::PRESS) {
+      DEBUG_SLOG("KEY PRESSED: ", toUnderlying<Input::Key>(event.key), "TIME: ", event.time);
       display.setShouldClose(true);
     }
   });
-  input.addKeyCallback(INPUT_KEY_Q, [&input = input](const Input::KeyEvent &event) {
-    if (event.action) {
-      DEBUG_SLOG("KEY PRESSED: ", event.key, "TIME: ", event.time);
+  input.addKeyCallback(Input::Key::Q, [&input = input](const Input::KeyEvent &event) {
+    if (event.action == Input::Action::PRESS) {
+      DEBUG_SLOG("KEY PRESSED: ", toUnderlying<Input::Key>(event.key), "TIME: ", event.time);
       input.toggleCursorMode();
     }
   });
@@ -92,11 +92,10 @@ App::App(int, char **)
     }
   }
   ModelRegisterReturn helmetModel = renderSystem->registerGltfModel(helmet);
-  world_system::WorldObject &helmetObject =
-      worldSystem->createWorldObject(component::Transform(glm::vec3(0.0f, 0.0f, -8.0f), glm::vec3(90.0f, 0.0f, 0.0f)));
+  world_system::WorldObject &helmetObject = worldSystem->createWorldObject(
+      component::Transform(glm::vec3(0.0f, 0.0f, -8.0f), glm::vec3(90.0f, 0.0f, 0.0f)));
   helmetObject.addComponent<component::Model>(
       {helmetModel.meshIds.front(), helmetModel.primIdToMatId.front()});
-
 
   GLint size;
   glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &size);
@@ -109,10 +108,10 @@ App::App(int, char **)
 } // namespace app
 
 void App::processInput(float dt) {
-  bool keyW = input.getKey(INPUT_KEY_W);
-  bool keyA = input.getKey(INPUT_KEY_A);
-  bool keyD = input.getKey(INPUT_KEY_D);
-  bool keyS = input.getKey(INPUT_KEY_S);
+  bool keyW = input.getKey(Input::Key::W);
+  bool keyA = input.getKey(Input::Key::A);
+  bool keyD = input.getKey(Input::Key::D);
+  bool keyS = input.getKey(Input::Key::S);
 
   if (keyW && keyA) {
     camera->processMovement(CameraMovement::STRAFE_LEFT, dt);
@@ -162,6 +161,32 @@ void App::runRenderLoop(std::string_view renderOutput) {
       component::Light(glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
 
   int envMap = 0;
+  input.addKeyCallback(
+      Input::Key::H, [&envMap, &renderSystem = renderSystem](const Input::KeyEvent &keyEvent) {
+        // change env
+        if (keyEvent.action == Input::Action::PRESS) {
+          Image skybox;
+          switch (envMap) {
+          case 0:
+            Loaders::loadImage(skybox, "resources/skybox/HDR_111_Parking_Lot_2.hdr", true);
+            break;
+          case 1:
+            Loaders::loadImage(skybox, "resources/skybox/Factory_Catwalk_2k.hdr", true);
+            break;
+
+          case 2:
+            Loaders::loadImage(skybox, "resources/skybox/kloppenheim_02_2k.hdr", true);
+            break;
+
+          default:
+            Loaders::loadImage(skybox, "resources/skybox/14-Hamarikyu_Bridge_B.hdr", true);
+            envMap = -1;
+          }
+          envMap++;
+          renderSystem->setSkyBox(&skybox);
+        }
+      });
+
   float ltf, lt, ct, dt = 0.0f;
   int frameCnt = 0;
   ltf = lt = ct = display.getTime(); // time in seconds
@@ -198,31 +223,6 @@ void App::runRenderLoop(std::string_view renderOutput) {
     //            1000)).c_str());
     //      });
     //    }
-    input.addKeyCallback(
-        INPUT_KEY_H, [&envMap, &renderSystem = renderSystem](const Input::KeyEvent &keyEvent) {
-          // change env
-          if (keyEvent.action == INPUT_PRESS) {
-            Image skybox;
-            switch (envMap) {
-            case 0:
-              Loaders::loadImage(skybox, "resources/skybox/HDR_111_Parking_Lot_2.hdr", true);
-              break;
-            case 1:
-              Loaders::loadImage(skybox, "resources/skybox/Factory_Catwalk_2k.hdr", true);
-              break;
-
-            case 2:
-              Loaders::loadImage(skybox, "resources/skybox/kloppenheim_02_2k.hdr", true);
-              break;
-
-            default:
-              Loaders::loadImage(skybox, "resources/skybox/14-Hamarikyu_Bridge_B.hdr", true);
-              envMap = -1;
-            }
-            envMap++;
-            renderSystem->setSkyBox(&skybox);
-          }
-        });
     auto err = glGetError();
     if (err != GL_NO_ERROR) CSLOG("OpenGL ERROR:", err);
     display.update();

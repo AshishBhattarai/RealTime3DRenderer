@@ -10,9 +10,8 @@ namespace app {
 Display::Display(std::string_view title, int width, int height)
     : title(title), width(width), height(height) {
 
-  glfwSetErrorCallback([](int error, const char *description) {
-    SLOG("[GLFW_CALLBACK]", error, description);
-  });
+  glfwSetErrorCallback(
+      [](int error, const char *description) { SLOG("[GLFW_CALLBACK]", error, description); });
   // init glfw
   if (!glfwInit()) {
     assert(false && "Failed to init GLFW.");
@@ -29,9 +28,8 @@ Display::Display(std::string_view title, int width, int height)
   // create window
   window = glfwCreateWindow(
       width, height,
-      (this->title + " " + std::to_string(width) + "x" + std::to_string(height))
-          .c_str(),
-      NULL, NULL);
+      (this->title + " " + std::to_string(width) + "x" + std::to_string(height)).c_str(), NULL,
+      NULL);
   if (!window) {
     glfwTerminate();
     assert(false && "Failed to create glfw window.");
@@ -63,17 +61,13 @@ void Display::update() {
   glfwPollEvents();
 }
 
-void Display::setShouldClose(bool close) {
-  glfwSetWindowShouldClose(window, close);
-}
+void Display::setShouldClose(bool close) { glfwSetWindowShouldClose(window, close); }
 
 void Display::setSwapInterval(int value) { glfwSwapInterval(value); }
 
 float Display::getTime() const { return (float)glfwGetTime(); }
 bool Display::shouldClose() const { return glfwWindowShouldClose(window); }
-bool Display::isFocused() const {
-  return glfwGetWindowAttrib(window, GLFW_FOCUSED);
-}
+bool Display::isFocused() const { return glfwGetWindowAttrib(window, GLFW_FOCUSED); }
 
 void Display::hideWindow() { glfwHideWindow(window); }
 

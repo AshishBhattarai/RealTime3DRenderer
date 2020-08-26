@@ -41,10 +41,10 @@ template <typename T> constexpr auto toUnderlying(T e) noexcept {
   return static_cast<std::underlying_type_t<T>>(e);
 }
 
-template <typename... T> constexpr auto orUnderlying(T... e) {
+template <typename... T> constexpr auto bOrUnderlying(T... e) {
   return (toUnderlying(e) | ...);
 }
 
-template <typename... T> constexpr auto andUnderlying(T... e) {
+template <typename... T> constexpr auto bAndUnderlying(T... e) {
   return (toUnderlying(e) & ...);
 }
