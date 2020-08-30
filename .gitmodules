@@ -10,3 +10,6 @@
 [submodule "src/third_party/asio"]
 	path = src/third_party/asio
 	url = https://github.com/chriskohlhoff/asio
+[submodule "src/third_party/imgui"]
+	path = src/third_party/imgui
+	url = https://github.com/ocornut/imgui

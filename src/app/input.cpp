@@ -46,13 +46,25 @@ void Input::update() {
     unhandledCursorPos.pop();
     CursorPos dt = pos - lastCursorPos;
     lastCursorPos = pos;
-    cursorCallback(dt);
+    for (CursorCallback &callback : cursorCallbacks) {
+      callback(dt);
+    }
   }
   while (!unhandledKeys.empty()) {
     const KeyEvent &event = unhandledKeys.front();
     unhandledKeys.pop();
     auto it = keyCallbacks.find(event.key);
-    if (it != keyCallbacks.end()) it->second(event);
+    if (it != keyCallbacks.end()) {
+      for (KeyCallback &callback : it->second) {
+        callback(event);
+      }
+    }
+    it = keyCallbacks.find(Input::Key::ANY);
+    if (it != keyCallbacks.end()) {
+      for (KeyCallback &callback : it->second) {
+        callback(event);
+      }
+    }
     bool pressed = event.action == Action::PRESS || event.action == Action::REPEAT;
     keys[event.key] = pressed;
   }

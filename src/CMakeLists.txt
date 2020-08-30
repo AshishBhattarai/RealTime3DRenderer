@@ -6,6 +6,7 @@ set(GLAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad)
 set(GLFW_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw)
 set(GLM_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm)
 set(ASIO_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/asio/asio)
+#set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui)
 
 # opengl
 if(POLICY CMP0072)
@@ -47,6 +48,9 @@ else()
 endif()
 include_directories(${ASIO_INCLUDE_DIR})
     
+#imgui - this is covered by including src/third_party
+#include_directories(${IMGUI_DIR})
+
 
 # modules
 add_subdirectory(third_party)

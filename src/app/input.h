@@ -11,6 +11,8 @@ class Input {
 public:
   /* Key Codes, integer values are from GLFW */
   enum class Key : s16 {
+    /* non GLFW */
+    ANY, // Used to bridge with IMGUI
     /* Unknown key */
     UNKNOWN = -1,
     /* Printable keys */
@@ -220,8 +222,8 @@ private:
   std::map<Key, bool> keys;
 
   /* Event callbacks */
-  std::map<Key, KeyCallback> keyCallbacks;
-  CursorCallback cursorCallback;
+  std::map<Key, std::vector<KeyCallback>> keyCallbacks;
+  std::vector<CursorCallback> cursorCallbacks;
 
   /* Event queues */
   std::queue<KeyEvent> unhandledKeys;
@@ -229,8 +231,10 @@ private:
 
 public:
   Input(const Display &display);
-  void addKeyCallback(Key key, const KeyCallback &callback) { keyCallbacks[key] = callback; }
-  void addCursorCallback(const CursorCallback &callback) { cursorCallback = callback; }
+  void addKeyCallback(Key key, const KeyCallback &callback) {
+    keyCallbacks[key].push_back(callback);
+  }
+  void addCursorCallback(const CursorCallback &callback) { cursorCallbacks.push_back(callback); }
   [[nodiscard]] const CursorPos &getLastCursorPos() const { return lastCursorPos; }
   [[nodiscard]] bool getKey(Key key) { return keys[key]; }
   void setCursorMode(CursorMode mode);
