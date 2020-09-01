@@ -5,8 +5,8 @@
 
 namespace app {
 Input::Input(const Display &display)
-    : display(display), cursorMode(CursorMode::NORMAL),
-      lastCursorPos(display.getWidth() / 2.0f, display.getHeight() / 2.0f) {
+    : display(display), cursorMode(CursorMode::NORMAL), lastCursorPos{display.getWidth() / 2.0f,
+                                                                      display.getHeight() / 2.0f} {
   GLFWwindow *window = display.window;
   //  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetWindowUserPointer(window, this);
@@ -23,7 +23,23 @@ Input::Input(const Display &display)
   // cursor pos callback
   glfwSetCursorPosCallback(window, [](GLFWwindow *window, double xPos, double yPos) {
     Input *self = static_cast<Input *>(glfwGetWindowUserPointer(window));
-    self->unhandledCursorPos.push(CursorPos((float)xPos, (float)yPos));
+    self->unhandledCursorPos.push({(float)xPos, (float)yPos});
+  });
+  // scroll offset callback
+  glfwSetScrollCallback(window, [](GLFWwindow *window, double xoffset, double yoffset) {
+    Input *self = static_cast<Input *>(glfwGetWindowUserPointer(window));
+    self->unhandledScrollOffset.push({(float)xoffset, (float)yoffset});
+  });
+  // mouse button callback
+  glfwSetMouseButtonCallback(window, [](GLFWwindow *window, int button, int action, int mods) {
+    Input *self = static_cast<Input *>(glfwGetWindowUserPointer(window));
+    self->unhandledButtons.push(
+        {static_cast<MouseButton>(button), static_cast<Action>(action), static_cast<Mod>(mods)});
+  });
+  // char callback
+  glfwSetCharCallback(window, [](GLFWwindow *window, uint c) {
+    Input *self = static_cast<Input *>(glfwGetWindowUserPointer(window));
+    self->unhandledChars.push({c});
   });
   setCursorMode(cursorMode);
 }
@@ -41,6 +57,7 @@ void Input::toggleCursorMode() {
 }
 
 void Input::update() {
+  /* CursorPos Events */
   while (!unhandledCursorPos.empty()) {
     const CursorPos &pos = unhandledCursorPos.front();
     unhandledCursorPos.pop();
@@ -50,6 +67,31 @@ void Input::update() {
       callback(dt);
     }
   }
+  /* ScrollOffset Events */
+  while (!unhandledScrollOffset.empty()) {
+    const ScrollOffset &offset = unhandledScrollOffset.front();
+    unhandledScrollOffset.pop();
+    for (ScrollOffsetCallback &callback : scrollCallbacks) {
+      callback(offset);
+    }
+  }
+  /* MouseButton Events */
+  while (!unhandledButtons.empty()) {
+    const MouseButtonEvent &event = unhandledButtons.front();
+    auto it = buttonCallbacks.find(event.button);
+    if (it != buttonCallbacks.end()) {
+      for (ButtonCallback &callback : it->second) {
+        callback(event);
+      }
+    }
+    it = buttonCallbacks.find(MouseButton::ANY);
+    if (it != buttonCallbacks.end()) {
+      for (ButtonCallback &callback : it->second) {
+        callback(event);
+      }
+    }
+  }
+  /* Keyboard Keys Events */
   while (!unhandledKeys.empty()) {
     const KeyEvent &event = unhandledKeys.front();
     unhandledKeys.pop();
@@ -59,7 +101,7 @@ void Input::update() {
         callback(event);
       }
     }
-    it = keyCallbacks.find(Input::Key::ANY);
+    it = keyCallbacks.find(Key::ANY);
     if (it != keyCallbacks.end()) {
       for (KeyCallback &callback : it->second) {
         callback(event);
@@ -67,6 +109,15 @@ void Input::update() {
     }
     bool pressed = event.action == Action::PRESS || event.action == Action::REPEAT;
     keys[event.key] = pressed;
+  }
+  /* Char Events  */
+  while (!unhandledChars.empty()) {
+    // TODO: const& if members added to CharEvent
+    CharEvent event = unhandledChars.front();
+    unhandledChars.pop();
+    for (CharCallback callback : charCallbacks) {
+      callback(event);
+    }
   }
 }
 
@@ -208,18 +259,23 @@ static_assert(toUnderlying<Input::Mod>(Input::Mod::CAPS_LOCK) == GLFW_MOD_CAPS_L
 static_assert(toUnderlying<Input::Mod>(Input::Mod::NUM_LOCK) == GLFW_MOD_NUM_LOCK);
 
 /* mouse button */
-static_assert(toUnderlying<Input::Mouse>(Input::Mouse::BUTTON_1) == GLFW_MOUSE_BUTTON_1);
-static_assert(toUnderlying<Input::Mouse>(Input::Mouse::BUTTON_2) == GLFW_MOUSE_BUTTON_2);
-static_assert(toUnderlying<Input::Mouse>(Input::Mouse::BUTTON_3) == GLFW_MOUSE_BUTTON_3);
-static_assert(toUnderlying<Input::Mouse>(Input::Mouse::BUTTON_4) == GLFW_MOUSE_BUTTON_4);
-static_assert(toUnderlying<Input::Mouse>(Input::Mouse::BUTTON_5) == GLFW_MOUSE_BUTTON_5);
-static_assert(toUnderlying<Input::Mouse>(Input::Mouse::BUTTON_6) == GLFW_MOUSE_BUTTON_6);
-static_assert(toUnderlying<Input::Mouse>(Input::Mouse::BUTTON_7) == GLFW_MOUSE_BUTTON_7);
-static_assert(toUnderlying<Input::Mouse>(Input::Mouse::BUTTON_8) == GLFW_MOUSE_BUTTON_8);
-static_assert(toUnderlying<Input::Mouse>(Input::Mouse::BUTTON_LAST) == GLFW_MOUSE_BUTTON_LAST);
-static_assert(toUnderlying<Input::Mouse>(Input::Mouse::BUTTON_LEFT) == GLFW_MOUSE_BUTTON_LEFT);
-static_assert(toUnderlying<Input::Mouse>(Input::Mouse::BUTTON_RIGHT) == GLFW_MOUSE_BUTTON_RIGHT);
-static_assert(toUnderlying<Input::Mouse>(Input::Mouse::BUTTON_MIDDLE) == GLFW_MOUSE_BUTTON_MIDDLE);
+static_assert(toUnderlying<Input::MouseButton>(Input::MouseButton::ONE) == GLFW_MOUSE_BUTTON_1);
+static_assert(toUnderlying<Input::MouseButton>(Input::MouseButton::TWO) == GLFW_MOUSE_BUTTON_2);
+static_assert(toUnderlying<Input::MouseButton>(Input::MouseButton::THREE) == GLFW_MOUSE_BUTTON_3);
+static_assert(toUnderlying<Input::MouseButton>(Input::MouseButton::FOUR) == GLFW_MOUSE_BUTTON_4);
+static_assert(toUnderlying<Input::MouseButton>(Input::MouseButton::FIVE) == GLFW_MOUSE_BUTTON_5);
+static_assert(toUnderlying<Input::MouseButton>(Input::MouseButton::SIX) == GLFW_MOUSE_BUTTON_6);
+static_assert(toUnderlying<Input::MouseButton>(Input::MouseButton::SEVEN) == GLFW_MOUSE_BUTTON_7);
+static_assert(toUnderlying<Input::MouseButton>(Input::MouseButton::EIGHT) == GLFW_MOUSE_BUTTON_8);
+static_assert(toUnderlying<Input::MouseButton>(Input::MouseButton::LEFT) == GLFW_MOUSE_BUTTON_LEFT);
+static_assert(toUnderlying<Input::MouseButton>(Input::MouseButton::RIGHT) ==
+              GLFW_MOUSE_BUTTON_RIGHT);
+static_assert(toUnderlying<Input::MouseButton>(Input::MouseButton::MIDDLE) ==
+              GLFW_MOUSE_BUTTON_MIDDLE);
+
+/**/
+static_assert(toUnderlying<Input::MouseButton>(Input::MouseButton::EIGHT) ==
+              GLFW_MOUSE_BUTTON_LAST);
 
 /* cursor status */
 static_assert(toUnderlying<Input::CursorMode>(Input::CursorMode::NORMAL) == GLFW_CURSOR_NORMAL);

@@ -12,7 +12,7 @@ public:
   /* Key Codes, integer values are from GLFW */
   enum class Key : s16 {
     /* non GLFW */
-    ANY, // Used to bridge with IMGUI
+    ANY, // Not actual key but use for adding callback for 'any' key press.
     /* Unknown key */
     UNKNOWN = -1,
     /* Printable keys */
@@ -172,19 +172,19 @@ public:
   };
 
   /* mouse buttons */
-  enum class Mouse : u8 {
-    BUTTON_1 = 0,
-    BUTTON_2 = 1,
-    BUTTON_3 = 2,
-    BUTTON_4 = 3,
-    BUTTON_5 = 4,
-    BUTTON_6 = 5,
-    BUTTON_7 = 6,
-    BUTTON_8 = 7,
-    BUTTON_LAST = BUTTON_8,
-    BUTTON_LEFT = BUTTON_1,
-    BUTTON_RIGHT = BUTTON_2,
-    BUTTON_MIDDLE = BUTTON_3
+  enum class MouseButton : u8 {
+    ANY, // Not actual button but use for adding callback for 'any' button press.
+    ONE = 0,
+    TWO = 1,
+    THREE = 2,
+    FOUR = 3,
+    FIVE = 4,
+    SIX = 5,
+    SEVEN = 6,
+    EIGHT = 7,
+    LEFT = ONE,
+    RIGHT = TWO,
+    MIDDLE = THREE
   };
 
   /* cursor Mode*/
@@ -200,20 +200,38 @@ public:
     double time; // keyevent time TODO: Use standard c++ timestamp?
   };
 
+  struct MouseButtonEvent {
+    MouseButton button;
+    Action action;
+    Mod modifiers;
+  };
+
+  struct CharEvent {
+    uint characer;
+  };
+
   struct CursorPos {
     float xPos;
     float yPos;
-    CursorPos(float xPos, float yPos) : xPos(xPos), yPos(yPos) {}
 
     friend CursorPos operator-(const CursorPos &lhs, const CursorPos &rhs) {
-      return CursorPos(lhs.xPos - rhs.xPos, lhs.yPos - rhs.yPos);
+      return {lhs.xPos - rhs.xPos, lhs.yPos - rhs.yPos};
     }
 
     bool operator!=(const CursorPos &rhs) { return (xPos != rhs.xPos || yPos != rhs.yPos); }
   };
 
+  struct ScrollOffset {
+    float x;
+    float y;
+  };
+
   using KeyCallback = std::function<void(const KeyEvent &keyEvent)>;
+  using ButtonCallback = std::function<void(const MouseButtonEvent &buttonEvent)>;
   using CursorCallback = std::function<void(const CursorPos &dt)>; // dt - cursor pos delta
+  using ScrollOffsetCallback = std::function<void(const ScrollOffset &offset)>;
+  using CharCallback = std::function<void(CharEvent c)>;
+  // make above const& if more members added to CharEvent
 
 private:
   const Display &display;
@@ -223,11 +241,17 @@ private:
 
   /* Event callbacks */
   std::map<Key, std::vector<KeyCallback>> keyCallbacks;
+  std::map<MouseButton, std::vector<ButtonCallback>> buttonCallbacks;
   std::vector<CursorCallback> cursorCallbacks;
+  std::vector<ScrollOffsetCallback> scrollCallbacks;
+  std::vector<CharCallback> charCallbacks;
 
   /* Event queues */
   std::queue<KeyEvent> unhandledKeys;
+  std::queue<MouseButtonEvent> unhandledButtons;
   std::queue<CursorPos> unhandledCursorPos;
+  std::queue<ScrollOffset> unhandledScrollOffset;
+  std::queue<CharEvent> unhandledChars;
 
 public:
   Input(const Display &display);
