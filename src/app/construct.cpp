@@ -41,8 +41,7 @@ render_system::RenderSystem *Construct::newRenderSystem(int width, int height) {
       {checkerImage,
        /**
         * const shader::StageCodeMap &flatForwardShader;
-        * const shader::StageCodeMap &textureForwardShader;
-        * const shader::StageCodeMap &skyboxShader;
+        * const shader::StageCodeMap &textureForwardShader; const shader::StageCodeMap &skyboxShader;
         * const shader::StageCodeMap &cubemapShader;
         * const shader::StageCodeMap &equirectangularShader;
         * const shader::StageCodeMap &visualPrepShader;

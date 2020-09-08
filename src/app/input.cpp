@@ -4,9 +4,10 @@
 #include <GLFW/glfw3.h>
 
 namespace app {
-Input::Input(const Display &display)
-    : display(display), cursorMode(CursorMode::NORMAL), lastCursorPos{display.getWidth() / 2.0f,
-                                                                      display.getHeight() / 2.0f} {
+Input::Input(Display &display)
+    : display(display),
+      cursorMode(CursorMode::NORMAL), lastCursorPos{display.getDisplaySize().x / 2.0f,
+                                                    display.getDisplaySize().y / 2.0f} {
   GLFWwindow *window = display.window;
   //  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetWindowUserPointer(window, this);
@@ -17,8 +18,8 @@ Input::Input(const Display &display)
      * If the key(int) doesn't match ony enums(Keys) it'll be a garbage enum
      * (won't equate to any enums).
      */
-    self->unhandledKeys.push({static_cast<Key>(key), static_cast<Action>(action),
-                              static_cast<Mod>(mods), glfwGetTime()});
+    self->unhandledKeys.push(
+        {static_cast<Mod>(mods), static_cast<Key>(key), static_cast<Action>(action)});
   });
   // cursor pos callback
   glfwSetCursorPosCallback(window, [](GLFWwindow *window, double xPos, double yPos) {
@@ -34,13 +35,26 @@ Input::Input(const Display &display)
   glfwSetMouseButtonCallback(window, [](GLFWwindow *window, int button, int action, int mods) {
     Input *self = static_cast<Input *>(glfwGetWindowUserPointer(window));
     self->unhandledButtons.push(
-        {static_cast<MouseButton>(button), static_cast<Action>(action), static_cast<Mod>(mods)});
+        {static_cast<Mod>(mods), static_cast<MouseButton>(button), static_cast<Action>(action)});
   });
   // char callback
   glfwSetCharCallback(window, [](GLFWwindow *window, uint c) {
     Input *self = static_cast<Input *>(glfwGetWindowUserPointer(window));
     self->unhandledChars.push({c});
   });
+
+  glfwSetFramebufferSizeCallback(window, [](GLFWwindow *window, int width, int height) {
+    Input *self = static_cast<Input *>(glfwGetWindowUserPointer(window));
+    self->display.fboSize.x = width;
+    self->display.fboSize.y = height;
+  });
+
+  glfwSetWindowSizeCallback(window, [](GLFWwindow *window, int width, int height) {
+    Input *self = static_cast<Input *>(glfwGetWindowUserPointer(window));
+    self->display.displaySize.x = width;
+    self->display.displaySize.y = height;
+  });
+
   setCursorMode(cursorMode);
 }
 
@@ -55,6 +69,8 @@ void Input::toggleCursorMode() {
     cursorMode = CursorMode::NORMAL;
   setCursorMode(cursorMode);
 }
+
+void Input::setCursorPos(CursorPos pos) { glfwSetCursorPos(display.window, pos.x, pos.y); }
 
 void Input::update() {
   /* CursorPos Events */
@@ -78,6 +94,7 @@ void Input::update() {
   /* MouseButton Events */
   while (!unhandledButtons.empty()) {
     const MouseButtonEvent &event = unhandledButtons.front();
+    unhandledKeys.pop();
     auto it = buttonCallbacks.find(event.button);
     if (it != buttonCallbacks.end()) {
       for (ButtonCallback &callback : it->second) {

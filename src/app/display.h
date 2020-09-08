@@ -1,24 +1,32 @@
 #pragma once
 
+#include <glm/glm.hpp>
+#include <map>
 #include <string>
 
 class GLFWwindow;
+class GLFWcursor;
 namespace app {
 
 class Display {
+public:
+  enum class CursorShape { ARROW, IBEAM, CROSSHAIR, HAND, HRESIZE, VRESIZE };
+
 private:
   static constexpr int MAJOR_VERSION = 4;
   static constexpr int MINOR_VERSION = 6;
+  static constexpr int CURSOR_SHAPE_COUNT = 6;
 
   std::string title;
-  int width;
-  int height;
+  glm::ivec2 displaySize;
+  glm::ivec2 fboSize;
   GLFWwindow *window;
+  std::map<CursorShape, GLFWcursor *> mouseCursors;
 
   friend class Input;
 
 public:
-  Display(std::string_view title, int width, int height);
+  Display(std::string_view title, glm::ivec2 displaySize);
   ~Display();
 
   // swap buffer & poll events
@@ -27,16 +35,17 @@ public:
   // setters
   void setShouldClose(bool close);
   void setSwapInterval(int value);
+  void setCursorShape(CursorShape shape);
 
   // getters
-  int getWidth() const { return width; }
-  int getHeight() const { return height; }
-  float getAspectRatio() const { return (float)width / height; }
+  [[nodiscard]] float getAspectRatio() const { return (float)displaySize.x / displaySize.y; }
+  [[nodiscard]] glm::ivec2 getDisplaySize() const { return displaySize; }
+  [[nodiscard]] glm::ivec2 getFboSize() const { return fboSize; }
 
   // time since the window was initialize usually in nano or micro seconds
-  float getTime() const;
-  bool shouldClose() const;
-  bool isFocused() const;
+  [[nodiscard]] float getTime() const;
+  [[nodiscard]] bool shouldClose() const;
+  [[nodiscard]] bool isFocused() const;
 
   void hideWindow();
   void showWindow();

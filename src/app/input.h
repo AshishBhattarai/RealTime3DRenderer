@@ -191,19 +191,18 @@ public:
   enum class CursorMode : u32 { NORMAL = 0x00034001, HIDDEN = 0x00034002, DISABLED = 0x00034003 };
 
   /* keyboard keys + mouse button action */
-  enum class Action { RELEASE = 0, PRESS = 1, REPEAT = 2 };
+  enum class Action : u8 { RELEASE = 0, PRESS = 1, REPEAT = 2 };
 
   struct KeyEvent {
+    Mod modifiers;
     Key key;
     Action action;
-    Mod modifiers;
-    double time; // keyevent time TODO: Use standard c++ timestamp?
   };
 
   struct MouseButtonEvent {
+    Mod modifiers;
     MouseButton button;
     Action action;
-    Mod modifiers;
   };
 
   struct CharEvent {
@@ -211,14 +210,14 @@ public:
   };
 
   struct CursorPos {
-    float xPos;
-    float yPos;
+    float x;
+    float y;
 
     friend CursorPos operator-(const CursorPos &lhs, const CursorPos &rhs) {
-      return {lhs.xPos - rhs.xPos, lhs.yPos - rhs.yPos};
+      return {lhs.x - rhs.x, lhs.y - rhs.y};
     }
 
-    bool operator!=(const CursorPos &rhs) { return (xPos != rhs.xPos || yPos != rhs.yPos); }
+    bool operator!=(const CursorPos &rhs) { return (x != rhs.x || y != rhs.y); }
   };
 
   struct ScrollOffset {
@@ -226,15 +225,19 @@ public:
     float y;
   };
 
-  using KeyCallback = std::function<void(const KeyEvent &keyEvent)>;
-  using ButtonCallback = std::function<void(const MouseButtonEvent &buttonEvent)>;
-  using CursorCallback = std::function<void(const CursorPos &dt)>; // dt - cursor pos delta
-  using ScrollOffsetCallback = std::function<void(const ScrollOffset &offset)>;
-  using CharCallback = std::function<void(CharEvent c)>;
+  using KeyCallback = std::function<void(const KeyEvent keyEvent)>;
+  using ButtonCallback = std::function<void(const MouseButtonEvent buttonEvent)>;
+  using CursorCallback = std::function<void(const CursorPos dt)>; // dt - cursor pos delta
+  using ScrollOffsetCallback = std::function<void(const ScrollOffset offset)>;
+  using CharCallback = std::function<void(const CharEvent c)>;
   // make above const& if more members added to CharEvent
 
 private:
-  const Display &display;
+  /**
+   * This is really bad idea.
+   * TODO: move everything related to glfw to display.cpp
+   */
+  Display &display;
   CursorMode cursorMode;
   CursorPos lastCursorPos;
   std::map<Key, bool> keys;
@@ -254,14 +257,22 @@ private:
   std::queue<CharEvent> unhandledChars;
 
 public:
-  Input(const Display &display);
+  Input(Display &display);
   void addKeyCallback(Key key, const KeyCallback &callback) {
     keyCallbacks[key].push_back(callback);
   }
+  void addMouseButton(MouseButton button, const ButtonCallback &callback) {
+    buttonCallbacks[button].push_back(callback);
+  }
   void addCursorCallback(const CursorCallback &callback) { cursorCallbacks.push_back(callback); }
+  void addScrollOffsetCallback(const ScrollOffsetCallback &callback) {
+    scrollCallbacks.push_back(callback);
+  }
+  void addCharCallback(const CharCallback &callback) { charCallbacks.push_back(callback); }
   [[nodiscard]] const CursorPos &getLastCursorPos() const { return lastCursorPos; }
   [[nodiscard]] bool getKey(Key key) { return keys[key]; }
   void setCursorMode(CursorMode mode);
+  void setCursorPos(CursorPos pos);
   void toggleCursorMode();
   void update();
 };

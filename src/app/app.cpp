@@ -21,7 +21,6 @@
 #include "utils/slogger.h"
 #include <asio_noexcept.h>
 #include <glm/vec3.hpp>
-#include <iostream>
 #include <map>
 #include <tinygltf/tiny_gltf.h>
 
@@ -29,10 +28,11 @@ using namespace render_system;
 
 namespace app {
 App::App(int, char **)
-    : threadPool(NUM_THREADS), commandServer(8003, 4), display("App", 1366, 768), input(display),
-      construct(), coordinator(ecs::Coordinator::getInstance()),
+    : threadPool(NUM_THREADS), commandServer(8003, 4), display("App", glm::ivec2(1366, 768)),
+      input(display), construct(), coordinator(ecs::Coordinator::getInstance()),
       worldSystem(new world_system::WorldSystem()),
-      renderSystem(construct.newRenderSystem(display.getWidth(), display.getHeight())),
+      renderSystem(
+          construct.newRenderSystem(display.getDisplaySize().x, display.getDisplaySize().y)),
       camera(new Camera(glm::vec3(0.0f, 0.0f, 0.0f))) {
   DEBUG_SLOG("App constructed.");
   //  input.setCursorStatus(INPUT_CURSOR_DISABLED);
@@ -53,20 +53,19 @@ App::App(int, char **)
 
   input.addKeyCallback(Input::Key::ESCAPE, [&display = display](const Input::KeyEvent &event) {
     if (event.action == Input::Action::PRESS) {
-      DEBUG_SLOG("KEY PRESSED: ", toUnderlying<Input::Key>(event.key), "TIME: ", event.time);
+      DEBUG_SLOG("KEY PRESSED: ", toUnderlying<Input::Key>(event.key));
       display.setShouldClose(true);
     }
   });
   input.addKeyCallback(Input::Key::Q, [&input = input](const Input::KeyEvent &event) {
     if (event.action == Input::Action::PRESS) {
-      DEBUG_SLOG("KEY PRESSED: ", toUnderlying<Input::Key>(event.key), "TIME: ", event.time);
+      DEBUG_SLOG("KEY PRESSED: ", toUnderlying<Input::Key>(event.key));
       input.toggleCursorMode();
     }
   });
 
-  input.addCursorCallback([&camera = camera](const Input::CursorPos &dt) {
-    camera->processRotation(dt.xPos, dt.yPos);
-  });
+  input.addCursorCallback(
+      [&camera = camera](const Input::CursorPos &dt) { camera->processRotation(dt.x, dt.y); });
 
   int nrRow = 7;
   int nrCOl = 7;

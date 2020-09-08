@@ -7,8 +7,8 @@
 
 namespace app {
 
-Display::Display(std::string_view title, int width, int height)
-    : title(title), width(width), height(height) {
+Display::Display(std::string_view title, glm::ivec2 displaySize)
+    : title(title), displaySize(displaySize), fboSize(0, 0) {
 
   glfwSetErrorCallback(
       [](int error, const char *description) { SLOG("[GLFW_CALLBACK]", error, description); });
@@ -27,9 +27,10 @@ Display::Display(std::string_view title, int width, int height)
 
   // create window
   window = glfwCreateWindow(
-      width, height,
-      (this->title + " " + std::to_string(width) + "x" + std::to_string(height)).c_str(), NULL,
-      NULL);
+      displaySize.x, displaySize.y,
+      (this->title + " " + std::to_string(displaySize.x) + "x" + std::to_string(displaySize.y))
+          .c_str(),
+      NULL, NULL);
   if (!window) {
     glfwTerminate();
     assert(false && "Failed to create glfw window.");
@@ -45,12 +46,27 @@ Display::Display(std::string_view title, int width, int height)
     exit(FailureCode::GLAD_INIT_FALUIRE);
   }
   glfwSwapInterval(1);
-  glViewport(0, 0, width, height);
+  glViewport(0, 0, displaySize.x, displaySize.y);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
   hideWindow();
+
+  // init cursor shapes, can add new shape with glfwCreateCursor()
+  mouseCursors[CursorShape::ARROW] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+  mouseCursors[CursorShape::IBEAM] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+  mouseCursors[CursorShape::VRESIZE] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+  mouseCursors[CursorShape::HRESIZE] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+  mouseCursors[CursorShape::HAND] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+
+  glfwGetFramebufferSize(window, &fboSize.x, &fboSize.y);
 }
 
 Display::~Display() {
+  // destory crusors
+  for (auto &cursor : mouseCursors) {
+    glfwDestroyCursor(cursor.second);
+    cursor.second = NULL;
+  }
+
   glfwDestroyWindow(window);
   glfwTerminate();
   DEBUG_SLOG("Display destoryed.");
@@ -62,14 +78,13 @@ void Display::update() {
 }
 
 void Display::setShouldClose(bool close) { glfwSetWindowShouldClose(window, close); }
-
 void Display::setSwapInterval(int value) { glfwSwapInterval(value); }
+void Display::setCursorShape(CursorShape shape) { glfwSetCursor(window, mouseCursors[shape]); }
 
 float Display::getTime() const { return (float)glfwGetTime(); }
 bool Display::shouldClose() const { return glfwWindowShouldClose(window); }
 bool Display::isFocused() const { return glfwGetWindowAttrib(window, GLFW_FOCUSED); }
 
 void Display::hideWindow() { glfwHideWindow(window); }
-
 void Display::showWindow() { glfwShowWindow(window); }
 } // namespace app
