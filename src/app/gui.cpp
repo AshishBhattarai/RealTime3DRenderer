@@ -119,12 +119,14 @@ void Gui::newFrame(float dt, Input &input, Display &display) {
     input.setCursorMode(Input::CursorMode::NORMAL);
   }
 
+  // TODO: add this to resize callback
   // set framebuffer size - set every frame for resize support
   glm::ivec2 displaySize = display.getDisplaySize();
   glm::ivec2 fboSize = display.getFboSize();
 
   io.DisplaySize = ImVec2((float)displaySize.x, (float)displaySize.y);
   // ratio of framebufferSize & displaySize
+  // coz in retian display fboSize != displaySize (fboSize is about 2xdisplaySize)
   if (displaySize.x > 0 && displaySize.y > 0)
     io.DisplayFramebufferScale =
         ImVec2((float)fboSize.x / displaySize.x, (float)fboSize.y / displaySize.y);

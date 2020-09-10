@@ -1,7 +1,6 @@
 #pragma once
 
 #include "program.h"
-#include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp>
 
 namespace render_system {

@@ -3,6 +3,7 @@
 #include "../point_light.h"
 #include "../texture.h"
 #include "config.h"
+#include <glm/gtc/type_ptr.hpp>
 
 namespace render_system::shader {
 FlatForwardMaterial::FlatForwardMaterial(const StageCodeMap &codeMap) : Program(codeMap) {}

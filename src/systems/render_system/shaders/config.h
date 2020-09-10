@@ -140,6 +140,29 @@ constexpr int ROUGHNESS_LOC = FRAG_U_ROUGHNESS_LOC;
 } // namespace iblSpecularConvolution
 #undef CUBEMAP_VERTEX_SHADER
 #undef IBL_SPECULAR_CONVOLUTION_FRAGMENT_SHADER
+#undef GLSL_CONFIG_H
+
+#define GUI_VERTEX_SHADER
+#define GUI_FRAGMENT_SHADER
+#include "glsl/config.h"
+namespace gui {
+namespace vertex {
+namespace attribute {
+constexpr int POSITION_LOC = VERT_A_POSITION_LOC;
+constexpr int TEXCOORD0_LOC = VERT_A_TEXCOORD0_LOC;
+constexpr int COLOR_LOC = VERT_A_COLOR_LOC;
+} // namespace attribute
+namespace uniform {
+constexpr int PROJECTION_MAT_LOC = VERT_U_PROJECTION_MAT_LOC;
+}
+} // namespace vertex
+namespace fragment {
+constexpr int TEXTURE_BND = COLOR_ATTACHMENT0;
+}
+} // namespace gui
+#undef GUI_VERTEX
+#undef GUI_VERTEX
+#undef GLSL_CONFIG_H
 } // namespace shader
 enum class ShaderType { FORWARD_SHADER, FLAT_FORWARD_SHADER };
 } // namespace render_system

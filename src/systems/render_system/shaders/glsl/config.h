@@ -1,6 +1,13 @@
 #ifndef GLSL_CONFIG_H
 #define GLSL_CONFIG_H
 
+/**
+ * This was really stupid idea, should have used --auto-map-bindings and  --auto-map-bindings
+ * --auto-map-locations options glslangvalidator to auto generate location and bindings config.
+ * 
+ * TODO: Do this properly
+ */
+
 // configuration file for vertex shaders
 #ifdef FORWARD_VERTEX_SHADER
 #define VERTEX_SHADER
@@ -97,6 +104,22 @@
 
 #if defined(VISUAL_PREP_VERTEX_SHADER) || defined(VISUAL_PREP_FRAGMENT_SHADER)
 #define VERT_V_TEX_COORDS_LOC 10
+#endif
+
+#if defined GUI_VERTEX_SHADER
+#define VERT_A_POSITION_LOC 0
+#define VERT_A_TEXCOORD0_LOC 1
+#define VERT_A_COLOR_LOC 2
+#define VERT_U_PROJECTION_MAT_LOC 0
+#endif
+
+#if defined GUI_FRAGMENT_SHADE
+#define FRAGMENT_SHADER
+#define FRAG_U_TEXTURE_BND 0
+#endif
+
+#if defined(GUI_VERTEX_SHADER) || defined(GUI_FRAGMENT_SHADER)
+#define VERT_INTERFACE_BLOCK_LOC 0
 #endif
 
 #ifdef VERTEX_SHADER
