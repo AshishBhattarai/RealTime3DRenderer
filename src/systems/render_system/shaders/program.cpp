@@ -21,6 +21,7 @@ GLuint Program::createShader(const Buffer &data, GLenum type) {
     SLOG("Failed to compile", type, infoLog);
     glDeleteShader(shader);
     shader = 0;
+    DEBUG_CSLOG("Shader Create Error:", infoLog);
     assert(success && "Shader compile failed.");
   }
   return shader;

@@ -12,7 +12,7 @@ public:
   /* Key Codes, integer values are from GLFW */
   enum class Key : s16 {
     /* non GLFW */
-    ANY, // Not actual key but use for adding callback for 'any' key press.
+    ANY = -2, // Not actual key but use for adding callback for 'any' key press.
     /* Unknown key */
     UNKNOWN = -1,
     /* Printable keys */
@@ -173,7 +173,7 @@ public:
 
   /* mouse buttons */
   enum class MouseButton : u8 {
-    ANY, // Not actual button but use for adding callback for 'any' button press.
+    ANY = 100, // Not actual button but use for adding callback for 'any' button press.
     ONE = 0,
     TWO = 1,
     THREE = 2,
@@ -194,13 +194,13 @@ public:
   enum class Action : u8 { RELEASE = 0, PRESS = 1, REPEAT = 2 };
 
   struct KeyEvent {
-    Mod modifiers;
+    int modifiers;
     Key key;
     Action action;
   };
 
   struct MouseButtonEvent {
-    Mod modifiers;
+    int modifiers;
     MouseButton button;
     Action action;
   };
@@ -230,6 +230,7 @@ public:
   using CursorCallback = std::function<void(const CursorPos dt)>; // dt - cursor pos delta
   using ScrollOffsetCallback = std::function<void(const ScrollOffset offset)>;
   using CharCallback = std::function<void(const CharEvent c)>;
+  using CursorModeCallback = std::function<void(const CursorMode)>;
   // make above const& if more members added to CharEvent
 
 private:
@@ -241,6 +242,7 @@ private:
   CursorMode cursorMode;
   CursorPos lastCursorPos;
   std::map<Key, bool> keys;
+  std::map<MouseButton, bool> mouseButtons;
 
   /* Event callbacks */
   std::map<Key, std::vector<KeyCallback>> keyCallbacks;
@@ -248,6 +250,7 @@ private:
   std::vector<CursorCallback> cursorCallbacks;
   std::vector<ScrollOffsetCallback> scrollCallbacks;
   std::vector<CharCallback> charCallbacks;
+  CursorModeCallback cursorModeCallback; // for gui mouse disable
 
   /* Event queues */
   std::queue<KeyEvent> unhandledKeys;
@@ -269,8 +272,11 @@ public:
     scrollCallbacks.push_back(callback);
   }
   void addCharCallback(const CharCallback &callback) { charCallbacks.push_back(callback); }
+  void setCursorModeCallback(const CursorModeCallback &callback) { cursorModeCallback = callback; }
   [[nodiscard]] const CursorPos &getLastCursorPos() const { return lastCursorPos; }
   [[nodiscard]] bool getKey(Key key) { return keys[key]; }
+  [[nodiscard]] bool getButton(MouseButton button) { return mouseButtons[button]; }
+  [[nodiscard]] CursorMode getCursorMode() { return cursorMode; }
   void setCursorMode(CursorMode mode);
   void setCursorPos(CursorPos pos);
   void toggleCursorMode();

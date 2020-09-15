@@ -20,6 +20,7 @@ target_link_libraries(
     ${OPENGL_LIBRARIES}
     ${GLAD_LIBRARIES}
     ${GLFW_LIBRARIES}
+    ${IMGUI_LIBRARIES}
     dl
     pthread
 )

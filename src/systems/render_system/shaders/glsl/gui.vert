@@ -13,10 +13,10 @@ layout(location = VERT_INTERFACE_BLOCK_LOC) out VS_OUT {
 }
 vs_out;
 
-layout(location = VERT_U_PROJECTION_MAT_LOC) uniform mat4 projection_mat;
+layout(location = VERT_U_PROJECTION_MAT_LOC) uniform mat4 projectionMat;
 
 void main() {
-  gl_Position = projection_mat * vec4(position, 0.0f, 1.0f);
+  gl_Position = projectionMat * vec4(position, 0.0f, 1.0f);
   vs_out.texCoords = texCoords;
   vs_out.color = color;
 }

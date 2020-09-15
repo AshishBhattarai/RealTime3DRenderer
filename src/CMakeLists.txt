@@ -50,7 +50,7 @@ include_directories(${ASIO_INCLUDE_DIR})
     
 #imgui - this is covered by including src/third_party
 #include_directories(${IMGUI_DIR})
-
+set(IMGUI_LIBRARIES imgui-lib)
 
 # modules
 add_subdirectory(third_party)

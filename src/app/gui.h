@@ -1,10 +1,12 @@
 #pragma once
 
+struct ImGuiIO;
 namespace app {
 class Input;
 class Display;
 class Gui {
 private:
+  ImGuiIO &io;
   void mapInput(Input &input);
 
 public:

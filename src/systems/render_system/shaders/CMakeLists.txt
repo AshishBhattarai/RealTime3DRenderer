@@ -10,4 +10,5 @@ add_library(shaders-lib
     visual_prep.cpp
     ibl_specular_convolution.cpp
     cubemap.cpp
+    gui_shader.cpp
 )

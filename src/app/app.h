@@ -4,6 +4,7 @@
 #include "construct.h"
 #include "core/shared_queue.h"
 #include "display.h"
+#include "gui.h"
 #include "input.h"
 #include "types.h"
 #include <asio/thread_pool.hpp>
@@ -38,6 +39,7 @@ private:
   CommandServer commandServer;
   Display display;
   Input input;
+  Gui gui;
   Construct construct;
   ecs::Coordinator &coordinator;
   world_system::WorldSystem *worldSystem;

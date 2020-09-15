@@ -16,10 +16,8 @@ int main(int argc, char **argv) {
   // Register Components & systems
   using namespace ecs;
   Coordinator &coordinator = Coordinator::getInstance();
-  ComponentFamily transformFamily =
-      coordinator.registerComponent<component::Model>();
-  ComponentFamily meshFamily =
-      coordinator.registerComponent<component::Transform>();
+  ComponentFamily transformFamily = coordinator.registerComponent<component::Model>();
+  ComponentFamily meshFamily = coordinator.registerComponent<component::Transform>();
   coordinator.registerComponent<component::Light>();
 
   ecs::Signature sig;

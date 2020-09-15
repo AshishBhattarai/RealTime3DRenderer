@@ -7,6 +7,7 @@ add_library(render-system-lib
     render_defaults.cpp
     camera.cpp
     renderer.cpp
+    gui_renderer.cpp
     texture.cpp
     frame_buffer.cpp
     post_processor.cpp

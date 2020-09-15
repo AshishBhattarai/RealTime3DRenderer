@@ -18,8 +18,7 @@ Input::Input(Display &display)
      * If the key(int) doesn't match ony enums(Keys) it'll be a garbage enum
      * (won't equate to any enums).
      */
-    self->unhandledKeys.push(
-        {static_cast<Mod>(mods), static_cast<Key>(key), static_cast<Action>(action)});
+    self->unhandledKeys.push({mods, static_cast<Key>(key), static_cast<Action>(action)});
   });
   // cursor pos callback
   glfwSetCursorPosCallback(window, [](GLFWwindow *window, double xPos, double yPos) {
@@ -35,7 +34,7 @@ Input::Input(Display &display)
   glfwSetMouseButtonCallback(window, [](GLFWwindow *window, int button, int action, int mods) {
     Input *self = static_cast<Input *>(glfwGetWindowUserPointer(window));
     self->unhandledButtons.push(
-        {static_cast<Mod>(mods), static_cast<MouseButton>(button), static_cast<Action>(action)});
+        {mods, static_cast<MouseButton>(button), static_cast<Action>(action)});
   });
   // char callback
   glfwSetCharCallback(window, [](GLFWwindow *window, uint c) {
@@ -59,6 +58,8 @@ Input::Input(Display &display)
 }
 
 void Input::setCursorMode(CursorMode mode) {
+  cursorMode = mode;
+  if (cursorModeCallback) cursorModeCallback(mode);
   glfwSetInputMode(display.window, GLFW_CURSOR, toUnderlying<CursorMode>(mode));
 }
 
@@ -94,7 +95,7 @@ void Input::update() {
   /* MouseButton Events */
   while (!unhandledButtons.empty()) {
     const MouseButtonEvent &event = unhandledButtons.front();
-    unhandledKeys.pop();
+    unhandledButtons.pop();
     auto it = buttonCallbacks.find(event.button);
     if (it != buttonCallbacks.end()) {
       for (ButtonCallback &callback : it->second) {
@@ -107,6 +108,8 @@ void Input::update() {
         callback(event);
       }
     }
+    bool pressed = event.action == Action::PRESS || event.action == Action::REPEAT;
+    mouseButtons[event.button] = pressed;
   }
   /* Keyboard Keys Events */
   while (!unhandledKeys.empty()) {

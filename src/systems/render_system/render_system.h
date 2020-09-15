@@ -3,6 +3,7 @@
 #include "ecs/common.h"
 #include "ecs/system_manager.h"
 #include "frame_buffer.h"
+#include "gui_renderer.h"
 #include "point_light.h"
 #include "post_processor.h"
 #include "pre_processor.h"
@@ -31,6 +32,7 @@ struct RenderSystemConfig {
   const shader::StageCodeMap &iblConvolutionShader;
   const shader::StageCodeMap &iblSpecularConvolutionShader;
   const shader::StageCodeMap &iblBrdfIntegrationShader;
+  const shader::StageCodeMap &guiShader;
 
   int width;
   int height;
@@ -71,6 +73,7 @@ private:
 
   PreProcessor preProcessor;
   Renderer renderer;
+  GuiRenderer guiRenderer;
   PostProcessor postProcessor;
   FrameBuffer framebuffer;
   SceneLoader sceneLoader;
@@ -113,15 +116,13 @@ public:
   bool setSkyBox(Image *image);
   std::shared_ptr<Image> update(float dt);
 
-  void updateProjectionMatrix(float ar, float fov = DEFAULT_FOV,
-                              float near = DEFAULT_NEAR,
+  void updateProjectionMatrix(float ar, float fov = DEFAULT_FOV, float near = DEFAULT_NEAR,
                               float far = DEFAULT_FAR) {
     renderer.updateProjectionMatrix(ar, fov, near, far);
   }
   void setCamera(const Camera *camera) {
     assert(camera && "Invalid camera supplied.");
-    if (camera)
-      renderer.setCamera(camera);
+    if (camera) renderer.setCamera(camera);
   }
 };
 } // namespace render_system

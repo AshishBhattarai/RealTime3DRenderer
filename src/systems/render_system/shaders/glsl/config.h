@@ -113,7 +113,7 @@
 #define VERT_U_PROJECTION_MAT_LOC 0
 #endif
 
-#if defined GUI_FRAGMENT_SHADE
+#if defined GUI_FRAGMENT_SHADER
 #define FRAGMENT_SHADER
 #define FRAG_U_TEXTURE_BND 0
 #endif

@@ -29,7 +29,7 @@ using namespace render_system;
 namespace app {
 App::App(int, char **)
     : threadPool(NUM_THREADS), commandServer(8003, 4), display("App", glm::ivec2(1366, 768)),
-      input(display), construct(), coordinator(ecs::Coordinator::getInstance()),
+      input(display), gui(input), construct(), coordinator(ecs::Coordinator::getInstance()),
       worldSystem(new world_system::WorldSystem()),
       renderSystem(
           construct.newRenderSystem(display.getDisplaySize().x, display.getDisplaySize().y)),
@@ -64,8 +64,9 @@ App::App(int, char **)
     }
   });
 
-  input.addCursorCallback(
-      [&camera = camera](const Input::CursorPos &dt) { camera->processRotation(dt.x, dt.y); });
+  input.addCursorCallback([&camera = camera, &input = input](const Input::CursorPos &dt) {
+    if (input.getCursorMode() == Input::CursorMode::DISABLED) camera->processRotation(dt.x, dt.y);
+  });
 
   int nrRow = 7;
   int nrCOl = 7;
@@ -194,6 +195,8 @@ void App::runRenderLoop(std::string_view renderOutput) {
     ct = display.getTime();
     dt = ct - lt;
     lt = display.getTime();
+
+    gui.newFrame(dt, input, display);
 
     // rotate light
     lightPositions[0] = glm::vec3(10 * cos(display.getTime()), 0, 10 * sin(display.getTime()));

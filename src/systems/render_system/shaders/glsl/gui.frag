@@ -3,7 +3,7 @@
 #define GUI_FRAGMENT_SHADER
 #include "config.h"
 
-layout(location = COLOR_ATTACHMENT0) out vec4 FragColor;
+layout(location = COLOR_ATTACHMENT0) out vec4 fragColor;
 
 layout(location = VERT_INTERFACE_BLOCK_LOC) in VS_OUT {
   vec2 texCoords;
@@ -14,6 +14,5 @@ fs_in;
 layout(binding = FRAG_U_TEXTURE_BND) uniform sampler2D tex;
 
 void main() {
-  FragColor = fs_in.color * texture(tex, fs_in.texCoords);
-  // FragColor.rgb = pow(FragColor.rgb, vec3(2.2f));
+  fragColor = fs_in.color * texture(tex, fs_in.texCoords);
 }

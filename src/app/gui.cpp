@@ -8,13 +8,9 @@
 namespace app {
 static std::map<ImGuiMouseCursor, Display::CursorShape> cursorShapeMap;
 
-Gui::Gui(Input &input) {
+Gui::Gui(Input &input)
+    : io((IMGUI_CHECKVERSION(), ImGui::CreateContext(), ImGui::StyleColorsDark(), ImGui::GetIO())) {
   /* Init IMGUI */
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-  ImGui::StyleColorsDark();
-
-  ImGuiIO &io = ImGui::GetIO();
   io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
   io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
   io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
@@ -30,7 +26,6 @@ Gui::Gui(Input &input) {
 }
 
 void Gui::mapInput(Input &input) {
-  ImGuiIO &io = ImGui::GetIO();
   /* Keyboard mapping */
   io.KeyMap[ImGuiKey_Tab] = toUnderlying<Input::Key>(Input::Key::TAB);
   io.KeyMap[ImGuiKey_LeftArrow] = toUnderlying<Input::Key>(Input::Key::LEFT);
@@ -56,7 +51,7 @@ void Gui::mapInput(Input &input) {
   io.KeyMap[ImGuiKey_Z] = toUnderlying<Input::Key>(Input::Key::Z);
 
   /* Callbacks */
-  input.addKeyCallback(Input::Key::ANY, [&io](const Input::KeyEvent keyEvent) {
+  input.addKeyCallback(Input::Key::ANY, [&io = io](const Input::KeyEvent keyEvent) {
     io.KeysDown[toUnderlying<Input::Key>(keyEvent.key)] =
         (keyEvent.action == Input::Action::PRESS) || (keyEvent.action == Input::Action::REPEAT);
     io.KeysDown[toUnderlying<Input::Key>(keyEvent.key)] = keyEvent.action == Input::Action::RELEASE;
@@ -74,19 +69,25 @@ void Gui::mapInput(Input &input) {
   });
 
   // charCallback
-  input.addCharCallback([&io](Input::CharEvent e) { io.AddInputCharacter(e.characer); });
+  input.addCharCallback([&io = io](Input::CharEvent e) { io.AddInputCharacter(e.characer); });
 
   // scrollCallback
-  input.addScrollOffsetCallback([&io](Input::ScrollOffset offset) {
+  input.addScrollOffsetCallback([&io = io](Input::ScrollOffset offset) {
     io.MouseWheelH += offset.x;
     io.MouseWheel += offset.y;
   });
 
   // mousebuttonCallback
-  input.addMouseButton(Input::MouseButton::ANY, [&io](const Input::MouseButtonEvent event) {
+  input.addMouseButton(Input::MouseButton::ANY, [&io = io](const Input::MouseButtonEvent event) {
     u8 btnCode = toUnderlying<Input::MouseButton>(event.button);
     if (btnCode < ImGuiMouseButton_COUNT && event.action == Input::Action::PRESS)
       io.MouseDown[btnCode] = true;
+  });
+  input.setCursorModeCallback([&io = io](const Input::CursorMode cursorMode) {
+    if (cursorMode == Input::CursorMode::NORMAL)
+      io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+    else
+      io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
   });
 }
 
@@ -94,7 +95,7 @@ void Gui::newFrame(float dt, Input &input, Display &display) {
   ImGuiIO &io = ImGui::GetIO();
   // TODO: move crusor status get/set to display
 
-  // cursor post
+  // cursor pos
   if (display.isFocused()) {
     if (io.WantSetMousePos) {
       const ImVec2 mousePos = io.MousePos;
@@ -104,6 +105,11 @@ void Gui::newFrame(float dt, Input &input, Display &display) {
       const Input::CursorPos pos = input.getLastCursorPos();
       io.MousePos = ImVec2(pos.x, pos.y);
     }
+  }
+
+  // buttton
+  for (int i = 0; i < ImGuiMouseButton_COUNT; i++) {
+    io.MouseDown[i] = input.getButton(static_cast<Input::MouseButton>(i));
   }
 
   // update cursor
@@ -116,7 +122,7 @@ void Gui::newFrame(float dt, Input &input, Display &display) {
     Display::CursorShape cursorShape =
         (shapeIt == cursorShapeMap.end()) ? Display::CursorShape::ARROW : shapeIt->second;
     display.setCursorShape(cursorShape);
-    input.setCursorMode(Input::CursorMode::NORMAL);
+    //    input.setCursorMode(Input::CursorMode::NORMAL);
   }
 
   // TODO: add this to resize callback
@@ -133,6 +139,9 @@ void Gui::newFrame(float dt, Input &input, Display &display) {
 
   // set delta
   io.DeltaTime = dt;
+  ImGui::NewFrame();
+  ImGui::ShowDemoWindow();
 }
-
 }; // namespace app
+
+static_assert(ImGuiMouseButton_COUNT == 5 && "Imgui MouseButton_COUNT changed.");

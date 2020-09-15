@@ -10,6 +10,7 @@
 #include "renderable_entity.h"
 #include "scene.h"
 #include "shaders/config.h"
+#include "systems/render_system/gui_renderer.h"
 #include "utils/slogger.h"
 
 namespace render_system {
@@ -52,8 +53,9 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
                               &RenderDefaults::getInstance().getCamera(), config.flatForwardShader,
                               config.textureForwardShader, config.skyboxShader,
                               preProcessor.generateBRDFIntegrationMap()}),
-      postProcessor(config.visualPrepShader), framebuffer(config.width, config.height),
-      sceneLoader(), coordinator(ecs::Coordinator::getInstance()), skybox(nullptr) {
+      guiRenderer(config.guiShader), postProcessor(config.visualPrepShader),
+      framebuffer(config.width, config.height), sceneLoader(),
+      coordinator(ecs::Coordinator::getInstance()), skybox(nullptr) {
   /* update projection */
   updateProjectionMatrix(config.ar);
   /* setup framebuffer */
@@ -155,6 +157,7 @@ std::shared_ptr<Image> RenderSystem::update(float dt) {
   postProcessor.applyVisualPrep(frameTexture);
   frameTexture.release(); // this is a hack, reThink??
 
+  guiRenderer.render();
   return std::make_shared<Image>(FrameBuffer::readPixelsWindow());
 }
 

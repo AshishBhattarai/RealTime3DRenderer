@@ -15,22 +15,22 @@ GuiRenderer::GuiRenderer(const shader::StageCodeMap &codeMap)
 
   // setup attributes
   glBindVertexArray(vao);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
   glEnableVertexAttribArray(shader::gui::vertex::attribute::POSITION_LOC);
   glEnableVertexAttribArray(shader::gui::vertex::attribute::TEXCOORD0_LOC);
   glEnableVertexAttribArray(shader::gui::vertex::attribute::COLOR_LOC);
 
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert),
-                        (void *)IM_OFFSETOF(ImDrawVert, pos));
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert),
-                        (void *)IM_OFFSETOF(ImDrawVert, uv));
-  glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert),
-                        (void *)IM_OFFSETOF(ImDrawVert, col));
+  glVertexAttribPointer(shader::gui::vertex::attribute::POSITION_LOC, 2, GL_FLOAT, GL_FALSE,
+                        sizeof(ImDrawVert), (void *)IM_OFFSETOF(ImDrawVert, pos));
+  glVertexAttribPointer(shader::gui::vertex::attribute::TEXCOORD0_LOC, 2, GL_FLOAT, GL_FALSE,
+                        sizeof(ImDrawVert), (void *)IM_OFFSETOF(ImDrawVert, uv));
+  glVertexAttribPointer(shader::gui::vertex::attribute::COLOR_LOC, 4, GL_UNSIGNED_BYTE, GL_TRUE,
+                        sizeof(ImDrawVert), (void *)IM_OFFSETOF(ImDrawVert, col));
 
   glBindVertexArray(0);
-
-  glDisableVertexAttribArray(shader::gui::vertex::attribute::POSITION_LOC);
-  glDisableVertexAttribArray(shader::gui::vertex::attribute::TEXCOORD0_LOC);
-  glDisableVertexAttribArray(shader::gui::vertex::attribute::COLOR_LOC);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   buildFonts();
 }
@@ -95,6 +95,8 @@ void GuiRenderer::setupRenderState(ImDrawData *drawData, const glm::ivec2 fbSize
   shader.bind();
   shader.loadProjectionMat(orthoProjection);
   glBindSampler(shader::gui::fragment::TEXTURE_BND, 0); // reset texture properties
+  glActiveTexture(GL_TEXTURE0 + shader::gui::fragment::TEXTURE_BND);
+  glBindVertexArray(vao);
 }
 
 void GuiRenderer::render() {
@@ -140,6 +142,8 @@ void GuiRenderer::render() {
     const ImDrawList *cmdList = drawData->CmdLists[n];
 
     // Upload vertex/index buffers
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)cmdList->VtxBuffer.Size * (int)sizeof(ImDrawVert),
                  (const GLvoid *)cmdList->VtxBuffer.Data, GL_STREAM_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
