@@ -4,9 +4,9 @@ add_library(
     display.cpp
     input.cpp
     gui.cpp
+    app_ui.cpp
     loaders.cpp
     app_config.cpp
-    construct.cpp
     rtsp_client.cpp
     command_server.cpp
     app_model.qmodel

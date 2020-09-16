@@ -26,7 +26,7 @@ private:
   friend class Input;
 
 public:
-  Display(std::string_view title, glm::ivec2 displaySize);
+  Display(std::string_view title);
   ~Display();
 
   // swap buffer & poll events

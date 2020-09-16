@@ -45,6 +45,14 @@ bool RenderSystem::initSingletons(const Image &checkerImage) {
   return true;
 }
 
+void RenderSystem::setupFramebuffer(FrameBuffer &framebuffer) {
+  /* setup framebuffer for hdr pipeline */
+  framebuffer.use();
+  framebuffer.setColorAttachmentTB(GL_TEXTURE_2D, GL_RGB16F, GL_RGB, GL_FLOAT);
+  framebuffer.setDepthAttachment(FrameBuffer::AttachType::RENDER_BUFFER);
+  assert(framebuffer.isComplete() && "Framebuffer not complete.");
+}
+
 RenderSystem::RenderSystem(const RenderSystemConfig &config)
     : status(initSingletons(config.checkerImage)),
       preProcessor(config.cubemapShader, config.equirectangularShader, config.iblConvolutionShader,
@@ -54,16 +62,16 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
                               config.textureForwardShader, config.skyboxShader,
                               preProcessor.generateBRDFIntegrationMap()}),
       guiRenderer(config.guiShader), postProcessor(config.visualPrepShader),
-      framebuffer(config.width, config.height), sceneLoader(),
-      coordinator(ecs::Coordinator::getInstance()), skybox(nullptr) {
+      framebufferA(config.width, config.height), framebufferB(config.width, config.height),
+      sceneLoader(), coordinator(ecs::Coordinator::getInstance()), skybox(nullptr),
+      frameCallback(config.frameCallback) {
   /* update projection */
   updateProjectionMatrix(config.ar);
-  /* setup framebuffer */
-  framebuffer.use();
-  framebuffer.setColorAttachmentTB(GL_TEXTURE_2D, GL_RGB16F, GL_RGB, GL_FLOAT);
-  framebuffer.setDepthAttachment(FrameBuffer::AttachType::RENDER_BUFFER);
-  assert(framebuffer.isComplete() && "Framebuffer not complete.");
-  framebuffer.useDefault();
+
+  setupFramebuffer(framebufferA);
+  setupFramebuffer(framebufferB);
+  framebufferA.useDefault();
+
   /* load default materials */
   auto &renderDefaults = RenderDefaults::getInstance();
   materials.emplace(DEFAULT_MATERIAL_ID, std::unique_ptr<BaseMaterial>(new TextureMaterial(
@@ -122,7 +130,8 @@ bool RenderSystem::setSkyBox(Image *image) {
 
 std::shared_ptr<Image> RenderSystem::update(float dt) {
   // load preRender data
-  framebuffer.use();
+  glViewport(0, 0, framebufferA.getWidth(), framebufferA.getHeight());
+  framebufferA.use();
   renderer.preRender();
 
   // load lights
@@ -152,11 +161,15 @@ std::shared_ptr<Image> RenderSystem::update(float dt) {
   }
 
   // post process
-  Texture frameTexture = Texture(framebuffer.getColorAttachmentId(), GL_TEXTURE_2D);
-  framebuffer.useDefault();
+  Texture frameTexture = Texture(framebufferA.getColorAttachmentId(), GL_TEXTURE_2D);
+  framebufferB.use();
   postProcessor.applyVisualPrep(frameTexture);
-  frameTexture.release(); // this is a hack, reThink??
+  frameTexture.release(); // To prevent the framebuffer texture from being deleted
 
+  frameCallback(framebufferB.getColorAttachmentId(), framebufferB.getWidth(),
+                framebufferB.getHeight());
+
+  FrameBuffer::useDefault();
   guiRenderer.render();
   return std::make_shared<Image>(FrameBuffer::readPixelsWindow());
 }

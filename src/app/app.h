@@ -1,7 +1,7 @@
 #pragma once
 
+#include "app_ui.h"
 #include "command_server.h"
-#include "construct.h"
 #include "core/shared_queue.h"
 #include "display.h"
 #include "gui.h"
@@ -40,12 +40,13 @@ private:
   Display display;
   Input input;
   Gui gui;
-  Construct construct;
+  AppUi appUi;
   ecs::Coordinator &coordinator;
   world_system::WorldSystem *worldSystem;
   render_system::RenderSystem *renderSystem;
   render_system::Camera *camera;
 
   void processInput(float dt);
+  render_system::RenderSystem *createRenderSystem(int width, int height);
 };
 } // namespace app

@@ -245,6 +245,7 @@ private:
   std::map<MouseButton, bool> mouseButtons;
 
   /* Event callbacks */
+  // TODO: Use ecs event manager (forgot about it)
   std::map<Key, std::vector<KeyCallback>> keyCallbacks;
   std::map<MouseButton, std::vector<ButtonCallback>> buttonCallbacks;
   std::vector<CursorCallback> cursorCallbacks;

@@ -7,8 +7,7 @@
 
 namespace app {
 
-Display::Display(std::string_view title, glm::ivec2 displaySize)
-    : title(title), displaySize(displaySize), fboSize(0, 0) {
+Display::Display(std::string_view title) : title(title), displaySize(0, 0), fboSize(0, 0) {
 
   glfwSetErrorCallback(
       [](int error, const char *description) { SLOG("[GLFW_CALLBACK]", error, description); });
@@ -26,8 +25,10 @@ Display::Display(std::string_view title, glm::ivec2 displaySize)
   glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 
   // create window
+  const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+  displaySize = glm::ivec2(mode->width, mode->height);
   window = glfwCreateWindow(
-      displaySize.x, displaySize.y,
+      mode->width, mode->height,
       (this->title + " " + std::to_string(displaySize.x) + "x" + std::to_string(displaySize.y))
           .c_str(),
       NULL, NULL);
@@ -37,6 +38,8 @@ Display::Display(std::string_view title, glm::ivec2 displaySize)
     exit(FailureCode::GLFW_CREATE_WINDOW_FAILURE);
   }
   glfwMakeContextCurrent(window);
+  glfwSetWindowAttrib(window, GLFW_DECORATED, GL_FALSE);
+  glfwSetWindowAttrib(window, GLFW_RESIZABLE, GL_FALSE);
 
   // init glad
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {

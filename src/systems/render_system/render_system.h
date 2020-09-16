@@ -21,6 +21,8 @@ class Buffer;
 namespace render_system {
 class Camera;
 
+using FrameCallback = std::function<void(uint textureId, int width, int height)>;
+
 struct RenderSystemConfig {
   const Image &checkerImage; // can be removed after RenderSystem construction
   const shader::StageCodeMap &flatForwardShader;
@@ -33,6 +35,8 @@ struct RenderSystemConfig {
   const shader::StageCodeMap &iblSpecularConvolutionShader;
   const shader::StageCodeMap &iblBrdfIntegrationShader;
   const shader::StageCodeMap &guiShader;
+
+  const FrameCallback &frameCallback;
 
   int width;
   int height;
@@ -75,7 +79,8 @@ private:
   Renderer renderer;
   GuiRenderer guiRenderer;
   PostProcessor postProcessor;
-  FrameBuffer framebuffer;
+  FrameBuffer framebufferA;
+  FrameBuffer framebufferB;
   SceneLoader sceneLoader;
 
   std::unordered_map<MeshId, Mesh> meshes;
@@ -88,9 +93,13 @@ private:
   std::unique_ptr<Texture> globalDiffuseIBL;
   std::unique_ptr<Texture> globalSpecularIBL;
 
+  // callbacks
+  const FrameCallback frameCallback;
+
   void initSubSystems();
   // init render_system related singletons
   bool initSingletons(const Image &checkerImage);
+  void setupFramebuffer(FrameBuffer& framebuffer);
 
 public:
   RenderSystem(const RenderSystemConfig &config);

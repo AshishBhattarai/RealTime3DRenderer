@@ -28,11 +28,9 @@ using namespace render_system;
 
 namespace app {
 App::App(int, char **)
-    : threadPool(NUM_THREADS), commandServer(8003, 4), display("App", glm::ivec2(1366, 768)),
-      input(display), gui(input), construct(), coordinator(ecs::Coordinator::getInstance()),
-      worldSystem(new world_system::WorldSystem()),
-      renderSystem(
-          construct.newRenderSystem(display.getDisplaySize().x, display.getDisplaySize().y)),
+    : threadPool(NUM_THREADS), commandServer(8003, 4), display("App"), input(display), gui(input),
+      appUi(), coordinator(ecs::Coordinator::getInstance()),
+      worldSystem(new world_system::WorldSystem()), renderSystem(createRenderSystem(1920, 1080)),
       camera(new Camera(glm::vec3(0.0f, 0.0f, 0.0f))) {
   DEBUG_SLOG("App constructed.");
   //  input.setCursorStatus(INPUT_CURSOR_DISABLED);
@@ -61,6 +59,12 @@ App::App(int, char **)
     if (event.action == Input::Action::PRESS) {
       DEBUG_SLOG("KEY PRESSED: ", toUnderlying<Input::Key>(event.key));
       input.toggleCursorMode();
+    }
+  });
+  input.addKeyCallback(Input::Key::F, [&appUi= appUi](const Input::KeyEvent &event) {
+    if (event.action == Input::Action::PRESS) {
+      DEBUG_SLOG("KEY PRESSED: ", toUnderlying<Input::Key>(event.key));
+      appUi.toggleFullScreenFrame();
     }
   });
 
@@ -197,6 +201,7 @@ void App::runRenderLoop(std::string_view renderOutput) {
     lt = display.getTime();
 
     gui.newFrame(dt, input, display);
+    appUi.show();
 
     // rotate light
     lightPositions[0] = glm::vec3(10 * cos(display.getTime()), 0, 10 * sin(display.getTime()));
@@ -238,6 +243,73 @@ App::~App() {
   delete renderSystem;
   delete camera;
   delete worldSystem;
+}
+
+render_system::RenderSystem *App::createRenderSystem(int width, int height) {
+  /* Init RenderSystem */
+  Image checkerImage;
+  bool status = Loaders::loadImage(checkerImage, "resources/defaults/checker.bmp");
+  Buffer flatForwardVertex, flatForwardFragment, textureForwardVertex, textureForwardFragment,
+      skyboxVertex, cubemapVertex, cubemapFragment, equirectangularFragment, visualPrepVertex,
+      visualPrepFragment, iblConvolutionFragment, iblSpecularConvolutionFragment,
+      iblBrdfIntegrationFragment, guiVertex, guiFragment;
+  status = Loaders::loadBinaryFile(flatForwardVertex, "shaders/flat_forward_material_vert.spv");
+  status = Loaders::loadBinaryFile(flatForwardFragment, "shaders/flat_forward_material_frag.spv");
+  status =
+      Loaders::loadBinaryFile(textureForwardVertex, "shaders/texture_forward_material_vert.spv");
+  status =
+      Loaders::loadBinaryFile(textureForwardFragment, "shaders/texture_forward_material_frag.spv");
+  status = Loaders::loadBinaryFile(skyboxVertex, "shaders/skybox_vert.spv");
+  status = Loaders::loadBinaryFile(cubemapVertex, "shaders/cubemap_vert.spv");
+  status = Loaders::loadBinaryFile(cubemapFragment, "shaders/cubemap_frag.spv");
+  status = Loaders::loadBinaryFile(equirectangularFragment, "shaders/equirectangular_frag.spv");
+  status = Loaders::loadBinaryFile(visualPrepVertex, "shaders/visualprep_vert.spv");
+  status = Loaders::loadBinaryFile(visualPrepFragment, "shaders/visualprep_frag.spv");
+  status =
+      Loaders::loadBinaryFile(iblConvolutionFragment, "shaders/ibl_diffuse_convolution_frag.spv");
+  status = Loaders::loadBinaryFile(iblSpecularConvolutionFragment,
+                                   "shaders/ibl_specular_convolution_frag.spv");
+  status =
+      Loaders::loadBinaryFile(iblBrdfIntegrationFragment, "shaders/ibl_brdf_integration_map.spv");
+  status = Loaders::loadBinaryFile(guiVertex, "shaders/gui_vert.spv");
+  status = Loaders::loadBinaryFile(guiFragment, "shaders/gui_frag.spv");
+
+  return new RenderSystem(
+      {checkerImage,
+       /**
+        * const shader::StageCodeMap &flatForwardShader;
+        * const shader::StageCodeMap &textureForwardShader; const shader::StageCodeMap
+        * &skyboxShader; const shader::StageCodeMap &cubemapShader; const shader::StageCodeMap
+        * &equirectangularShader; const shader::StageCodeMap &visualPrepShader; const
+        * shader::StageCodeMap &iblConvolutionShader; const shader::StageCodeMap
+        * &iblSpecularConvolutionShader; const shader::StageCodeMap &iblBrdfIntegrationShader;
+        * guiVertex;
+        * guiFragment
+        */
+       shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, flatForwardVertex},
+                            {shader::ShaderStage::FRAGMENT_SHADER, flatForwardFragment}},
+       shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, textureForwardVertex},
+                            {shader::ShaderStage::FRAGMENT_SHADER, textureForwardFragment}},
+       shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, skyboxVertex},
+                            {shader::ShaderStage::FRAGMENT_SHADER, cubemapFragment}},
+       shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, cubemapVertex},
+                            {shader::ShaderStage::FRAGMENT_SHADER, cubemapFragment}},
+       shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, cubemapVertex},
+                            {shader::ShaderStage::FRAGMENT_SHADER, equirectangularFragment}},
+       shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, visualPrepVertex},
+                            {shader::ShaderStage::FRAGMENT_SHADER, visualPrepFragment}},
+       shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, cubemapVertex},
+                            {shader::ShaderStage::FRAGMENT_SHADER, iblConvolutionFragment}},
+       shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, cubemapVertex},
+                            {shader::ShaderStage::FRAGMENT_SHADER, iblSpecularConvolutionFragment}},
+       shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, visualPrepVertex},
+                            {shader::ShaderStage::FRAGMENT_SHADER, iblBrdfIntegrationFragment}},
+       shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, guiVertex},
+                            {shader::ShaderStage::FRAGMENT_SHADER, guiFragment}},
+       [&appUi = appUi](uint textureId, int width, int height) {
+         appUi.showFrame(textureId, width, height);
+       },
+       width, height, width / (float)height});
 }
 
 } // namespace app

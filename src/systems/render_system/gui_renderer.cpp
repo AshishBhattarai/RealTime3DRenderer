@@ -100,6 +100,7 @@ void GuiRenderer::setupRenderState(ImDrawData *drawData, const glm::ivec2 fbSize
 }
 
 void GuiRenderer::render() {
+  glClear(GL_COLOR_BUFFER_BIT);
   ImGui::Render();
   ImDrawData *drawData = ImGui::GetDrawData();
   /**
