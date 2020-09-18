@@ -30,7 +30,7 @@ namespace app {
 App::App(int, char **)
     : threadPool(NUM_THREADS), commandServer(8003, 4), display("App"), input(display), gui(input),
       appUi(), coordinator(ecs::Coordinator::getInstance()),
-      worldSystem(new world_system::WorldSystem()), renderSystem(createRenderSystem(1920, 1080)),
+      worldSystem(new world_system::WorldSystem()), renderSystem(createRenderSystem(1440, 1080)),
       camera(new Camera(glm::vec3(0.0f, 0.0f, 0.0f))) {
   DEBUG_SLOG("App constructed.");
   //  input.setCursorStatus(INPUT_CURSOR_DISABLED);
@@ -59,12 +59,6 @@ App::App(int, char **)
     if (event.action == Input::Action::PRESS) {
       DEBUG_SLOG("KEY PRESSED: ", toUnderlying<Input::Key>(event.key));
       input.toggleCursorMode();
-    }
-  });
-  input.addKeyCallback(Input::Key::F, [&appUi= appUi](const Input::KeyEvent &event) {
-    if (event.action == Input::Action::PRESS) {
-      DEBUG_SLOG("KEY PRESSED: ", toUnderlying<Input::Key>(event.key));
-      appUi.toggleFullScreenFrame();
     }
   });
 
@@ -211,11 +205,12 @@ void App::runRenderLoop(std::string_view renderOutput) {
 
     // calculate FPS
     if (ct - ltf >= 1) {
-      CSLOG("FPS:", frameCnt);
+      appUi.addFps(frameCnt);
       frameCnt = 1;
       ltf = ct;
-    } else
+    } else {
       frameCnt++;
+    }
 
     processInput(dt);
     worldSystem->update(dt);
@@ -234,6 +229,7 @@ void App::runRenderLoop(std::string_view renderOutput) {
     if (err != GL_NO_ERROR) CSLOG("OpenGL ERROR:", err);
     display.update();
     input.update();
+    if (appUi.getShouldClose()) display.setShouldClose(true);
   }
   CSLOG("Closing renderer..");
 } // namespace app

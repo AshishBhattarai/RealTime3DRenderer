@@ -1,4 +1,4 @@
-#include "gui.h"
+#include "gui_manager.h"
 #include "display.h"
 #include "input.h"
 #include "types.h"
@@ -8,12 +8,13 @@
 namespace app {
 static std::map<ImGuiMouseCursor, Display::CursorShape> cursorShapeMap;
 
-Gui::Gui(Input &input)
+GuiManager::GuiManager(Input &input)
     : io((IMGUI_CHECKVERSION(), ImGui::CreateContext(), ImGui::StyleColorsDark(), ImGui::GetIO())) {
   /* Init IMGUI */
   io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
   io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
   io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   /* map cursor shapes  */
   cursorShapeMap[ImGuiMouseCursor_Arrow] = Display::CursorShape::ARROW;
@@ -25,7 +26,7 @@ Gui::Gui(Input &input)
   mapInput(input);
 }
 
-void Gui::mapInput(Input &input) {
+void GuiManager::mapInput(Input &input) {
   /* Keyboard mapping */
   io.KeyMap[ImGuiKey_Tab] = toUnderlying<Input::Key>(Input::Key::TAB);
   io.KeyMap[ImGuiKey_LeftArrow] = toUnderlying<Input::Key>(Input::Key::LEFT);
@@ -91,7 +92,32 @@ void Gui::mapInput(Input &input) {
   });
 }
 
-void Gui::newFrame(float dt, Input &input, Display &display) {
+void GuiManager::showDockSpace() {
+  static ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_None;
+
+  // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+  // because it would be confusing to have two docking targets within each others.
+  ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking;
+  ImGuiViewport *viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->GetWorkPos());
+  ImGui::SetNextWindowSize(viewport->GetWorkSize());
+  ImGui::SetNextWindowViewport(viewport->ID);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+  windowFlags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+                 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                 ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+  ImGui::Begin("3DRenderer", nullptr, windowFlags);
+  ImGui::PopStyleVar(2);
+
+  // DockSpace
+  ImGuiID dockspaceId = ImGui::GetID("MyDockSpace");
+  ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), dockspaceFlags);
+  ImGui::End();
+}
+
+void GuiManager::newFrame(float dt, Input &input, Display &display) {
   ImGuiIO &io = ImGui::GetIO();
   // TODO: move crusor status get/set to display
 
@@ -140,6 +166,7 @@ void Gui::newFrame(float dt, Input &input, Display &display) {
   // set delta
   io.DeltaTime = dt;
   ImGui::NewFrame();
+  showDockSpace();
   ImGui::ShowDemoWindow();
 }
 }; // namespace app

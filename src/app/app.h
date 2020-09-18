@@ -4,7 +4,7 @@
 #include "command_server.h"
 #include "core/shared_queue.h"
 #include "display.h"
-#include "gui.h"
+#include "gui_manager.h"
 #include "input.h"
 #include "types.h"
 #include <asio/thread_pool.hpp>
@@ -39,7 +39,7 @@ private:
   CommandServer commandServer;
   Display display;
   Input input;
-  Gui gui;
+  GuiManager gui;
   AppUi appUi;
   ecs::Coordinator &coordinator;
   world_system::WorldSystem *worldSystem;

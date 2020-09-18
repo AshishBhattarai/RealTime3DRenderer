@@ -4,13 +4,14 @@ struct ImGuiIO;
 namespace app {
 class Input;
 class Display;
-class Gui {
+class GuiManager {
 private:
   ImGuiIO &io;
   void mapInput(Input &input);
+  void showDockSpace();
 
 public:
-  Gui(Input &input);
+  GuiManager(Input &input);
   void newFrame(float dt, Input &input, Display &display);
 };
 } // namespace app

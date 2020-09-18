@@ -3,7 +3,7 @@ add_library(
     app.cpp
     display.cpp
     input.cpp
-    gui.cpp
+    gui_manager.cpp
     app_ui.cpp
     loaders.cpp
     app_config.cpp
