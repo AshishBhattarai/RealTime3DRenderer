@@ -4,7 +4,7 @@
 /**
  * This was really stupid idea, should have used --auto-map-bindings and  --auto-map-bindings
  * --auto-map-locations options glslangvalidator to auto generate location and bindings config.
- * 
+ *
  * TODO: Do this properly
  */
 
@@ -119,6 +119,24 @@
 #endif
 
 #if defined(GUI_VERTEX_SHADER) || defined(GUI_FRAGMENT_SHADER)
+#define VERT_INTERFACE_BLOCK_LOC 0
+#endif
+
+#ifdef GRID_PLANE_VERTEX_SHADER
+#define VERT_A_POSITION_LOC 0
+#define VERT_UB_GENERAL_LOC 0
+#define VERT_U_TRANSFORMATION_LOC 0
+#endif
+
+#ifdef GRID_PLANE_FRAGMENT_SHADER
+#define FRAGMENT_SHADER
+#define FRAG_U_PLANE_COLOR_LOC 1
+#define FRAG_U_GRID_COLOR_LOC 2
+#define FRAG_U_GRID_MODE_LOC 3
+#define FRAG_U_DISTANCE_LIMIT_LOC 4
+#endif
+
+#if defined(GRID_PLANE_VERTEX_SHADER) || defined(GRID_PLANE_FRAGMENT_SHADER)
 #define VERT_INTERFACE_BLOCK_LOC 0
 #endif
 

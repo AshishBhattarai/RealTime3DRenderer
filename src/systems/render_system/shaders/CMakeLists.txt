@@ -11,4 +11,5 @@ add_library(shaders-lib
     ibl_specular_convolution.cpp
     cubemap.cpp
     gui_shader.cpp
+    grid_plane.cpp
 )

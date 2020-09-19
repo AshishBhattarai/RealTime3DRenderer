@@ -60,7 +60,7 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
       renderer(RendererConfig{config.width, config.height, meshes, materials,
                               &RenderDefaults::getInstance().getCamera(), config.flatForwardShader,
                               config.textureForwardShader, config.skyboxShader,
-                              preProcessor.generateBRDFIntegrationMap()}),
+                              config.gridPlaneShader, preProcessor.generateBRDFIntegrationMap()}),
       guiRenderer(config.guiShader), postProcessor(config.visualPrepShader),
       framebufferA(config.width, config.height), framebufferB(config.width, config.height),
       sceneLoader(), coordinator(ecs::Coordinator::getInstance()), skybox(nullptr),
@@ -151,6 +151,7 @@ std::shared_ptr<Image> RenderSystem::update(float dt) {
   if (skybox) {
     renderer.renderSkybox(*skybox);
   }
+  renderer.renderGridPlane();
 
   // render entites
   renderer.preRenderMesh(*globalDiffuseIBL, *globalSpecularIBL);

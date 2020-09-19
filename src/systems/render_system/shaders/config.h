@@ -157,12 +157,36 @@ constexpr int PROJECTION_MAT_LOC = VERT_U_PROJECTION_MAT_LOC;
 }
 } // namespace vertex
 namespace fragment {
-constexpr int TEXTURE_BND = COLOR_ATTACHMENT0;
+constexpr int TEXTURE_BND = FRAG_U_TEXTURE_BND;
 }
 } // namespace gui
-#undef GUI_VERTEX
-#undef GUI_VERTEX
+#undef GUI_VERTEX_SHADER
+#undef GUI_FRAGMENT_SHADER
 #undef GLSL_CONFIG_H
+
+#define GRID_PLANE_VERTEX_SHADER
+#define GRID_PLANE_FRAGMENT_SHADER
+#include "glsl/config.h"
+namespace gridPlane {
+namespace vertex {
+namespace attribute {
+constexpr int POSITION_LOC = VERT_A_POSITION_LOC; // 0 - we use 1x1 common plane
+} // namespace attribute
+namespace uniform {
+constexpr int TRANSFORMATION_MAT_LOC = VERT_U_TRANSFORMATION_LOC;
+}
+} // namespace vertex
+namespace fragment {
+constexpr int PLANE_COLOR_LOC = FRAG_U_PLANE_COLOR_LOC;
+constexpr int GRID_COLOR_LOC = FRAG_U_GRID_COLOR_LOC;
+constexpr int GRID_MODE_LOC = FRAG_U_GRID_MODE_LOC;
+constexpr int DISTANCE_LIMIT_LOC = FRAG_U_DISTANCE_LIMIT_LOC; 
+} // namespace fragment
+} // namespace gridPlane
+#undef GRID_PLANE_VERTEX_SHADER
+#undef GRID_PLANE_FRAGMENT_SHADER
+#undef GLSL_CONFIG_H
+
 } // namespace shader
 enum class ShaderType { FORWARD_SHADER, FLAT_FORWARD_SHADER };
 } // namespace render_system

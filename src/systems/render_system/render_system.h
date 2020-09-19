@@ -35,6 +35,7 @@ struct RenderSystemConfig {
   const shader::StageCodeMap &iblSpecularConvolutionShader;
   const shader::StageCodeMap &iblBrdfIntegrationShader;
   const shader::StageCodeMap &guiShader;
+  const shader::StageCodeMap &gridPlaneShader;
 
   const FrameCallback &frameCallback;
 
@@ -99,7 +100,7 @@ private:
   void initSubSystems();
   // init render_system related singletons
   bool initSingletons(const Image &checkerImage);
-  void setupFramebuffer(FrameBuffer& framebuffer);
+  void setupFramebuffer(FrameBuffer &framebuffer);
 
 public:
   RenderSystem(const RenderSystemConfig &config);

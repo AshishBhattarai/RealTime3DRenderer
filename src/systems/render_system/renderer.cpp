@@ -17,7 +17,7 @@ Renderer::Renderer(RendererConfig config)
     : meshes(config.meshes), materials(config.materials), projectionMatrix(1.0f),
       camera(config.camera), generalVSUBO(), flatForwardMaterial(config.flatForwardShader),
       textureForwardMaterial(config.textureForwardShader),
-      skyboxCubeMapShader(config.skyboxCubeMapShader),
+      skyboxCubeMapShader(config.skyboxCubeMapShader), gridPlaneShader(config.gridPlaneShape),
       brdfIntegrationMap(std::move(config.brdfIntegrationMap)) {
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -98,6 +98,11 @@ void Renderer::renderSkybox(const Texture &texture) {
 void Renderer::updateProjectionMatrix(float ar, float fov, float near, float far) {
   projectionMatrix = glm::perspective(glm::radians(fov), ar, near, far);
   generalVSUBO.setProjectionMatrix(projectionMatrix);
+}
+
+void Renderer::renderGridPlane() {
+  gridPlaneShader.bind();
+  DefaultPrimitivesRenderer::getInstance().drawPlane();
 }
 
 } // namespace render_system

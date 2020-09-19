@@ -248,7 +248,7 @@ render_system::RenderSystem *App::createRenderSystem(int width, int height) {
   Buffer flatForwardVertex, flatForwardFragment, textureForwardVertex, textureForwardFragment,
       skyboxVertex, cubemapVertex, cubemapFragment, equirectangularFragment, visualPrepVertex,
       visualPrepFragment, iblConvolutionFragment, iblSpecularConvolutionFragment,
-      iblBrdfIntegrationFragment, guiVertex, guiFragment;
+      iblBrdfIntegrationFragment, guiVertex, guiFragment, gridPlaneVertex, gridPlaneFragment;
   status = Loaders::loadBinaryFile(flatForwardVertex, "shaders/flat_forward_material_vert.spv");
   status = Loaders::loadBinaryFile(flatForwardFragment, "shaders/flat_forward_material_frag.spv");
   status =
@@ -269,6 +269,10 @@ render_system::RenderSystem *App::createRenderSystem(int width, int height) {
       Loaders::loadBinaryFile(iblBrdfIntegrationFragment, "shaders/ibl_brdf_integration_map.spv");
   status = Loaders::loadBinaryFile(guiVertex, "shaders/gui_vert.spv");
   status = Loaders::loadBinaryFile(guiFragment, "shaders/gui_frag.spv");
+  status = Loaders::loadBinaryFile(guiVertex, "shaders/gui_vert.spv");
+  status = Loaders::loadBinaryFile(guiFragment, "shaders/gui_frag.spv");
+  status = Loaders::loadBinaryFile(gridPlaneVertex, "shaders/grid_plane_vert.spv");
+  status = Loaders::loadBinaryFile(gridPlaneFragment, "shaders/grid_plane_frag.spv");
 
   return new RenderSystem(
       {checkerImage,
@@ -302,10 +306,13 @@ render_system::RenderSystem *App::createRenderSystem(int width, int height) {
                             {shader::ShaderStage::FRAGMENT_SHADER, iblBrdfIntegrationFragment}},
        shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, guiVertex},
                             {shader::ShaderStage::FRAGMENT_SHADER, guiFragment}},
+       shader::StageCodeMap{{shader::ShaderStage::VERTEX_SHADER, gridPlaneVertex},
+                            {shader::ShaderStage::FRAGMENT_SHADER, gridPlaneFragment}},
        [&appUi = appUi](uint textureId, int width, int height) {
          appUi.showFrame(textureId, width, height);
        },
-       width, height, width / (float)height});
+       width, height, width / (float)height} // namespace app
+  );
 }
 
 } // namespace app

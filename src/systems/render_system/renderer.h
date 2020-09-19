@@ -4,6 +4,7 @@
 #include "frame_buffer.h"
 #include "shaders/flat_forward_material.h"
 #include "shaders/general_vs_ubo.hpp"
+#include "shaders/grid_plane.h"
 #include "shaders/ibl_specular_convolution.h"
 #include "shaders/skybox_shader.h"
 #include "shaders/texture_forward_material.h"
@@ -36,6 +37,7 @@ struct RendererConfig {
   const shader::StageCodeMap &flatForwardShader;
   const shader::StageCodeMap &textureForwardShader;
   const shader::StageCodeMap &skyboxCubeMapShader;
+  const shader::StageCodeMap &gridPlaneShape;
   Texture brdfIntegrationMap;
 };
 
@@ -50,6 +52,7 @@ private:
   shader::FlatForwardMaterial flatForwardMaterial;
   shader::TextureForwardMaterial textureForwardMaterial;
   shader::SkyboxShader skyboxCubeMapShader;
+  shader::GridPlane gridPlaneShader;
 
   Texture brdfIntegrationMap;
 
@@ -77,5 +80,6 @@ public:
   void renderMesh(float dt, const glm::mat4 &transform, const MeshId &meshId,
                   std::map<PrimitiveId, MaterialId> primIdToMatId);
   void renderSkybox(const Texture &texture);
+  void renderGridPlane();
 };
 } // namespace render_system

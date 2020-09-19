@@ -26,6 +26,10 @@ add_spirv_shader(ibl_specular_convolution.frag ibl_specular_convolution_frag.spv
 add_spirv_shader(ibl_brdf_integration_map.frag ibl_brdf_integration_map.spv "")
 add_spirv_shader(gui.vert gui_vert.spv "")
 add_spirv_shader(gui.frag gui_frag.spv "")
+add_spirv_shader(grid_plane.vert grid_plane_vert.spv "")
+add_spirv_shader(grid_plane.frag grid_plane_frag.spv "")
+
+
 
 
 ###
@@ -49,4 +53,6 @@ add_custom_target(glsl-code ALL DEPENDS
     ${SHADER_OUTPUT_DIR}/ibl_brdf_integration_map.spv
     ${SHADER_OUTPUT_DIR}/gui_vert.spv 
     ${SHADER_OUTPUT_DIR}/gui_frag.spv 
+    ${SHADER_OUTPUT_DIR}/grid_plane_vert.spv
+    ${SHADER_OUTPUT_DIR}/grid_plane_frag.spv
 )
