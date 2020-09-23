@@ -33,10 +33,10 @@ void main() {
       uvr = vec3(-1.0f, -uv.y, uv.x);
       break;
     case 3:
-      uvr = vec3(uv.x, -1.0f, uv.y);
+      uvr = vec3(uv.x, 1.0f, -uv.y);
       break;
     case 4:
-      uvr = vec3(uv.x, 1.0f, uv.y);
+      uvr = vec3(uv.x, -1.0f, uv.y);
       break;
     case 5:
       uvr = vec3(uv.x, -uv.y, 1.0f);
