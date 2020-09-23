@@ -158,6 +158,9 @@ constexpr int PROJECTION_MAT_LOC = VERT_U_PROJECTION_MAT_LOC;
 } // namespace vertex
 namespace fragment {
 constexpr int TEXTURE_BND = FRAG_U_TEXTURE_BND;
+constexpr int TEXTURE_CUBE_BND = FRAG_U_TEXTURE_CUBE_BND;
+constexpr int LOD_LOC = FRAG_U_LOD_LOC;
+constexpr int FACE_LOC = FRAG_U_FACE_LOC;
 }
 } // namespace gui
 #undef GUI_VERTEX_SHADER

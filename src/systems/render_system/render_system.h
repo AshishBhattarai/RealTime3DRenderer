@@ -10,6 +10,8 @@
 #include "renderer.h"
 #include "scene.h"
 
+// TODO: refactor header
+
 namespace tinygltf {
 struct Model;
 }
@@ -134,5 +136,16 @@ public:
     assert(camera && "Invalid camera supplied.");
     if (camera) renderer.setCamera(camera);
   }
+
+  std::pair<uint, uint> getDiffuseConvMap() const {
+    return std::pair(globalDiffuseIBL->getId(), globalDiffuseIBL->getTarget());
+  }
+  std::pair<uint, uint> getSpecularConvMap() const {
+    return std::pair(globalSpecularIBL->getId(), globalSpecularIBL->getTarget());
+  }
+  std::pair<uint, uint> getEnvMap() const {
+    return std::pair(skybox->getId(), skybox->getTarget());
+  }
+  std::pair<uint, uint> getBrdfLUT() const { return renderer.getBrdfIntegrationMap(); }
 };
 } // namespace render_system

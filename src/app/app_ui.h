@@ -6,6 +6,14 @@
 struct ImGuiIO;
 namespace app {
 class AppUi {
+public:
+  struct Texture {
+    uint id = 0;
+    int width = 0;
+    int height = 0;
+    uint target = 0;
+  };
+
 private:
   static constexpr int HISTORY_SIZE = 50;
   ImGuiIO &io;
@@ -15,10 +23,10 @@ private:
   /* RenderSystem data */
   /* PBR */
   struct PBRTextures {
-    uint envMap;
-    uint diffuseConvMap;
-    uint specularConvMap;
-    uint brdfLUT;
+    Texture envMap;
+    Texture diffuseConvMap;
+    Texture specularConvMap;
+    Texture brdfLUT;
   } pbrTextures;
   /* PostProcess */
   struct PostProcessValues {
@@ -29,7 +37,7 @@ private:
   } postProcessValuesA;
   PostProcessValues postProcessValuesB;
 
-  void childImageView(const char *lable, uint texture);
+  void childImageView(const char *lable, Texture &texture, int *currentFace);
   void showRenderSystemWindow(bool *pclose);
   void showStatsWindow(bool *pclose);
 
@@ -37,6 +45,8 @@ private:
   bool shouldClose;
   void showFileMenu();
   void showMainMenuBar();
+
+  Texture createTexture(uint id, uint target);
 
 public:
   AppUi();
@@ -46,5 +56,10 @@ public:
   void showFrame(uint textureId, int texWidth, int texHeight);
 
   [[nodiscard]] bool getShouldClose() const;
+
+  void setEnvMap(uint id, uint target);
+  void setDiffuseConvMap(uint id, uint target);
+  void setSpecularConvMap(uint id, uint target);
+  void setBrdfLUT(uint id, uint target);
 };
 } // namespace app

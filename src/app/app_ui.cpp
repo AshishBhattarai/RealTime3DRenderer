@@ -1,4 +1,5 @@
 #include "app_ui.h"
+#include "systems/render_system/gui_renderer.h"
 #include "systems/render_system/texture.h"
 #include "types.h"
 #include <imgui/imgui.h>
@@ -23,9 +24,9 @@ static uint globalWindowsFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags
 namespace app {
 AppUi::AppUi() : io(ImGui::GetIO()), shouldClose(false) { fpsHistory.fill(60); }
 
-void AppUi::childImageView(const char *lable, uint texture) {
+void AppUi::childImageView(const char *lable, Texture &texture, int *currentFace) {
   if (ImGui::TreeNode(lable)) {
-    ImTextureID texId = io.Fonts->TexID;
+    ImTextureID texId = (ImTextureID)(uptr)texture.id;
     float texW = (float)256;
     float texH = (float)256;
     ImVec2 pos = ImGui::GetCursorScreenPos();
@@ -63,10 +64,13 @@ void AppUi::childImageView(const char *lable, uint texture) {
     static const char *items[] = {
         "0", "1", "2", "3", "4", "5",
     };
-    static int item_current = 0;
-    ImGui::PushItemWidth(35);
-    ImGui::Combo("Face", &item_current, items, IM_ARRAYSIZE(items));
-    ImGui::PopItemWidth();
+    if (currentFace) {
+      ImGui::PushItemWidth(35);
+      ImGui::Combo("Face", currentFace, items, IM_ARRAYSIZE(items));
+      texture.id =
+          render_system::GuiRenderer::generateTextureMask(texture.id, texture.target, *currentFace+1);
+      ImGui::PopItemWidth();
+    }
     ImGui::TreePop();
   }
 }
@@ -77,10 +81,13 @@ void AppUi::showRenderSystemWindow(bool *pclose) {
     ImGui::Text("Renderer");
     if (ImGui::CollapsingHeader("PBR")) {
       if (ImGui::TreeNode("PBR Indirect Lighting Maps")) {
-        childImageView("Environment Map", 0);
-        childImageView("Diffuse Convolution Map", 0);
-        childImageView("Specular Convolution Map", 0);
-        childImageView("BRDF LUT Map", 0);
+        static int envMapFace = 0;
+        childImageView("Environment Map", pbrTextures.envMap, &envMapFace);
+        static int diffuseConvFace = 0;
+        childImageView("Diffuse Convolution Map", pbrTextures.diffuseConvMap, &diffuseConvFace);
+        static int specularConvFace = 0;
+        childImageView("Specular Convolution Map", pbrTextures.specularConvMap, &specularConvFace);
+        childImageView("BRDF LUT Map", pbrTextures.brdfLUT, nullptr);
         ImGui::TreePop();
       }
     }
@@ -252,5 +259,29 @@ void AppUi::showFrame(uint textureId, int texWidth, int texHeight) {
 }
 
 bool AppUi::getShouldClose() const { return shouldClose; }
+
+AppUi::Texture AppUi::createTexture(uint id, uint target) {
+  int w, h;
+  GLenum GlTarget = (GLenum)target;
+  glBindTexture(GlTarget, id);
+  glGetTexLevelParameteriv(GlTarget, 0, GL_TEXTURE_WIDTH, &w);
+  glGetTexLevelParameteriv(GlTarget, 0, GL_TEXTURE_HEIGHT, &h);
+  glBindTexture(GlTarget, 0);
+  return {id, w, h, target};
+}
+
+void AppUi::setEnvMap(uint id, uint target) {
+  pbrTextures.envMap = createTexture(id, target);
+  pbrTextures.envMap.id = render_system::GuiRenderer::generateTextureMask(id, target, 1);
+}
+void AppUi::setDiffuseConvMap(uint id, uint target) {
+  pbrTextures.diffuseConvMap = createTexture(id, target);
+  pbrTextures.diffuseConvMap.id = render_system::GuiRenderer::generateTextureMask(id, target, 1);
+}
+void AppUi::setSpecularConvMap(uint id, uint target) {
+  pbrTextures.specularConvMap = createTexture(id, target);
+  pbrTextures.specularConvMap.id = render_system::GuiRenderer::generateTextureMask(id, target, 1);
+}
+void AppUi::setBrdfLUT(uint id, uint target) { pbrTextures.brdfLUT = createTexture(id, target); }
 
 } // namespace app

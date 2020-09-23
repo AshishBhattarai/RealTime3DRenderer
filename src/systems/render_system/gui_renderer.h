@@ -1,5 +1,6 @@
 #pragma once
 #include "shaders/gui_shader.h"
+#include "types.h"
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
@@ -27,9 +28,20 @@ private:
   void setupRenderState(ImDrawData *drawData, const glm::ivec2 fbSize);
 
 public:
+  struct TextureProperties {
+    GLenum target;
+    GLuint id;
+    int face;
+    int lod;
+  };
+
   GuiRenderer(const shader::StageCodeMap &codeMap);
-  void render();
   ~GuiRenderer();
+
+  void render();
+
+  static GLuint generateTextureMask(GLuint id, GLenum target, u8 face = 0);
+  static TextureProperties decodeTextureMask(GLuint id);
 };
 
 } // namespace render_system

@@ -101,6 +101,17 @@ App::App(int, char **)
   glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &size);
   std::cout << "SSBO MB: " << size / 1024 << std::endl;
 
+  std::pair brdfLUT = renderSystem->getBrdfLUT();
+  std::pair specularConv = renderSystem->getSpecularConvMap();
+  std::pair diffuseConv = renderSystem->getDiffuseConvMap();
+  std::pair envMap = renderSystem->getEnvMap();
+
+  appUi.setBrdfLUT(brdfLUT.first, brdfLUT.second);
+  appUi.setDiffuseConvMap(diffuseConv.first, diffuseConv.second);
+  appUi.setSpecularConvMap(specularConv.first, specularConv.second);
+  appUi.setEnvMap(envMap.first, envMap.second);
+  // https://stackoverflow.com/questions/38543155/opengl-render-face-of-cube-map-to-a-quad
+
   auto err = glGetError();
   if (err != GL_NO_ERROR) CSLOG("OpenGL ERROR:", err);
 } // namespace app
@@ -159,31 +170,37 @@ void App::runRenderLoop(std::string_view renderOutput) {
       component::Light(glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
 
   int envMap = 0;
-  input.addKeyCallback(
-      Input::Key::H, [&envMap, &renderSystem = renderSystem](const Input::KeyEvent &keyEvent) {
-        // change env
-        if (keyEvent.action == Input::Action::PRESS) {
-          Image skybox;
-          switch (envMap) {
-          case 0:
-            Loaders::loadImage(skybox, "resources/skybox/HDR_111_Parking_Lot_2.hdr", true);
-            break;
-          case 1:
-            Loaders::loadImage(skybox, "resources/skybox/Factory_Catwalk_2k.hdr", true);
-            break;
+  input.addKeyCallback(Input::Key::H, [&envMap, &renderSystem = renderSystem,
+                                       &appUi = appUi](const Input::KeyEvent &keyEvent) {
+    // change env
+    if (keyEvent.action == Input::Action::PRESS) {
+      Image skybox;
+      switch (envMap) {
+      case 0:
+        Loaders::loadImage(skybox, "resources/skybox/HDR_111_Parking_Lot_2.hdr", true);
+        break;
+      case 1:
+        Loaders::loadImage(skybox, "resources/skybox/Factory_Catwalk_2k.hdr", true);
+        break;
 
-          case 2:
-            Loaders::loadImage(skybox, "resources/skybox/kloppenheim_02_2k.hdr", true);
-            break;
+      case 2:
+        Loaders::loadImage(skybox, "resources/skybox/kloppenheim_02_2k.hdr", true);
+        break;
 
-          default:
-            Loaders::loadImage(skybox, "resources/skybox/14-Hamarikyu_Bridge_B.hdr", true);
-            envMap = -1;
-          }
-          envMap++;
-          renderSystem->setSkyBox(&skybox);
-        }
-      });
+      default:
+        Loaders::loadImage(skybox, "resources/skybox/14-Hamarikyu_Bridge_B.hdr", true);
+        envMap = -1;
+      }
+      envMap++;
+      renderSystem->setSkyBox(&skybox);
+      std::pair specularConv = renderSystem->getSpecularConvMap();
+      std::pair diffuseConv = renderSystem->getDiffuseConvMap();
+      std::pair envMap = renderSystem->getEnvMap();
+      appUi.setDiffuseConvMap(diffuseConv.first, diffuseConv.second);
+      appUi.setSpecularConvMap(specularConv.first, specularConv.second);
+      appUi.setEnvMap(envMap.first, envMap.second);
+    }
+  });
 
   float ltf, lt, ct, dt = 0.0f;
   int frameCnt = 0;

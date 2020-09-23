@@ -81,5 +81,9 @@ public:
                   std::map<PrimitiveId, MaterialId> primIdToMatId);
   void renderSkybox(const Texture &texture);
   void renderGridPlane();
+
+  std::pair<uint, uint> getBrdfIntegrationMap() const {
+    return std::pair(brdfIntegrationMap.getId(), brdfIntegrationMap.getTarget());
+  }
 };
 } // namespace render_system

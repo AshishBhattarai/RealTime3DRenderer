@@ -178,7 +178,15 @@ void GuiRenderer::render() {
                     (int)(clipRect.w - clipRect.y));
 
           // Bind texture, Draw
-          glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
+          const GLuint id = (GLuint)(intptr_t)pcmd->TextureId;
+          const TextureProperties properties = decodeTextureMask(id);
+          shader.loadFace(properties.face);
+          shader.loadLod((float)properties.lod);
+          if (properties.face)
+            glActiveTexture(GL_TEXTURE0 + shader::gui::fragment::TEXTURE_CUBE_BND);
+          else
+            glActiveTexture(GL_TEXTURE0 + shader::gui::fragment::TEXTURE_BND);
+          glBindTexture(properties.target, properties.id);
           glDrawElementsBaseVertex(GL_TRIANGLES, (GLsizei)pcmd->ElemCount,
                                    sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
                                    (void *)(intptr_t)(pcmd->IdxOffset * sizeof(ImDrawIdx)),
@@ -211,4 +219,26 @@ void GuiRenderer::render() {
   glViewport(lastViewport[0], lastViewport[1], lastViewport[2], lastViewport[3]);
   glScissor(lastScissorBox[0], lastScissorBox[1], lastScissorBox[2], lastScissorBox[3]);
 }
+
+GLuint GuiRenderer::generateTextureMask(GLuint id, GLenum target, u8 face) {
+  GLuint newId = id & 0x007FFFFF; // clear old, MSB 9-bit is for 0[FACE][MIP]
+  switch (target) {
+  case GL_TEXTURE_CUBE_MAP:
+    // MSB is always 0 then mask top 4-bit for face
+    newId = (face << 27) | (id & 0x0F);
+    break;
+  }
+  return newId;
+}
+GuiRenderer::TextureProperties GuiRenderer::decodeTextureMask(GLuint id) {
+  u8 lodFace = id >> 23; // MSB 9 bit for id
+  u8 face = (lodFace >> 4); // MSB 4-bit is face, if available
+  u8 lod = (lodFace & 0xF);
+  id = id & 0x00FFFFFF;
+  if (face)
+    return {GL_TEXTURE_CUBE_MAP, id, face, lod};
+  else
+    return {GL_TEXTURE_2D, id, 0, 0};
+}
+
 }; // namespace render_system
