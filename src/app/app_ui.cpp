@@ -24,7 +24,7 @@ static uint globalWindowsFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags
 namespace app {
 AppUi::AppUi() : io(ImGui::GetIO()), shouldClose(false) { fpsHistory.fill(60); }
 
-void AppUi::childImageView(const char *lable, Texture &texture, int *currentFace) {
+void AppUi::childImageView(const char *lable, Texture &texture, int *currentFace, int *currentLod) {
   if (ImGui::TreeNode(lable)) {
     ImTextureID texId = (ImTextureID)(uptr)texture.id;
     float texW = (float)256;
@@ -60,15 +60,26 @@ void AppUi::childImageView(const char *lable, Texture &texture, int *currentFace
       ImGui::EndTooltip();
     }
     ImGui::Text("%.0fx%.0f", texW, texH);
-    ImGui::SameLine();
     static const char *items[] = {
         "0", "1", "2", "3", "4", "5",
     };
     if (currentFace) {
       ImGui::PushItemWidth(35);
       ImGui::Combo("Face", currentFace, items, IM_ARRAYSIZE(items));
-      texture.id =
-          render_system::GuiRenderer::generateTextureMask(texture.id, texture.target, *currentFace+1);
+      texture.id = render_system::GuiRenderer::generateTextureMask(texture.id, texture.target,
+                                                                   *currentFace + 1);
+      ImGui::PopItemWidth();
+    }
+    if (currentLod) {
+      u8 face = 0;
+      if (currentFace) {
+        ImGui::SameLine();
+        face = *currentFace + 1;
+      }
+      ImGui::PushItemWidth(35);
+      ImGui::Combo("Lod", currentLod, items, IM_ARRAYSIZE(items));
+      texture.id = render_system::GuiRenderer::generateTextureMask(texture.id, texture.target, face,
+                                                                   *currentLod);
       ImGui::PopItemWidth();
     }
     ImGui::TreePop();
@@ -82,12 +93,17 @@ void AppUi::showRenderSystemWindow(bool *pclose) {
     if (ImGui::CollapsingHeader("PBR")) {
       if (ImGui::TreeNode("PBR Indirect Lighting Maps")) {
         static int envMapFace = 0;
-        childImageView("Environment Map", pbrTextures.envMap, &envMapFace);
+        static int envMapLod = 0;
+        childImageView("Environment Map", pbrTextures.envMap, &envMapFace, &envMapLod);
         static int diffuseConvFace = 0;
-        childImageView("Diffuse Convolution Map", pbrTextures.diffuseConvMap, &diffuseConvFace);
+        static int diffuseConvLod = 0;
+        childImageView("Diffuse Convolution Map", pbrTextures.diffuseConvMap, &diffuseConvFace,
+                       &diffuseConvLod);
         static int specularConvFace = 0;
-        childImageView("Specular Convolution Map", pbrTextures.specularConvMap, &specularConvFace);
-        childImageView("BRDF LUT Map", pbrTextures.brdfLUT, nullptr);
+        static int specularConvLod = 0;
+        childImageView("Specular Convolution Map", pbrTextures.specularConvMap, &specularConvFace,
+                       &specularConvLod);
+        childImageView("BRDF LUT Map", pbrTextures.brdfLUT, nullptr, nullptr);
         ImGui::TreePop();
       }
     }
@@ -103,7 +119,7 @@ void AppUi::showRenderSystemWindow(bool *pclose) {
 }
 
 void AppUi::showStatsWindow(bool *pclose) {
-  dtHistory[++fpsHistoryI % HISTORY_SIZE] = ImGui::GetIO().DeltaTime;
+  dtHistory[++dtHistoryI % HISTORY_SIZE] = ImGui::GetIO().DeltaTime;
 
   if (ImGui::Begin("Stats", pclose, globalWindowsFlags)) {
     float avg = std::accumulate(dtHistory.begin(), dtHistory.end(), 0.0f) / (float)HISTORY_SIZE;

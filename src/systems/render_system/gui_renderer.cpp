@@ -1,6 +1,7 @@
 #include "gui_renderer.h"
 #include "systems/render_system/shaders/config.h"
 #include "systems/render_system/shaders/program.h"
+#include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui/imgui.h>
 
@@ -220,21 +221,23 @@ void GuiRenderer::render() {
   glScissor(lastScissorBox[0], lastScissorBox[1], lastScissorBox[2], lastScissorBox[3]);
 }
 
-GLuint GuiRenderer::generateTextureMask(GLuint id, GLenum target, u8 face) {
+GLuint GuiRenderer::generateTextureMask(GLuint id, GLenum target, u8 face, u8 lod) {
   GLuint newId = id & 0x007FFFFF; // clear old, MSB 9-bit is for 0[FACE][MIP]
+  face = std::clamp(face, (u8)0, (u8)6);
+  lod = std::clamp(lod, (u8)0, (u8)10);
   switch (target) {
   case GL_TEXTURE_CUBE_MAP:
     // MSB is always 0 then mask top 4-bit for face
-    newId = (face << 27) | (id & 0x0F);
+    newId = ((0x0F & face) << 27) | ((0x0F & lod) << 23) | newId;
     break;
   }
   return newId;
 }
 GuiRenderer::TextureProperties GuiRenderer::decodeTextureMask(GLuint id) {
-  u8 lodFace = id >> 23; // MSB 9 bit for id
+  u8 lodFace = id >> 23;    // MSB 9 bit for id
   u8 face = (lodFace >> 4); // MSB 4-bit is face, if available
-  u8 lod = (lodFace & 0xF);
-  id = id & 0x00FFFFFF;
+  u8 lod = (lodFace & 0x0F);
+  id = id & 0x007FFFFF;
   if (face)
     return {GL_TEXTURE_CUBE_MAP, id, face, lod};
   else

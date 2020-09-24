@@ -25,6 +25,15 @@ void main() {
     // project a face of samplerCube to 2D plane
     vec2 uv = 2.0f * fs_in.texCoords - 1.0f; // remap to [-1, 1]
     vec3 uvr = vec3(0);
+    /**
+     * -ve y for +/- x,z coz images are upsidedown
+     *
+     * +ve z backward
+     * -ve z forward
+     *
+     * -ve z is upsidedown for +ve y
+     * +ve z is upsidedown for -ve y
+     */
     switch (face) {
     case 1:
       uvr = vec3(1.0f, -uv.y, uv.x);

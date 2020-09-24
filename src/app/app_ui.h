@@ -37,7 +37,7 @@ private:
   } postProcessValuesA;
   PostProcessValues postProcessValuesB;
 
-  void childImageView(const char *lable, Texture &texture, int *currentFace);
+  void childImageView(const char *lable, Texture &texture, int *currentFace, int *currentLod);
   void showRenderSystemWindow(bool *pclose);
   void showStatsWindow(bool *pclose);
 

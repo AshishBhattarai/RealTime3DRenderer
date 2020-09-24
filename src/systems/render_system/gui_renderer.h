@@ -40,7 +40,18 @@ public:
 
   void render();
 
-  static GLuint generateTextureMask(GLuint id, GLenum target, u8 face = 0);
+  /**
+   * @brief Masks in face and lod information on MSB 9-bit of textureId if target is cubemap for
+   * now.
+   *
+   * @param id
+   * @param target
+   * @param face - 0(no face), 1-6 valid face
+   * @param lod - must be [0, 10]
+   *
+   * @return masked textureId
+   */
+  static GLuint generateTextureMask(GLuint id, GLenum target, u8 face = 0, u8 lod = 0);
   static TextureProperties decodeTextureMask(GLuint id);
 };
 
