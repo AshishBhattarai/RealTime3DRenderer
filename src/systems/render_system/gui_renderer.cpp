@@ -222,19 +222,19 @@ void GuiRenderer::render() {
 }
 
 GLuint GuiRenderer::generateTextureMask(GLuint id, GLenum target, u8 face, u8 lod) {
-  GLuint newId = id & 0x007FFFFF; // clear old, MSB 9-bit is for 0[FACE][MIP]
+  GLuint newId = id & 0x007FFFFF; // clear old, MSB 8-bit is for [FACE][MIP]
   face = std::clamp(face, (u8)0, (u8)6);
   lod = std::clamp(lod, (u8)0, (u8)10);
   switch (target) {
   case GL_TEXTURE_CUBE_MAP:
-    // MSB is always 0 then mask top 4-bit for face
-    newId = ((0x0F & face) << 27) | ((0x0F & lod) << 23) | newId;
+    // MSB 4-bit for face, then another 4-bit for lod/mip
+    newId = ((0x0F & face) << 28) | ((0x0F & lod) << 24) | newId;
     break;
   }
   return newId;
 }
 GuiRenderer::TextureProperties GuiRenderer::decodeTextureMask(GLuint id) {
-  u8 lodFace = id >> 23;    // MSB 9 bit for id
+  u8 lodFace = id >> 24;    // MSB 8-bit for id
   u8 face = (lodFace >> 4); // MSB 4-bit is face, if available
   u8 lod = (lodFace & 0x0F);
   id = id & 0x007FFFFF;
