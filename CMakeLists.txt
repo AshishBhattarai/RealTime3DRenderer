@@ -13,7 +13,7 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 #options
-option(TEST_ENABLED "build tests" on)
+option(TEST_ENABLED "build tests" off)
 option(BUILD_SHARED_LIBS "build the shared libs" off)
 if(BUILD_SHARED_LIBS)
     option(USE_SHARED_GLFW "Use the shared glfw library" off)
