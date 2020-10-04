@@ -1,6 +1,5 @@
 #pragma once
 
-#include "config.h"
 #include "uniform_buffer.h"
 #include <glm/gtc/type_ptr.hpp>
 
@@ -16,7 +15,7 @@ private:                                                     // Bytes
   static constexpr int TOTAL_SIZE = CAMERA_POS_OFFSET + SIZE_VEC3; // 144 bytes
 
 public:
-  GeneralVSUBO() : UniformBuffer(TOTAL_SIZE, vertex::generalUBOBinding) {}
+  GeneralVSUBO();
 
   void setProjectionMatrix(const glm::mat4 &mat) {
     setBufferData(glm::value_ptr(mat), PROJECTION_MAT_OFFSET, SIZE_MATRIX4);

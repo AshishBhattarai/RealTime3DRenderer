@@ -6,7 +6,7 @@
 #include "mesh.h"
 #include "render_defaults.h"
 #include "renderable_entity.h"
-#include "shaders/general_vs_ubo.hpp"
+#include "shaders/general_vs_ubo.h"
 #include "utils/slogger.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <limits>

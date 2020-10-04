@@ -151,7 +151,7 @@ std::shared_ptr<Image> RenderSystem::update(float dt) {
   if (skybox) {
     renderer.renderSkybox(*skybox);
   }
-  renderer.renderGridPlane();
+  // renderer.renderGridPlane();
 
   // render entites
   renderer.preRenderMesh(*globalDiffuseIBL, *globalSpecularIBL);
