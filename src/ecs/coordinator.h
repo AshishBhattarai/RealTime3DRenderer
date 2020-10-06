@@ -1,6 +1,7 @@
 #pragma once
 
 #include "component_manager.h"
+#include "default_events.h"
 #include "entity_manager.h"
 #include "event_manager.h"
 #include "system_manager.h"
@@ -29,24 +30,24 @@ public:
 
   template <typename T> void addComponent(Entity entity, const T &component) {
     componentManager.addComponent<T>(entity, component);
-    Signature signature = entityManager.updateSignaure(
-        entity, componentManager.getComponentFamily<T>(), true);
-    systemManager.entitySignatureChanged(entity, signature);
+    Signature sig =
+        entityManager.updateSignaure(entity, componentManager.getComponentFamily<T>(), true);
+    eventManager.emit<event::EntityChanged>(entity, sig, event::EntityChanged::Status::UPDATED);
+    systemManager.entitySignatureChanged(entity, sig);
   }
 
-  template <typename T, typename... Args>
-  void addComponent(Entity entity, Args &&... args) {
+  template <typename T, typename... Args> void addComponent(Entity entity, Args &&... args) {
     T component(std::forward<Args>(args)...);
     componentManager.addComponent<T>(entity, component);
-    Signature signature = entityManager.updateSignaure(
-        entity, componentManager.getComponentFamily<T>(), true);
+    Signature signature =
+        entityManager.updateSignaure(entity, componentManager.getComponentFamily<T>(), true);
     systemManager.entitySignatureChanged(entity, signature);
   }
 
   template <typename T> void removeComponent(Entity entity) {
     componentManager.removeComponent<T>(entity);
-    Signature signature = entityManager.updateSignaure(
-        entity, componentManager.getComponentFamily<T>(), false);
+    Signature signature =
+        entityManager.updateSignaure(entity, componentManager.getComponentFamily<T>(), false);
     systemManager.entitySignatureChanged(entity, signature);
   }
 
@@ -68,9 +69,7 @@ public:
   }
 
   // event
-  template <typename T> void registerEvent() {
-    eventManager.registerEvent<T>();
-  }
+  template <typename T> void registerEvent() { eventManager.registerEvent<T>(); }
 
   template <typename E, typename R> void subscribeToEvent(R &receiver) {
     eventManager.subscribe<E, R>(receiver);
@@ -80,16 +79,14 @@ public:
     eventManager.unsubscribe<E, R>(reciver);
   }
 
-  template <typename E> void emitEvent(const E &event) {
-    eventManager.emit<E>(event);
-  }
+  template <typename E> void emitEvent(const E &event) { eventManager.emit<E>(event); }
   template <typename E, typename... Args> void emitEvent(Args &&... args) {
     E event(std::forward<Args>(args)...);
     eventManager.emit<E>(event);
   }
 
 private:
-  Coordinator() = default;
+  Coordinator() { registerEvent<event::EntityChanged>(); };
 };
 
 } // namespace ecs

@@ -1,12 +1,19 @@
 #include "coordinator.h"
+#include "ecs/default_events.h"
 
 namespace ecs {
 
-Entity Coordinator::createEntity() { return entityManager.createEntity(); }
+Entity Coordinator::createEntity() {
+  Entity entity = entityManager.createEntity();
+  Signature sig = entityManager.getSignature(entity);
+  eventManager.emit<event::EntityChanged>(entity, sig, event::EntityChanged::Status::CREATED);
+  return entity;
+}
 void Coordinator::destoryEntity(Entity entity) {
-  Signature entitySignature = entityManager.getSignature(entity);
+  Signature sig = entityManager.getSignature(entity);
+  eventManager.emit<event::EntityChanged>(entity, sig, event::EntityChanged::Status::DELETED);
   entityManager.destoryEntity(entity);
-  componentManager.entityDestoryed(entity, entitySignature);
+  componentManager.entityDestoryed(entity, sig);
   systemManager.entityDestoryed(entity);
 }
 

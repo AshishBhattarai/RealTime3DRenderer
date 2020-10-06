@@ -1,11 +1,17 @@
 #pragma once
 
+#include "ecs/default_events.h"
+#include "ecs/event_manager.h"
 #include "types.h"
 #include <array>
+#include <string>
+#include <map>
+#include <vector>
 
+// TODO: Split this into multiple class ??
 struct ImGuiIO;
 namespace app {
-class AppUi {
+class AppUi : public ecs::Receiver<event::EntityChanged> {
 public:
   struct Texture {
     uint id = 0;
@@ -37,9 +43,20 @@ private:
   } postProcessValuesA;
   PostProcessValues postProcessValuesB;
 
+  /* ECS data */
+  struct Entity {
+    std::string id;
+    std::string sig;
+  };
+  std::map<EntityId, Entity> entities;
+
   void childImageView(const char *lable, Texture &texture, int *currentFace, int *currentLod);
+  void childSelectableColumn(std::vector<std::vector<std::string>> columns, int &selected);
+
+  /* dockable Windows */
   void showRenderSystemWindow(bool *pclose);
   void showStatsWindow(bool *pclose);
+  void showEntityWinow(bool *pclose);
 
   /* Menu bar */
   bool shouldClose;
@@ -61,5 +78,8 @@ public:
   void setDiffuseConvMap(uint id, uint target);
   void setSpecularConvMap(uint id, uint target);
   void setBrdfLUT(uint id, uint target);
+
+  /* Receive Events */
+  void receive(const event::EntityChanged &event);
 };
 } // namespace app

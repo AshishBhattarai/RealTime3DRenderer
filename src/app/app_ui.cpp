@@ -1,10 +1,14 @@
 #include "app_ui.h"
+#include "ecs/coordinator.h"
+#include "ecs/default_events.h"
+#include "ecs/event_manager.h"
 #include "systems/render_system/gui_renderer.h"
 #include "systems/render_system/texture.h"
 #include "types.h"
 #include <imgui/imgui.h>
 #include <numeric>
 #include <string>
+#include <utility>
 
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -17,12 +21,16 @@ static int dtHistoryI = 0;
 /* Window status */
 static bool statsOpen = true;
 static bool renderSystemOpen = true;
+static bool entityWindowOpen = true;
 static int sceneScale = 68;
 
 static uint globalWindowsFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
 
 namespace app {
-AppUi::AppUi() : io(ImGui::GetIO()), shouldClose(false) { fpsHistory.fill(60); }
+AppUi::AppUi() : io(ImGui::GetIO()), entities(), shouldClose(false) {
+  fpsHistory.fill(60);
+  ecs::Coordinator::getInstance().eventManager.subscribe<event::EntityChanged>(*this);
+}
 
 void AppUi::childImageView(const char *lable, Texture &texture, int *currentFace, int *currentLod) {
   if (ImGui::TreeNode(lable)) {
@@ -86,6 +94,21 @@ void AppUi::childImageView(const char *lable, Texture &texture, int *currentFace
   }
 }
 
+void AppUi::childSelectableColumn(std::vector<std::vector<std::string>> columns, int &selected) {
+  for (size_t i = 0; i < columns.size(); ++i) {
+    char label[32];
+    sprintf(label, "##%04d", (int)i);
+    if (ImGui::Selectable(label, selected == (int)i, ImGuiSelectableFlags_SpanAllColumns))
+      selected = i;
+    // bool hovered = ImGui::IsItemHovered();
+    ImGui::SameLine();
+    for (const auto &column : columns[i]) {
+      ImGui::Text(column.c_str());
+      ImGui::NextColumn();
+    }
+  }
+}
+
 void AppUi::showRenderSystemWindow(bool *pclose) {
   if (ImGui::Begin("Render System", pclose, globalWindowsFlags)) {
     ImGui::AlignTextToFramePadding();
@@ -129,6 +152,43 @@ void AppUi::showStatsWindow(bool *pclose) {
     ImGui::PlotLines("FPS", fpsHistory.data(), HISTORY_SIZE, 0,
                      ("avg: " + std::to_string(avg)).c_str(), 0.0f, 60.0f, ImVec2(0, 80.0f));
     ImGui::SliderInt("Scene scale", &sceneScale, 20.0f, 100.0f, "%d%%", ImGuiSliderFlags_NoInput);
+  }
+  ImGui::End();
+}
+
+void AppUi::showEntityWinow(bool *pclose) {
+  if (ImGui::Begin("Entity Window", pclose, globalWindowsFlags)) {
+    ImGui::AlignTextToFramePadding();
+    // current width
+    ImVec2 size = ImGui::GetWindowSize();
+    // begin entity list window
+    ImGui::BeginChild("Entites", ImVec2(0, size.y / 2), true,
+                      ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar);
+
+    static int selected = -1;
+    ImGui::Columns(2, "Entites");
+    ImGui::Separator();
+    ImGui::Text("ID");
+    ImGui::NextColumn();
+    ImGui::Text("ComplentFlag");
+    ImGui::NextColumn();
+    ImGui::Separator();
+    std::vector<std::vector<std::string>> data;
+    for (const auto &e : entities) {
+      data.emplace_back(std::vector<std::string>{e.second.id, e.second.sig});
+    }
+    if (ImGui::BeginMenuBar()) {
+      ImGui::Text("Entites");
+      ImGui::EndMenuBar();
+    }
+    childSelectableColumn(data, selected);
+    ImGui::Columns(1);
+    ImGui::Separator();
+    ImGui::EndChild();
+    // end entity list window
+
+    if (ImGui::CollapsingHeader("Components")) {
+    }
   }
   ImGui::End();
 }
@@ -223,6 +283,9 @@ void AppUi::showMainMenuBar() {
       if (ImGui::MenuItem("Render System", NULL, renderSystemOpen)) {
         renderSystemOpen = true;
       }
+      if (ImGui::MenuItem("Entity Window", NULL, entityWindowOpen)) {
+        entityWindowOpen = true;
+      }
       if (ImGui::MenuItem("Entity List", NULL, false, false)) {
       } // Disabled item
       ImGui::Separator();
@@ -245,6 +308,9 @@ void AppUi::show() {
   }
   if (renderSystemOpen) {
     showRenderSystemWindow(&renderSystemOpen);
+  }
+  if (entityWindowOpen) {
+    showEntityWinow(&entityWindowOpen);
   }
 }
 
@@ -299,5 +365,22 @@ void AppUi::setSpecularConvMap(uint id, uint target) {
   pbrTextures.specularConvMap.id = render_system::GuiRenderer::generateTextureMask(id, target, 1);
 }
 void AppUi::setBrdfLUT(uint id, uint target) { pbrTextures.brdfLUT = createTexture(id, target); }
+
+/* Receive Events */
+void AppUi::receive(const event::EntityChanged &event) {
+  using event::EntityChanged;
+  switch (event.status) {
+  case EntityChanged::Status::CREATED:
+    entities.emplace(event.entity,
+                     Entity{std::to_string(event.entity), event.signature.to_string()});
+    break;
+  case EntityChanged::Status::UPDATED:
+    entities[event.entity] = {std::to_string(event.entity), event.signature.to_string()};
+    break;
+  case EntityChanged::Status::DELETED:
+    entities.erase(event.entity);
+    break;
+  }
+}
 
 } // namespace app
