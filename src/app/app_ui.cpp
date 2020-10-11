@@ -1,10 +1,13 @@
 #include "app_ui.h"
+#include "../utils/slogger.h"
+#include "components/transform.h"
 #include "ecs/coordinator.h"
 #include "ecs/default_events.h"
 #include "ecs/event_manager.h"
 #include "systems/render_system/gui_renderer.h"
 #include "systems/render_system/texture.h"
 #include "types.h"
+#include <glm/gtc/type_ptr.hpp>
 #include <imgui/imgui.h>
 #include <numeric>
 #include <string>
@@ -103,10 +106,19 @@ void AppUi::childSelectableColumn(std::vector<std::vector<std::string>> columns,
     // bool hovered = ImGui::IsItemHovered();
     ImGui::SameLine();
     for (const auto &column : columns[i]) {
-      ImGui::Text(column.c_str());
+      ImGui::TextUnformatted(column.c_str());
       ImGui::NextColumn();
     }
   }
+}
+
+component::Transform AppUi::showTransformComponent(const component::Transform &transform) {
+  glm::vec3 position = transform.position();
+  glm::vec3 rotation = transform.rotation();
+  float scale = transform.scale().x;
+  ImGui::Text("Transformation");
+  ImGui::DragFloat3("Translate##2", glm::value_ptr(position), 0.05f, 0.0f, 0.0f, "%.2f");
+  return component::Transform(position, rotation, glm::vec3(scale));
 }
 
 void AppUi::showRenderSystemWindow(bool *pclose) {
@@ -157,15 +169,15 @@ void AppUi::showStatsWindow(bool *pclose) {
 }
 
 void AppUi::showEntityWinow(bool *pclose) {
-  if (ImGui::Begin("Entity Window", pclose, globalWindowsFlags)) {
-    ImGui::AlignTextToFramePadding();
-    // current width
-    ImVec2 size = ImGui::GetWindowSize();
-    // begin entity list window
-    ImGui::BeginChild("Entites", ImVec2(0, size.y / 2), true,
-                      ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar);
+  ImGui::Begin("Entity Window", pclose, globalWindowsFlags);
+  ImGui::AlignTextToFramePadding();
+  // current width
+  ImVec2 size = ImGui::GetWindowSize();
+  // begin entity list window
+  static int selected = -1;
+  if (ImGui::BeginChild("Entites", ImVec2(0, size.y / 2), true,
+                        ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar)) {
 
-    static int selected = -1;
     ImGui::Columns(2, "Entites");
     ImGui::Separator();
     ImGui::Text("ID");
@@ -184,14 +196,29 @@ void AppUi::showEntityWinow(bool *pclose) {
     childSelectableColumn(data, selected);
     ImGui::Columns(1);
     ImGui::Separator();
-    ImGui::EndChild();
-    // end entity list window
+  }
+  ImGui::EndChild();
 
-    if (ImGui::CollapsingHeader("Components")) {
+  // components
+  if (selected > -1 && ((size_t)selected < entities.size())) {
+    ImGui::BeginChild("Components", ImVec2(0, size.y / 2), true,
+                      ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar);
+    if (ImGui::BeginMenuBar()) {
+      ImGui::Text("Components");
+      ImGui::EndMenuBar();
     }
+    if (auto it = entities.find(selected + 1); it != entities.end()) {
+      EntityId id = it->first;
+      auto &coordinator = ecs::Coordinator::getInstance();
+      if (coordinator.hasComponent<component::Transform>(id)) {
+        auto &transform = coordinator.getComponent<component::Transform>(id);
+        transform = showTransformComponent(transform);
+      }
+    }
+    ImGui::EndChild();
   }
   ImGui::End();
-}
+} // namespace app
 
 void AppUi::showFileMenu() {
   ImGui::MenuItem("(WIP menu)", NULL, false, false);

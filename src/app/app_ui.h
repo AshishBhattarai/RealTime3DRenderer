@@ -1,11 +1,12 @@
 #pragma once
 
+#include "components/transform.h"
 #include "ecs/default_events.h"
 #include "ecs/event_manager.h"
 #include "types.h"
 #include <array>
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 // TODO: Split this into multiple class ??
@@ -52,6 +53,9 @@ private:
 
   void childImageView(const char *lable, Texture &texture, int *currentFace, int *currentLod);
   void childSelectableColumn(std::vector<std::vector<std::string>> columns, int &selected);
+
+  /* Component Nodes */
+  component::Transform showTransformComponent(const component::Transform &transform);
 
   /* dockable Windows */
   void showRenderSystemWindow(bool *pclose);

@@ -5,6 +5,7 @@
 #include "entity_manager.h"
 #include "event_manager.h"
 #include "system_manager.h"
+#include <bitset>
 #include <memory>
 
 namespace ecs {
@@ -39,9 +40,10 @@ public:
   template <typename T, typename... Args> void addComponent(Entity entity, Args &&... args) {
     T component(std::forward<Args>(args)...);
     componentManager.addComponent<T>(entity, component);
-    Signature signature =
+    Signature sig =
         entityManager.updateSignaure(entity, componentManager.getComponentFamily<T>(), true);
-    systemManager.entitySignatureChanged(entity, signature);
+   eventManager.emit<event::EntityChanged>(entity, sig, event::EntityChanged::Status::UPDATED);
+    systemManager.entitySignatureChanged(entity, sig);
   }
 
   template <typename T> void removeComponent(Entity entity) {
@@ -49,6 +51,12 @@ public:
     Signature signature =
         entityManager.updateSignaure(entity, componentManager.getComponentFamily<T>(), false);
     systemManager.entitySignatureChanged(entity, signature);
+  }
+
+  template <typename T> bool hasComponent(Entity entity) {
+    std::bitset sig = entityManager.getSignature(entity);
+    ComponentFamily fmly = getComponentFamily<T>();
+    return sig[fmly];
   }
 
   template <typename T> T &getComponent(Entity entity) {

@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
   Coordinator &coordinator = Coordinator::getInstance();
   ComponentFamily transformFamily = coordinator.registerComponent<component::Model>();
   ComponentFamily meshFamily = coordinator.registerComponent<component::Transform>();
-  coordinator.registerComponent<component::Light>();
+  auto i = coordinator.registerComponent<component::Light>();
 
   ecs::Signature sig;
   sig.set(transformFamily, true);
