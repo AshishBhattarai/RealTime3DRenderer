@@ -53,9 +53,10 @@ void GuiManager::mapInput(Input &input) {
 
   /* Callbacks */
   input.addKeyCallback(Input::Key::ANY, [&io = io](const Input::KeyEvent keyEvent) {
-    io.KeysDown[toUnderlying<Input::Key>(keyEvent.key)] =
+    auto keyId = toUnderlying<Input::Key>(keyEvent.key);
+    io.KeysDown[keyId] =
         (keyEvent.action == Input::Action::PRESS) || (keyEvent.action == Input::Action::REPEAT);
-    io.KeysDown[toUnderlying<Input::Key>(keyEvent.key)] = keyEvent.action == Input::Action::RELEASE;
+    io.KeysDown[keyId] = !(keyEvent.action == Input::Action::RELEASE);
 
     // Modifiers are not reliable across systems
     io.KeyCtrl = io.KeysDown[toUnderlying<Input::Key>(Input::Key::LEFT_CONTROL)] ||
