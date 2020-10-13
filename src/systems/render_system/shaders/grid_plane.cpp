@@ -13,7 +13,7 @@ GridPlane::GridPlane(const StageCodeMap &codeMap) : Program(codeMap), gridMode(0
   loadScale(1000.0);
   loadPlaneColor(glm::vec3(1.0f, 1.0f, 1.0f));
   loadGridColor(glm::vec3(0.6f, 0.6f, 0.6f));
-  loadDiscardMode(false	);
+  loadDiscardMode(false);
   loadDistanceMode(true);
   loadDistanceLimit(80);
   unBind();

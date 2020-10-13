@@ -25,12 +25,17 @@ static int dtHistoryI = 0;
 static bool statsOpen = true;
 static bool renderSystemOpen = true;
 static bool entityWindowOpen = true;
+static bool settingWindowOpen = true;
 static int sceneScale = 68;
 
 static uint globalWindowsFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
 
 namespace app {
-AppUi::AppUi() : io(ImGui::GetIO()), entities(), shouldClose(false) {
+AppUi::AppUi()
+    : io(ImGui::GetIO()),
+      entities(), editorState{{glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.6f, 0.6f, 0.6f), 1000.0f,
+                               80, true, false, true}},
+      shouldClose(false) {
   fpsHistory.fill(60);
   ecs::Coordinator::getInstance().eventManager.subscribe<event::EntityChanged>(*this);
 }
@@ -135,7 +140,7 @@ component::Light AppUi::showLightComponent(const component::Light &light) {
   ImGui::Text("Light");
   ImGui::ColorEdit4("Color##1L", glm::value_ptr(color));
   ImGui::DragFloat("Intensity##1T", &intensity, 0.05f, 0.0f, 0.0f, "%.2f");
-  ImGui::DragFloat("Rang##1T", &range, 0.05f, 0.0f, 0.0f, "%.2f");
+  ImGui::DragFloat("Range##1T", &range, 0.05f, 0.0f, 0.0f, "%.2f");
   ImGui::Combo("Type##1T", &typeSelected, items, IM_ARRAYSIZE(items));
   return component::Light(glm::vec3(color), intensity, range, type);
 }
@@ -146,6 +151,16 @@ component::Model AppUi::showModelComponent(const component::Model &model) {
   // TODO: mesh & material selection by name
   ImGui::TextUnformatted(std::string("MeshID: " + std::to_string(model.meshId)).c_str());
   return model;
+}
+
+void AppUi::showGridPlaneSettings() {
+  ImGui::ColorEdit4("PlaneColor##1GP", glm::value_ptr(editorState.gridPlaneState.planeColor));
+  ImGui::ColorEdit4("GridColor##1GP", glm::value_ptr(editorState.gridPlaneState.gridColor));
+  ImGui::DragFloat("Scale##1GP", &editorState.gridPlaneState.scale, 0.05f, 0.0f, 0.0f, "%.2f");
+  ImGui::DragInt("CamDistance##1GP", &editorState.gridPlaneState.distanceLimit, 2, 10, 0);
+  ImGui::Checkbox("CamDistance##1GPC", &editorState.gridPlaneState.enableDistance);
+  ImGui::Checkbox("OnlyGrid##1GPC", &editorState.gridPlaneState.enableDiscard);
+  ImGui::Checkbox("ShowPlane##1GPC", &editorState.gridPlaneState.showPlane);
 }
 
 void AppUi::showRenderSystemWindow(bool *pclose) {
@@ -190,7 +205,6 @@ void AppUi::showStatsWindow(bool *pclose) {
     avg = std::accumulate(fpsHistory.begin(), fpsHistory.end(), 0.0f) / (float)HISTORY_SIZE;
     ImGui::PlotLines("FPS", fpsHistory.data(), HISTORY_SIZE, 0,
                      ("avg: " + std::to_string(avg)).c_str(), 0.0f, 60.0f, ImVec2(0, 80.0f));
-    ImGui::SliderInt("Scene scale", &sceneScale, 20.0f, 100.0f, "%d%%", ImGuiSliderFlags_NoInput);
   }
   ImGui::End();
 }
@@ -254,6 +268,19 @@ void AppUi::showEntityWinow(bool *pclose) {
   }
   ImGui::End();
 } // namespace app
+
+void AppUi::showSettingsWindow(bool *pclose) {
+  if (ImGui::Begin("Editor Settings", pclose, globalWindowsFlags)) {
+    if (ImGui::CollapsingHeader("Scene")) {
+      ImGui::SliderInt("Scale", &sceneScale, 20.0f, 100.0f, "%d%%", ImGuiSliderFlags_NoInput);
+      if (ImGui::TreeNode("GridPlaneSettings")) {
+        showGridPlaneSettings();
+        ImGui::TreePop();
+      }
+    }
+  }
+  ImGui::End();
+}
 
 void AppUi::showFileMenu() {
   ImGui::MenuItem("(WIP menu)", NULL, false, false);
@@ -350,6 +377,9 @@ void AppUi::showMainMenuBar() {
       }
       if (ImGui::MenuItem("Entity List", NULL, false, false)) {
       } // Disabled item
+      if (ImGui::MenuItem("Editor Setting", NULL, settingWindowOpen)) {
+        settingWindowOpen = true;
+      }
       ImGui::Separator();
       if (ImGui::MenuItem("Cut", "CTRL+X")) {
       }
@@ -373,6 +403,9 @@ void AppUi::show() {
   }
   if (entityWindowOpen) {
     showEntityWinow(&entityWindowOpen);
+  }
+  if (settingWindowOpen) {
+    showSettingsWindow(&settingWindowOpen);
   }
 }
 
@@ -403,6 +436,8 @@ void AppUi::showFrame(uint textureId, int texWidth, int texHeight) {
 }
 
 bool AppUi::getShouldClose() const { return shouldClose; }
+
+AppUi::EditorState AppUi::getEditorState() const { return editorState; }
 
 AppUi::Texture AppUi::createTexture(uint id, uint target) {
   int w, h;

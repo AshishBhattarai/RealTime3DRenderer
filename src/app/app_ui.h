@@ -23,6 +23,19 @@ public:
     uint target = 0;
   };
 
+  /* Editor state */
+  struct EditorState {
+    struct {
+      glm::vec3 planeColor;
+      glm::vec3 gridColor;
+      float scale;
+      int distanceLimit;
+      bool enableDistance;
+      bool enableDiscard;
+      bool showPlane;
+    } gridPlaneState;
+  };
+
 private:
   static constexpr int HISTORY_SIZE = 50;
   ImGuiIO &io;
@@ -53,6 +66,8 @@ private:
   };
   std::map<EntityId, Entity> entities;
 
+  EditorState editorState;
+
   void childImageView(const char *lable, Texture &texture, int *currentFace, int *currentLod);
   void childSelectableColumn(std::vector<std::vector<std::string>> columns, int &selected);
 
@@ -61,10 +76,14 @@ private:
   component::Light showLightComponent(const component::Light &light);
   component::Model showModelComponent(const component::Model &model);
 
+  /* Editor Settings */
+  void showGridPlaneSettings();
+
   /* dockable Windows */
   void showRenderSystemWindow(bool *pclose);
   void showStatsWindow(bool *pclose);
   void showEntityWinow(bool *pclose);
+  void showSettingsWindow(bool *pclose);
 
   /* Menu bar */
   bool shouldClose;
@@ -81,6 +100,7 @@ public:
   void showFrame(uint textureId, int texWidth, int texHeight);
 
   [[nodiscard]] bool getShouldClose() const;
+  [[nodiscard]] EditorState getEditorState() const;
 
   void setEnvMap(uint id, uint target);
   void setDiffuseConvMap(uint id, uint target);

@@ -31,7 +31,7 @@ App::App(int, char **)
     : threadPool(NUM_THREADS), commandServer(8003, 4), display("App"), input(display), gui(input),
       appUi(), coordinator(ecs::Coordinator::getInstance()),
       worldSystem(new world_system::WorldSystem()), renderSystem(createRenderSystem(1440, 1080)),
-      camera(new Camera(glm::vec3(0.0f, 0.0f, 0.0f))) {
+      camera(new Camera(glm::vec3(0.0f, 10.0f, 0.0f))) {
   DEBUG_SLOG("App constructed.");
   //  input.setCursorStatus(INPUT_CURSOR_DISABLED);
 
@@ -68,6 +68,7 @@ App::App(int, char **)
 
   int nrRow = 7;
   int nrCOl = 7;
+  float height = 10.0f;
   float spacing = 2.5f;
 
   for (int i = 0; i < nrRow; ++i) {
@@ -84,14 +85,15 @@ App::App(int, char **)
 
       component::Model model = {regScene.meshIds.front(), {{primId, matId}}};
 
-      world_system::WorldObject &worldObject = worldSystem->createWorldObject(component::Transform(
-          glm::vec3((j - (nrCOl / 2.0f)) * spacing, (i - (nrRow / 2.0f)) * spacing, -10.0f)));
+      world_system::WorldObject &worldObject =
+          worldSystem->createWorldObject(component::Transform(glm::vec3(
+              (j - (nrCOl / 2.0f)) * spacing, ((i - (nrRow / 2.0f)) * spacing) + height, -10.0f)));
       worldObject.addComponent<component::Model>(model);
     }
   }
   ModelRegisterReturn helmetModel = renderSystem->registerGltfModel(helmet);
   world_system::WorldObject &helmetObject = worldSystem->createWorldObject(
-      component::Transform(glm::vec3(0.0f, 0.0f, -8.0f), glm::vec3(90.0f, 0.0f, 0.0f)));
+      component::Transform(glm::vec3(0.0f, height, -8.0f), glm::vec3(90.0f, 0.0f, 0.0f)));
   helmetObject.addComponent<component::Model>(
       {helmetModel.meshIds.front(), helmetModel.primIdToMatId.front()});
 
@@ -159,7 +161,7 @@ void App::runRenderLoop(std::string_view renderOutput) {
   //                        renderOutput, true);
   //  assert(rtspClient.start());
 
-  glm::vec3 lightPositions[] = {glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f)};
+  glm::vec3 lightPositions[] = {glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(0.0f, 10.0f, 0.0f)};
   world_system::WorldObject &testLight1 =
       worldSystem->createWorldObject(component::Transform(lightPositions[0]));
   testLight1.addComponent<component::Light>(
@@ -215,8 +217,8 @@ void App::runRenderLoop(std::string_view renderOutput) {
     appUi.show();
 
     // rotate light
-    lightPositions[0] = glm::vec3(10 * cos(display.getTime()), 0, 10 * sin(display.getTime()));
-    lightPositions[1] = glm::vec3(16 * sin(display.getTime()), 0, 16 * cos(display.getTime()) - 10);
+    lightPositions[0] = glm::vec3(10 * cos(display.getTime()), 10, 10 * sin(display.getTime()));
+    lightPositions[1] = glm::vec3(16 * sin(display.getTime()), 10, 16 * cos(display.getTime()) - 10);
     testLight1.getTransform().position(lightPositions[0]);
     testLight2.getTransform().position(lightPositions[1]);
 
