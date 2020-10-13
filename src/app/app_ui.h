@@ -1,5 +1,7 @@
 #pragma once
 
+#include "components/light.h"
+#include "components/model.h"
 #include "components/transform.h"
 #include "ecs/default_events.h"
 #include "ecs/event_manager.h"
@@ -56,6 +58,8 @@ private:
 
   /* Component Nodes */
   component::Transform showTransformComponent(const component::Transform &transform);
+  component::Light showLightComponent(const component::Light &light);
+  component::Model showModelComponent(const component::Model &model);
 
   /* dockable Windows */
   void showRenderSystemWindow(bool *pclose);

@@ -117,8 +117,35 @@ component::Transform AppUi::showTransformComponent(const component::Transform &t
   glm::vec3 rotation = transform.rotation();
   float scale = transform.scale().x;
   ImGui::Text("Transformation");
-  ImGui::DragFloat3("Translate##2", glm::value_ptr(position), 0.05f, 0.0f, 0.0f, "%.2f");
+  ImGui::DragFloat3("Translate##1T", glm::value_ptr(position), 0.05f, 0.0f, 0.0f, "%.2f");
+  ImGui::DragFloat3("Rotate##1T", glm::value_ptr(rotation), 0.05f, 0.0f, 0.0f, "%.2f");
+  ImGui::DragFloat("Scale##1T", &scale, 0.05f, 0.1f, 0.0f, "%.2f");
+  scale = (scale <= 0.1) ? 0.1 : scale;
+  // TODO: Fix gimble-lock, instead of using euler angle to store rotation use quat
   return component::Transform(position, rotation, glm::vec3(scale));
+}
+
+component::Light AppUi::showLightComponent(const component::Light &light) {
+  glm::vec4 color = glm::vec4(light.color, 0.0f);
+  float intensity = light.intensity;
+  float range = light.range;
+  LightType type = light.type;
+  static const char *items[] = {"POINT_LIGHT", "DIRECTION_LIGHT", "SPOT_LIGHT", "AREA_LIGHT"};
+  int typeSelected = (int)light.type;
+  ImGui::Text("Light");
+  ImGui::ColorEdit4("Color##1L", glm::value_ptr(color));
+  ImGui::DragFloat("Intensity##1T", &intensity, 0.05f, 0.0f, 0.0f, "%.2f");
+  ImGui::DragFloat("Rang##1T", &range, 0.05f, 0.0f, 0.0f, "%.2f");
+  ImGui::Combo("Type##1T", &typeSelected, items, IM_ARRAYSIZE(items));
+  return component::Light(glm::vec3(color), intensity, range, type);
+}
+
+component::Model AppUi::showModelComponent(const component::Model &model) {
+  // TODO: create a resource manager with all mesh and material ids
+  ImGui::Text("Model");
+  // TODO: mesh & material selection by name
+  ImGui::TextUnformatted(std::string("MeshID: " + std::to_string(model.meshId)).c_str());
+  return model;
 }
 
 void AppUi::showRenderSystemWindow(bool *pclose) {
@@ -213,6 +240,14 @@ void AppUi::showEntityWinow(bool *pclose) {
       if (coordinator.hasComponent<component::Transform>(id)) {
         auto &transform = coordinator.getComponent<component::Transform>(id);
         transform = showTransformComponent(transform);
+      }
+      if (coordinator.hasComponent<component::Light>(id)) {
+        auto &light = coordinator.getComponent<component::Light>(id);
+        light = showLightComponent(light);
+      }
+      if (coordinator.hasComponent<component::Model>(id)) {
+        auto &model = coordinator.getComponent<component::Model>(id);
+        model = showModelComponent(model);
       }
     }
     ImGui::EndChild();
