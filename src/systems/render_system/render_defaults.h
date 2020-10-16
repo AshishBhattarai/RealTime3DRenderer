@@ -17,6 +17,7 @@ private:
   static constexpr uchar black[] = {255, 255, 255, 255};
   static constexpr uchar white[] = {0, 0, 0, 0};
 
+  Image gridImage;
   Image checkerImage;
   Image blackImage;
   Image whiteImage;
@@ -26,7 +27,7 @@ private:
   // 1x1 plane
   Primitive plane;
 
-  RenderDefaults(const Image *checkerImage);
+  RenderDefaults(const Image *gridImage, const Image *checkerImage);
   ~RenderDefaults();
 
   Primitive loadPrimitive(const float *vertices, uint verticesCount, uint dim, const uint *indices,
@@ -35,10 +36,13 @@ private:
   Primitive loadPlane();
 
 public:
-  static RenderDefaults &getInstance(const Image *checkerImage = nullptr) {
-    static RenderDefaults instance(checkerImage);
+  static RenderDefaults &getInstance(const Image *gridImage = nullptr,
+                                     const Image *checkerImage = nullptr) {
+    static RenderDefaults instance(gridImage, checkerImage);
     return instance;
   }
+
+  Texture createGridTexture() { return Texture(gridImage, toUnderlying(TextureFlags::REPEATE)); }
 
   /**
    * @brief Creates a new checker texture.

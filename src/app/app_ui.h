@@ -26,12 +26,7 @@ public:
   /* Editor state */
   struct EditorState {
     struct {
-      glm::vec3 planeColor;
-      glm::vec3 gridColor;
       float scale;
-      int distanceLimit;
-      bool enableDistance;
-      bool enableDiscard;
       bool showPlane;
     } gridPlaneState;
   };

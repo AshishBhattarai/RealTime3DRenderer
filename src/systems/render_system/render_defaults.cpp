@@ -6,12 +6,12 @@
 #include <string>
 
 namespace render_system {
-RenderDefaults::RenderDefaults(const Image *checkerImage)
-    : checkerImage(*checkerImage), blackImage(Buffer(black, 4), 1, 1, 4),
+RenderDefaults::RenderDefaults(const Image *gridImage, const Image *checkerImage)
+    : gridImage(*gridImage), checkerImage(*checkerImage), blackImage(Buffer(black, 4), 1, 1, 4),
       whiteImage(Buffer(white, 4), 1, 1, 4), camera(glm::vec3(0, 0, -10.0f)), cube(loadCube()),
       plane(loadPlane()) {
 
-  assert(checkerImage && "Invalid checker image received.");
+  assert(gridImage && checkerImage && "Invalid checker or grid image received.");
 } // namespace render_system
 
 Primitive RenderDefaults::loadCube() {

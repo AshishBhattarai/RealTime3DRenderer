@@ -14,7 +14,7 @@ namespace render_system {
  *
  * NONE indicates LDR RGB texture?? re do this
  */
-enum class TextureFlags : short { NONE = 0x0000, DISABLE_MIPMAP = 0x0002 };
+enum class TextureFlags : short { NONE = 0x0000, DISABLE_MIPMAP = 0x0002, REPEATE = 0x0004 };
 
 class Texture : NonCopyable {
 private:

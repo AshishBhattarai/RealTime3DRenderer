@@ -11,6 +11,7 @@
 #include "scene.h"
 #include "shaders/config.h"
 #include "systems/render_system/gui_renderer.h"
+#include "systems/render_system/shaders/grid_plane.h"
 #include "utils/slogger.h"
 
 namespace render_system {
@@ -38,9 +39,9 @@ void RenderSystem::initSubSystems() {
   lightingSystem = new LightingSystem();
 }
 
-bool RenderSystem::initSingletons(const Image &checkerImage) {
+bool RenderSystem::initSingletons(const Image &gridImage, const Image &checkerImage) {
   /* init RenderDefaults */
-  auto &renderDefaults = RenderDefaults::getInstance(&checkerImage);
+  auto &renderDefaults = RenderDefaults::getInstance(&gridImage, &checkerImage);
   DefaultPrimitivesRenderer::getInstance(&renderDefaults.getCube(), &renderDefaults.getPlane());
   return true;
 }
@@ -54,7 +55,7 @@ void RenderSystem::setupFramebuffer(FrameBuffer &framebuffer) {
 }
 
 RenderSystem::RenderSystem(const RenderSystemConfig &config)
-    : status(initSingletons(config.checkerImage)),
+    : status(initSingletons(config.gridImage, config.checkerImage)),
       preProcessor(config.cubemapShader, config.equirectangularShader, config.iblConvolutionShader,
                    config.iblSpecularConvolutionShader, config.iblBrdfIntegrationShader),
       renderer(RendererConfig{config.width, config.height, meshes, materials,
@@ -64,7 +65,7 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
       guiRenderer(config.guiShader), postProcessor(config.visualPrepShader),
       framebufferA(config.width, config.height), framebufferB(config.width, config.height),
       sceneLoader(), coordinator(ecs::Coordinator::getInstance()), skybox(nullptr),
-      frameCallback(config.frameCallback) {
+      frameCallback(config.frameCallback), showGridPlane(false) {
   /* update projection */
   updateProjectionMatrix(config.ar);
 
@@ -151,7 +152,9 @@ std::shared_ptr<Image> RenderSystem::update(float dt) {
   if (skybox) {
     renderer.renderSkybox(*skybox);
   }
-  renderer.renderGridPlane();
+  if (showGridPlane) {
+    renderer.renderGridPlane();
+  }
 
   // render entites
   renderer.preRenderMesh(*globalDiffuseIBL, *globalSpecularIBL);
@@ -173,6 +176,14 @@ std::shared_ptr<Image> RenderSystem::update(float dt) {
   FrameBuffer::useDefault();
   guiRenderer.render();
   return std::make_shared<Image>(FrameBuffer::readPixelsWindow());
+}
+
+void RenderSystem::setGridPlaneConfig(float scale, bool showPlane) {
+  shader::GridPlane &gridPlaneShader = renderer.getGridPlaneShader();
+  gridPlaneShader.bind();
+  gridPlaneShader.loadScale(scale);
+  gridPlaneShader.unBind();
+  showGridPlane = showPlane;
 }
 
 } // namespace render_system

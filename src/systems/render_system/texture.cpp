@@ -6,8 +6,7 @@
 
 namespace render_system {
 
-Texture::Texture(const Image &image, short flags)
-    : id(0), target(GL_TEXTURE_2D) {
+Texture::Texture(const Image &image, short flags) : id(0), target(GL_TEXTURE_2D) {
   assert(image.getBuffer() && "Invalid buffer data.");
   if (!image.getBuffer()) {
     CSLOG("LOAD_TEXTURE failed invalid image.");
@@ -25,9 +24,7 @@ Texture::Texture(const std::array<const Image *, 6> images, short flags)
   loadTexture(std::vector(images.begin(), images.end()), flags);
 }
 
-Texture::Texture(Texture &&texture) : id(texture.id), target(texture.target) {
-  texture.id = 0;
-}
+Texture::Texture(Texture &&texture) : id(texture.id), target(texture.target) { texture.id = 0; }
 
 Texture &Texture::operator=(Texture &&texture) {
   if (id) {
@@ -47,11 +44,11 @@ Texture::~Texture() {
   }
 }
 
-void Texture::loadTexture(const std::vector<const Image *> &images,
-                          short flags) {
-  assert((images.size() == 1 || images.size() == 6) &&
-         "Invalid number of images.");
+void Texture::loadTexture(const std::vector<const Image *> &images, short flags) {
+  assert((images.size() == 1 || images.size() == 6) && "Invalid number of images.");
   bool disableMipmap = flags & toUnderlying(TextureFlags::DISABLE_MIPMAP);
+  bool wrapRepeate = flags & toUnderlying(TextureFlags::REPEATE);
+
   /**
    * To make texture filter customizable, i can have a RTextureLoader
    * singleton that has a textureFilterType member that is use to set
@@ -60,8 +57,7 @@ void Texture::loadTexture(const std::vector<const Image *> &images,
   glGenTextures(1, &id);
   glBindTexture(target, id);
   GLenum texTarget = GL_TEXTURE_2D;
-  if (target == GL_TEXTURE_CUBE_MAP)
-    texTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+  if (target == GL_TEXTURE_CUBE_MAP) texTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 
   for (uint i = 0; i < images.size(); ++i) {
     const Image &image = *images[i];
@@ -92,8 +88,8 @@ void Texture::loadTexture(const std::vector<const Image *> &images,
       transferType = GL_FLOAT;
     }
 
-    glTexImage2D(texTarget + i, 0, internalFormat, width, height, 0, format,
-                 transferType, (void *)buffer);
+    glTexImage2D(texTarget + i, 0, internalFormat, width, height, 0, format, transferType,
+                 (void *)buffer);
   }
   if (!disableMipmap) {
     // this works for cubemap too
@@ -102,11 +98,11 @@ void Texture::loadTexture(const std::vector<const Image *> &images,
   } else {
     glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   }
+  GLenum wrap = (wrapRepeate) ? GL_REPEAT : GL_CLAMP_TO_EDGE;
   glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  if (target == GL_TEXTURE_CUBE_MAP)
-    glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+  glTexParameteri(target, GL_TEXTURE_WRAP_S, wrap);
+  glTexParameteri(target, GL_TEXTURE_WRAP_T, wrap);
+  if (target == GL_TEXTURE_CUBE_MAP) glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
   glBindTexture(target, 0);
 }
 

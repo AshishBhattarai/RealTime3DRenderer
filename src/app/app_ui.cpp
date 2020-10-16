@@ -31,11 +31,7 @@ static int sceneScale = 68;
 static uint globalWindowsFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
 
 namespace app {
-AppUi::AppUi()
-    : io(ImGui::GetIO()),
-      entities(), editorState{{glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.6f, 0.6f, 0.6f), 1000.0f,
-                               80, true, false, true}},
-      shouldClose(false) {
+AppUi::AppUi() : io(ImGui::GetIO()), entities(), editorState{{40.0f, true}}, shouldClose(false) {
   fpsHistory.fill(60);
   ecs::Coordinator::getInstance().eventManager.subscribe<event::EntityChanged>(*this);
 }
@@ -154,12 +150,7 @@ component::Model AppUi::showModelComponent(const component::Model &model) {
 }
 
 void AppUi::showGridPlaneSettings() {
-  ImGui::ColorEdit4("PlaneColor##1GP", glm::value_ptr(editorState.gridPlaneState.planeColor));
-  ImGui::ColorEdit4("GridColor##1GP", glm::value_ptr(editorState.gridPlaneState.gridColor));
-  ImGui::DragFloat("Scale##1GP", &editorState.gridPlaneState.scale, 0.05f, 0.0f, 0.0f, "%.2f");
-  ImGui::DragInt("CamDistance##1GP", &editorState.gridPlaneState.distanceLimit, 2, 10, 0);
-  ImGui::Checkbox("CamDistance##1GPC", &editorState.gridPlaneState.enableDistance);
-  ImGui::Checkbox("OnlyGrid##1GPC", &editorState.gridPlaneState.enableDiscard);
+  ImGui::DragFloat("Scale##1GP", &editorState.gridPlaneState.scale, 2.0f, 0.0f, 0.0f, "%.2f");
   ImGui::Checkbox("ShowPlane##1GPC", &editorState.gridPlaneState.showPlane);
 }
 

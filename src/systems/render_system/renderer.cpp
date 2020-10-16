@@ -18,7 +18,8 @@ Renderer::Renderer(RendererConfig config)
       camera(config.camera), generalVSUBO(), flatForwardMaterial(config.flatForwardShader),
       textureForwardMaterial(config.textureForwardShader),
       skyboxCubeMapShader(config.skyboxCubeMapShader), gridPlaneShader(config.gridPlaneShape),
-      brdfIntegrationMap(std::move(config.brdfIntegrationMap)) {
+      brdfIntegrationMap(std::move(config.brdfIntegrationMap)),
+      gridTexture(RenderDefaults::getInstance().createGridTexture()) {
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
@@ -101,8 +102,12 @@ void Renderer::updateProjectionMatrix(float ar, float fov, float near, float far
 }
 
 void Renderer::renderGridPlane() {
+  glDisable(GL_CULL_FACE);
   gridPlaneShader.bind();
+  glActiveTexture(GL_TEXTURE0);
+  gridTexture.bind();
   DefaultPrimitivesRenderer::getInstance().drawPlane();
+  glEnable(GL_CULL_FACE);
 }
 
 } // namespace render_system

@@ -161,7 +161,7 @@ constexpr int TEXTURE_BND = FRAG_U_TEXTURE_BND;
 constexpr int TEXTURE_CUBE_BND = FRAG_U_TEXTURE_CUBE_BND;
 constexpr int LOD_LOC = FRAG_U_LOD_LOC;
 constexpr int FACE_LOC = FRAG_U_FACE_LOC;
-}
+} // namespace fragment
 } // namespace gui
 #undef GUI_VERTEX_SHADER
 #undef GUI_FRAGMENT_SHADER
@@ -180,10 +180,7 @@ constexpr int TRANSFORMATION_MAT_LOC = VERT_U_TRANSFORMATION_LOC;
 }
 } // namespace vertex
 namespace fragment {
-constexpr int PLANE_COLOR_LOC = FRAG_U_PLANE_COLOR_LOC;
-constexpr int GRID_COLOR_LOC = FRAG_U_GRID_COLOR_LOC;
-constexpr int GRID_MODE_LOC = FRAG_U_GRID_MODE_LOC;
-constexpr int DISTANCE_LIMIT_LOC = FRAG_U_DISTANCE_LIMIT_LOC; 
+constexpr int TEXTURE_BND = FRAG_U_GRID_TEXTURE_BND;
 } // namespace fragment
 } // namespace gridPlane
 #undef GRID_PLANE_VERTEX_SHADER

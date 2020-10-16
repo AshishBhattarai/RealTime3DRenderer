@@ -55,6 +55,7 @@ private:
   shader::GridPlane gridPlaneShader;
 
   Texture brdfIntegrationMap;
+  Texture gridTexture; // TODO: Added in grid as entity
 
 public:
   Renderer(RendererConfig config);
@@ -85,5 +86,7 @@ public:
   std::pair<uint, uint> getBrdfIntegrationMap() const {
     return std::pair(brdfIntegrationMap.getId(), brdfIntegrationMap.getTarget());
   }
+
+  shader::GridPlane &getGridPlaneShader() { return gridPlaneShader; }
 };
 } // namespace render_system

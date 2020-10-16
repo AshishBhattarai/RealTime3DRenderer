@@ -26,6 +26,7 @@ class Camera;
 using FrameCallback = std::function<void(uint textureId, int width, int height)>;
 
 struct RenderSystemConfig {
+  const Image &gridImage;
   const Image &checkerImage; // can be removed after RenderSystem construction
   const shader::StageCodeMap &flatForwardShader;
   const shader::StageCodeMap &textureForwardShader;
@@ -99,9 +100,11 @@ private:
   // callbacks
   const FrameCallback frameCallback;
 
+  bool showGridPlane;
+
   void initSubSystems();
   // init render_system related singletons
-  bool initSingletons(const Image &checkerImage);
+  bool initSingletons(const Image &gridImage, const Image &checkerImage);
   void setupFramebuffer(FrameBuffer &framebuffer);
 
 public:
@@ -147,5 +150,7 @@ public:
     return std::pair(skybox->getId(), skybox->getTarget());
   }
   std::pair<uint, uint> getBrdfLUT() const { return renderer.getBrdfIntegrationMap(); }
+
+  void setGridPlaneConfig(float scale, bool showPlane);
 };
 } // namespace render_system

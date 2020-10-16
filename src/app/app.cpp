@@ -218,7 +218,8 @@ void App::runRenderLoop(std::string_view renderOutput) {
 
     // rotate light
     lightPositions[0] = glm::vec3(10 * cos(display.getTime()), 10, 10 * sin(display.getTime()));
-    lightPositions[1] = glm::vec3(16 * sin(display.getTime()), 10, 16 * cos(display.getTime()) - 10);
+    lightPositions[1] =
+        glm::vec3(16 * sin(display.getTime()), 10, 16 * cos(display.getTime()) - 10);
     testLight1.getTransform().position(lightPositions[0]);
     testLight2.getTransform().position(lightPositions[1]);
 
@@ -234,16 +235,12 @@ void App::runRenderLoop(std::string_view renderOutput) {
     processInput(dt);
     worldSystem->update(dt);
     auto img = renderSystem->update(dt);
-    //    frameQueue.pushBack(img);
-    //    if (input.getKey(INPUT_KEY_H)) {
-    //      // screenshot
-    //      asio::post(threadPool, [image = img, time = display.getTime()]() {
-    //        Loaders::writeImage(
-    //            image,
-    //            (std::string("test.png") + std::to_string(time *
-    //            1000)).c_str());
-    //      });
-    //    }
+
+    // ui state update
+    AppUi::EditorState editorState = appUi.getEditorState();
+    renderSystem->setGridPlaneConfig(editorState.gridPlaneState.scale,
+                                     editorState.gridPlaneState.showPlane);
+
     auto err = glGetError();
     if (err != GL_NO_ERROR) CSLOG("OpenGL ERROR:", err);
     display.update();
@@ -262,8 +259,9 @@ App::~App() {
 
 render_system::RenderSystem *App::createRenderSystem(int width, int height) {
   /* Init RenderSystem */
-  Image checkerImage;
+  Image checkerImage, gridImage;
   bool status = Loaders::loadImage(checkerImage, "resources/defaults/checker.bmp");
+  status = Loaders::loadImage(gridImage, "resources/defaults/grid.png");
   Buffer flatForwardVertex, flatForwardFragment, textureForwardVertex, textureForwardFragment,
       skyboxVertex, cubemapVertex, cubemapFragment, equirectangularFragment, visualPrepVertex,
       visualPrepFragment, iblConvolutionFragment, iblSpecularConvolutionFragment,
@@ -294,7 +292,7 @@ render_system::RenderSystem *App::createRenderSystem(int width, int height) {
   status = Loaders::loadBinaryFile(gridPlaneFragment, "shaders/grid_plane_frag.spv");
 
   return new RenderSystem(
-      {checkerImage,
+      {gridImage, checkerImage,
        /**
         * const shader::StageCodeMap &flatForwardShader;
         * const shader::StageCodeMap &textureForwardShader; const shader::StageCodeMap
