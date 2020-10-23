@@ -26,11 +26,15 @@
 
 using namespace render_system;
 
+static constexpr int renderWidth = 1440;
+static constexpr int renderHeight = 1080;
+
 namespace app {
 App::App(int, char **)
     : threadPool(NUM_THREADS), commandServer(8003, 4), display("App"), input(display), gui(input),
       appUi(), coordinator(ecs::Coordinator::getInstance()),
-      worldSystem(new world_system::WorldSystem()), renderSystem(createRenderSystem(1440, 1080)),
+      worldSystem(new world_system::WorldSystem()),
+      renderSystem(createRenderSystem(renderWidth, renderHeight)),
       camera(new Camera(glm::vec3(0.0f, 10.0f, 0.0f))) {
   DEBUG_SLOG("App constructed.");
   //  input.setCursorStatus(INPUT_CURSOR_DISABLED);
@@ -75,6 +79,7 @@ App::App(int, char **)
     float metallic = i / (float)nrRow;
     for (int j = 0; j < nrCOl; ++j) {
       float roughness = j / (float)nrCOl;
+
       MaterialId matId = renderSystem->registerMaterial<FlatMaterial>(
           ShaderType::FLAT_FORWARD_SHADER, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
           glm::vec3(0.0f, 0.0f, 0.0f), metallic, roughness, 1.0f);
@@ -240,6 +245,9 @@ void App::runRenderLoop(std::string_view renderOutput) {
     AppUi::EditorState editorState = appUi.getEditorState();
     renderSystem->setGridPlaneConfig(editorState.gridPlaneState.scale,
                                      editorState.gridPlaneState.showPlane);
+    appUi.setCoordinateSpaceState({camera->getViewMatrix(), renderSystem->getProjectionMatrix(),
+                                   glm::vec4(0.0f, 0.0f, renderWidth, renderHeight),
+                                   camera->position});
 
     auto err = glGetError();
     if (err != GL_NO_ERROR) CSLOG("OpenGL ERROR:", err);

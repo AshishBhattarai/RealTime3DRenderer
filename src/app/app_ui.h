@@ -8,6 +8,7 @@
 #include "types.h"
 #include <array>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -23,12 +24,19 @@ public:
     uint target = 0;
   };
 
-  /* Editor state */
   struct EditorState {
     struct {
       float scale;
       bool showPlane;
     } gridPlaneState;
+  };
+
+  /* Coordinate space state for calculating screenspace coords of an object */
+  struct CoordinateSpaceState {
+    glm::mat4 viewMatrix;
+    glm::mat4 projectionMatrix;
+    glm::vec4 viewPort;
+    glm::vec3 camPos;
   };
 
 private:
@@ -60,11 +68,15 @@ private:
     std::string sig;
   };
   std::map<EntityId, Entity> entities;
-
+  glm::mat4 projectionMat;
   EditorState editorState;
+  CoordinateSpaceState coordinateSpaceState;
 
   void childImageView(const char *lable, Texture &texture, int *currentFace, int *currentLod);
   void childSelectableColumn(std::vector<std::vector<std::string>> columns, int &selected);
+
+  std::optional<glm::vec2> worldToScene(glm::vec3 pos);
+  void showGizmo(const component::Transform &transform);
 
   /* Component Nodes */
   component::Transform showTransformComponent(const component::Transform &transform);
@@ -101,6 +113,7 @@ public:
   void setDiffuseConvMap(uint id, uint target);
   void setSpecularConvMap(uint id, uint target);
   void setBrdfLUT(uint id, uint target);
+  void setCoordinateSpaceState(const CoordinateSpaceState &state);
 
   /* Receive Events */
   void receive(const event::EntityChanged &event);

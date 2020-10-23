@@ -139,6 +139,7 @@ public:
     assert(camera && "Invalid camera supplied.");
     if (camera) renderer.setCamera(camera);
   }
+  const Camera *getCamera() { return renderer.getCamera(); }
 
   std::pair<uint, uint> getDiffuseConvMap() const {
     return std::pair(globalDiffuseIBL->getId(), globalDiffuseIBL->getTarget());
@@ -150,7 +151,7 @@ public:
     return std::pair(skybox->getId(), skybox->getTarget());
   }
   std::pair<uint, uint> getBrdfLUT() const { return renderer.getBrdfIntegrationMap(); }
-
+  glm::mat4 getProjectionMatrix() const { return renderer.getProjectionMatrix(); }
   void setGridPlaneConfig(float scale, bool showPlane);
 };
 } // namespace render_system

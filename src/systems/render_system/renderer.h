@@ -83,10 +83,12 @@ public:
   void renderSkybox(const Texture &texture);
   void renderGridPlane();
 
-  std::pair<uint, uint> getBrdfIntegrationMap() const {
+  [[nodiscard]] std::pair<uint, uint> getBrdfIntegrationMap() const {
     return std::pair(brdfIntegrationMap.getId(), brdfIntegrationMap.getTarget());
   }
 
-  shader::GridPlane &getGridPlaneShader() { return gridPlaneShader; }
+  [[nodiscard]] shader::GridPlane &getGridPlaneShader() { return gridPlaneShader; }
+  [[nodiscard]] const Camera *getCamera() { return camera; }
+  [[nodiscard]] glm::mat4 getProjectionMatrix() const { return projectionMatrix; }
 };
 } // namespace render_system

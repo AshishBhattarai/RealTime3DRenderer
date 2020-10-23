@@ -27,11 +27,14 @@ static bool renderSystemOpen = true;
 static bool entityWindowOpen = true;
 static bool settingWindowOpen = true;
 static int sceneScale = 68;
+static glm::vec4 sceneViewport;
 
 static uint globalWindowsFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize;
 
 namespace app {
-AppUi::AppUi() : io(ImGui::GetIO()), entities(), editorState{{40.0f, true}}, shouldClose(false) {
+AppUi::AppUi()
+    : io(ImGui::GetIO()), entities(), projectionMat(), editorState{{40.0f, true}},
+      shouldClose(false) {
   fpsHistory.fill(60);
   ecs::Coordinator::getInstance().eventManager.subscribe<event::EntityChanged>(*this);
 }
@@ -113,6 +116,49 @@ void AppUi::childSelectableColumn(std::vector<std::vector<std::string>> columns,
   }
 }
 
+std::optional<glm::vec2> AppUi::worldToScene(glm::vec3 pos) {
+  glm::vec4 clip = coordinateSpaceState.projectionMatrix * coordinateSpaceState.viewMatrix *
+                   glm::vec4(pos, 1.0f);
+  // clip x, y, z must be in [-w, w] and w > 0
+  glm::vec3 ndc = glm::vec3(clip.x / clip.w, clip.y / clip.w, clip.z / clip.w);
+  if (clip.w > 0 && ndc.x > -1.0f && ndc.x < 1.0f && ndc.y < 1.0f && ndc.y > -1.0f) {
+    return std::optional(glm::vec2((ndc.x + 1.0f) / 2.0f, (1.0f - ndc.y) / 2.0f) *
+                             glm::vec2(sceneViewport.z, sceneViewport.w) +
+                         glm::vec2(sceneViewport.x, sceneViewport.y));
+  } else
+    return std::nullopt;
+}
+
+void AppUi::showGizmo(const component::Transform &transform) {
+  // translation gimzo test
+  glm::vec3 pos = transform.position();
+  auto scene = worldToScene(pos);
+  if (scene.has_value()) {
+    // draw tranlatio gizmo
+    float distS = (glm::length(coordinateSpaceState.camPos - pos)) * 0.15f;
+    auto lines = std::array{glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1)};
+    auto drawList = ImGui::GetForegroundDrawList();
+
+    for (const auto &line : lines) {
+      auto slineOpt = worldToScene(pos + line * distS);
+      if (slineOpt.has_value()) {
+        auto sline = slineOpt.value();
+        auto color = IM_COL32(255 * line.x, 255 * line.y, 255 * line.z, 255);
+        ImGui::GetForegroundDrawList()->AddLine(ImVec2(scene.value().x, scene.value().y),
+                                                ImVec2(sline.x, sline.y), color, 3.0f);
+        glm::vec2 toLine = glm::normalize(sline - scene.value()) * 10.0f;
+        glm::vec2 orthoDir = glm::normalize(glm::vec2(toLine.y, -toLine.x)) * 10.0f;
+
+        ImVec2 p1 = ImVec2(sline.x, sline.y) + ImVec2(toLine.x, toLine.y);
+        ImVec2 p2 = ImVec2(orthoDir.x, orthoDir.y) + ImVec2(sline.x, sline.y);
+        ImVec2 p3 = ImVec2(-orthoDir.x, -orthoDir.y) + ImVec2(sline.x, sline.y);
+
+        drawList->AddTriangleFilled(p1, p2, p3, color);
+      }
+    }
+  }
+}
+
 component::Transform AppUi::showTransformComponent(const component::Transform &transform) {
   glm::vec3 position = transform.position();
   glm::vec3 rotation = transform.rotation();
@@ -123,6 +169,8 @@ component::Transform AppUi::showTransformComponent(const component::Transform &t
   ImGui::DragFloat("Scale##1T", &scale, 0.05f, 0.1f, 0.0f, "%.2f");
   scale = (scale <= 0.1) ? 0.1 : scale;
   // TODO: Fix gimble-lock, instead of using euler angle to store rotation use quat
+
+  showGizmo(transform);
   return component::Transform(position, rotation, glm::vec3(scale));
 }
 
@@ -206,7 +254,7 @@ void AppUi::showEntityWinow(bool *pclose) {
   // current width
   ImVec2 size = ImGui::GetWindowSize();
   // begin entity list window
-  static int selected = -1;
+  static int selected = 1;
   if (ImGui::BeginChild("Entites", ImVec2(0, size.y / 2), true,
                         ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar)) {
 
@@ -421,6 +469,9 @@ void AppUi::showFrame(uint textureId, int texWidth, int texHeight) {
       float height = ar * displaySize.y;
       sceneSize = (ImVec2(width, height) * sceneScale / 100.0f);
     }
+
+    ImVec2 windowPos = ImGui::GetCursorScreenPos();
+    sceneViewport = glm::vec4(windowPos.x, windowPos.y, sceneSize.x, sceneSize.y);
     ImGui::Image((ImTextureID)(uptr)textureId, sceneSize, ImVec2(0, 1), ImVec2(1, 0));
   }
   ImGui::End();
@@ -453,6 +504,10 @@ void AppUi::setSpecularConvMap(uint id, uint target) {
   pbrTextures.specularConvMap.id = render_system::GuiRenderer::generateTextureMask(id, target, 1);
 }
 void AppUi::setBrdfLUT(uint id, uint target) { pbrTextures.brdfLUT = createTexture(id, target); }
+
+void AppUi::setCoordinateSpaceState(const CoordinateSpaceState &state) {
+  coordinateSpaceState = state;
+}
 
 /* Receive Events */
 void AppUi::receive(const event::EntityChanged &event) {
