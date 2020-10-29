@@ -1,7 +1,7 @@
 #pragma once
 
-#include "asio_noexcept.h"
 #include "command_queues.h"
+#include "third_party/asio_noexcept.h"
 #include <memory>
 #include <vector>
 
@@ -28,7 +28,6 @@ private:
   asio::executor_work_guard<asio::io_context::executor_type> work;
   std::vector<std::thread> threads;
   std::vector<std::weak_ptr<Connection>> connections;
-  void handleAccept(std::shared_ptr<Connection> connection,
-                    const asio::error_code &ec);
+  void handleAccept(std::shared_ptr<Connection> connection, const asio::error_code &ec);
 };
 } // namespace app
