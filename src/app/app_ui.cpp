@@ -1,5 +1,6 @@
 #include "app_ui.h"
 #include "../utils/slogger.h"
+#include "common.h"
 #include "components/transform.h"
 #include "ecs/coordinator.h"
 #include "ecs/default_events.h"
@@ -7,7 +8,10 @@
 #include "systems/render_system/gui_renderer.h"
 #include "systems/render_system/texture.h"
 #include "types.h"
+#include <cmath>
+#include <glm/ext/quaternion_geometric.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/transform.hpp>
 #include <imgui/imgui.h>
 #include <numeric>
 #include <string>
@@ -134,16 +138,19 @@ void AppUi::showGizmo(const component::Transform &transform) {
   glm::vec3 pos = transform.position();
   auto scene = worldToScene(pos);
   if (scene.has_value()) {
-    // draw tranlatio gizmo
-    float distS = (glm::length(coordinateSpaceState.camPos - pos)) * 0.15f;
+    // draw translation gizmo
+    // three axis x, y, z
     auto lines = std::array{glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1)};
     auto drawList = ImGui::GetForegroundDrawList();
+    glm::vec3 camToObj = glm::normalize(transform.position() - coordinateSpaceState.camPos);
+    float distS = (glm::length(coordinateSpaceState.camPos - pos)) * 0.15f;
 
-    for (const auto &line : lines) {
-      auto slineOpt = worldToScene(pos + line * distS);
+    for (uint i = 0; i < 3; ++i) {
+      auto slineOpt = worldToScene(pos + lines[i] * distS);
       if (slineOpt.has_value()) {
         auto sline = slineOpt.value();
-        auto color = IM_COL32(255 * line.x, 255 * line.y, 255 * line.z, 255);
+        float factor = 1.0f - glm::smoothstep(0.8f, 1.0f, abs(camToObj[i])); // fade near cos(0)
+        auto color = IM_COL32(255 * lines[i].x, 255 * lines[i].y, 255 * lines[i].z, 255 * factor);
         ImGui::GetForegroundDrawList()->AddLine(ImVec2(scene.value().x, scene.value().y),
                                                 ImVec2(sline.x, sline.y), color, 3.0f);
         glm::vec2 toLine = glm::normalize(sline - scene.value()) * 10.0f;
@@ -155,6 +162,32 @@ void AppUi::showGizmo(const component::Transform &transform) {
 
         drawList->AddTriangleFilled(p1, p2, p3, color);
       }
+    }
+    // rotation gizmo
+    for (uint i = 0; i < 3; ++i) { // i==2 is x-axis
+      // convert vector on plane (ie: yz for pitch(x-asix)) to angle on the plane.
+      float angleStart = atan2f(camToObj[(i + 2) % 3], camToObj[(i + 1) % 3]); // atan(z, y) for x
+      angleStart += M_PI * 0.5f; // rotate 90 deg, so that semi-circle faces the camera.
+      ImVec2 circlePos[30];      // 30 segments
+      int actualSize = 0;
+      for (uint j = 0; j < 30; ++j) {
+        float ng = angleStart + M_PI * j / 30.0f; // draw semi-circle 180 deg
+        // convert angle back to vector in respective palne (ie: zy for pitch(x-axis)
+        glm::vec3 vec = glm::vec3(std::cos(ng), std::sin(ng), 0.0f);
+        // for yz(pitch) we need vec3(0, cos(ng) , sing(ng))
+        glm::vec3 wpos = glm::vec3(vec[2 - i], vec[(3 - i) % 3], vec[(4 - i) % 3]) * distS +
+                         transform.position();
+        // screen space position
+        auto spos = worldToScene(wpos);
+        if (spos.has_value()) {
+          circlePos[j] = ImVec2(spos.value().x, spos.value().y);
+          ++actualSize;
+        } else {
+          break;
+        }
+      }
+      auto color = IM_COL32(255 * lines[i].x, 255 * lines[i].y, 255 * lines[i].z, 255);
+      drawList->AddPolyline(circlePos, actualSize, color, false, 2.0f);
     }
   }
 }
