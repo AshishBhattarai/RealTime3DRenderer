@@ -45,6 +45,9 @@ private:
   std::array<float, HISTORY_SIZE> dtHistory;
   std::array<float, HISTORY_SIZE> fpsHistory;
 
+  /* Gizmo mode */
+  enum class GizmoMode { TRANSLATION, ROTATION, SCALE };
+
   /* RenderSystem data */
   /* PBR */
   struct PBRTextures {
@@ -76,7 +79,7 @@ private:
   void childSelectableColumn(std::vector<std::vector<std::string>> columns, int &selected);
 
   std::optional<glm::vec2> worldToScene(glm::vec3 pos);
-  void showGizmo(const component::Transform &transform);
+  void showGizmo(const component::Transform &transform, const GizmoMode mode);
 
   /* Component Nodes */
   component::Transform showTransformComponent(const component::Transform &transform);
@@ -98,6 +101,7 @@ private:
   void showMainMenuBar();
 
   Texture createTexture(uint id, uint target);
+  float distanceFromSeg(glm::vec2 a, glm::vec2 b, glm::vec2 p);
 
 public:
   AppUi();

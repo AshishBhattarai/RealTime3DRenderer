@@ -133,7 +133,7 @@ std::optional<glm::vec2> AppUi::worldToScene(glm::vec3 pos) {
     return std::nullopt;
 }
 
-void AppUi::showGizmo(const component::Transform &transform) {
+void AppUi::showGizmo(const component::Transform &transform, const GizmoMode mode) {
   // translation gimzo test
   glm::vec3 pos = transform.position();
   auto scene = worldToScene(pos);
@@ -143,51 +143,88 @@ void AppUi::showGizmo(const component::Transform &transform) {
     auto lines = std::array{glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1)};
     auto drawList = ImGui::GetForegroundDrawList();
     glm::vec3 camToObj = glm::normalize(transform.position() - coordinateSpaceState.camPos);
-    float distS = (glm::length(coordinateSpaceState.camPos - pos)) * 0.15f;
+    float distS = (glm::length(coordinateSpaceState.camPos - pos)) * 0.20f;
 
+    constexpr float thickness = 4.0f;
     for (uint i = 0; i < 3; ++i) {
       auto slineOpt = worldToScene(pos + lines[i] * distS);
-      if (slineOpt.has_value()) {
-        auto sline = slineOpt.value();
-        float factor = 1.0f - glm::smoothstep(0.8f, 1.0f, abs(camToObj[i])); // fade near cos(0)
-        auto color = IM_COL32(255 * lines[i].x, 255 * lines[i].y, 255 * lines[i].z, 255 * factor);
-        ImGui::GetForegroundDrawList()->AddLine(ImVec2(scene.value().x, scene.value().y),
-                                                ImVec2(sline.x, sline.y), color, 3.0f);
-        glm::vec2 toLine = glm::normalize(sline - scene.value()) * 10.0f;
-        glm::vec2 orthoDir = glm::normalize(glm::vec2(toLine.y, -toLine.x)) * 10.0f;
+      if (!slineOpt.has_value()) continue;
 
-        ImVec2 p1 = ImVec2(sline.x, sline.y) + ImVec2(toLine.x, toLine.y);
+      auto sline = slineOpt.value();
+      // check line collision
+
+      /* Check if the lines are hovered */
+      ImVec2 mousePos = ImGui::GetMousePos();
+      float dist = distanceFromSeg(scene.value(), sline, glm::vec2(mousePos.x, mousePos.y));
+      drawList->AddCircle(mousePos, 2.0f, IM_COL32(255, 0, 0, 255));
+      bool hover = !glm::step(2.5f, dist);
+
+      /* Color based on hover and view */
+      float factor = 1.0f - glm::smoothstep(0.85f, 0.95f, abs(camToObj[i]));
+      if (factor == 0.0f) hover = false;
+      auto color = IM_COL32(255 * lines[i].x, 255 * lines[i].y, 255 * lines[i].z, 255 * factor);
+      if (hover) {
+        float x = glm::max(lines[i].x, 0.8f);
+        float y = glm::max(lines[i].y, 0.8f);
+        float z = glm::max(lines[i].z, 0.8f);
+        color = IM_COL32(255 * x, 255 * y, 255 * z, 255 * factor);
+        // TODO: check button pressed and calcuate mousedt
+      }
+
+      switch (mode) {
+      case GizmoMode::TRANSLATION: {
+        /**
+         * Translation Gizmo
+         */
+        ImGui::GetForegroundDrawList()->AddLine(ImVec2(scene.value().x, scene.value().y),
+                                                ImVec2(sline.x, sline.y), color, thickness);
+        glm::vec2 toLine = glm::normalize(sline - scene.value());
+        glm::vec2 orthoDir = glm::normalize(glm::vec2(toLine.y, -toLine.x)) * 12.0f;
+
+        ImVec2 p1 = ImVec2(sline.x, sline.y) + ImVec2(toLine.x, toLine.y) * 12.0f;
         ImVec2 p2 = ImVec2(orthoDir.x, orthoDir.y) + ImVec2(sline.x, sline.y);
         ImVec2 p3 = ImVec2(-orthoDir.x, -orthoDir.y) + ImVec2(sline.x, sline.y);
 
         drawList->AddTriangleFilled(p1, p2, p3, color);
-      }
-    }
-    // rotation gizmo
-    for (uint i = 0; i < 3; ++i) { // i==2 is x-axis
-      // convert vector on plane (ie: yz for pitch(x-asix)) to angle on the plane.
-      float angleStart = atan2f(camToObj[(i + 2) % 3], camToObj[(i + 1) % 3]); // atan(z, y) for x
-      angleStart += M_PI * 0.5f; // rotate 90 deg, so that semi-circle faces the camera.
-      ImVec2 circlePos[30];      // 30 segments
-      int actualSize = 0;
-      for (uint j = 0; j < 30; ++j) {
-        float ng = angleStart + M_PI * j / 30.0f; // draw semi-circle 180 deg
-        // convert angle back to vector in respective palne (ie: zy for pitch(x-axis)
-        glm::vec3 vec = glm::vec3(std::cos(ng), std::sin(ng), 0.0f);
-        // for yz(pitch) we need vec3(0, cos(ng) , sing(ng))
-        glm::vec3 wpos = glm::vec3(vec[2 - i], vec[(3 - i) % 3], vec[(4 - i) % 3]) * distS +
-                         transform.position();
-        // screen space position
-        auto spos = worldToScene(wpos);
-        if (spos.has_value()) {
-          circlePos[j] = ImVec2(spos.value().x, spos.value().y);
-          ++actualSize;
-        } else {
-          break;
+      } break;
+
+      case GizmoMode::ROTATION: {
+        /**
+         * Rotation Gizmo
+         */
+        // convert vector on plane (ie: yz for pitch(x-asix)) to angle on the plane.
+        float angleStart = atan2f(camToObj[(i + 2) % 3], camToObj[(i + 1) % 3]); // atan(z, y) for x
+        angleStart += M_PI * 0.5f; // rotate 90 deg, so that semi-circle faces the camera.
+        ImVec2 circlePos[30];      // 30 segments
+        int actualSize = 0;
+        for (uint j = 0; j < 30; ++j) {
+          float ng = angleStart + M_PI * j / 30.0f; // draw semi-circle 180 deg
+          // convert angle back to vector in respective palne (ie: zy for pitch(x-axis)
+          glm::vec3 vec = glm::vec3(std::cos(ng), std::sin(ng), 0.0f);
+          // for yz(pitch) we need vec3(0, cos(ng) , sing(ng))
+          glm::vec3 wpos = glm::vec3(vec[2 - i], vec[(3 - i) % 3], vec[(4 - i) % 3]) * distS +
+                           transform.position();
+          // screen space position
+          auto spos = worldToScene(wpos);
+          if (spos.has_value()) {
+            circlePos[j] = ImVec2(spos.value().x, spos.value().y);
+            ++actualSize;
+          } else {
+            break;
+          }
         }
+        auto color = IM_COL32(255 * lines[i].x, 255 * lines[i].y, 255 * lines[i].z, 255);
+        drawList->AddPolyline(circlePos, actualSize, color, false, thickness);
+      } break;
+
+      case GizmoMode::SCALE: {
+        /**
+         * Scale Gizmo
+         */
+        ImGui::GetForegroundDrawList()->AddLine(ImVec2(scene.value().x, scene.value().y),
+                                                ImVec2(sline.x, sline.y), color, thickness);
+      } break;
       }
-      auto color = IM_COL32(255 * lines[i].x, 255 * lines[i].y, 255 * lines[i].z, 255);
-      drawList->AddPolyline(circlePos, actualSize, color, false, 2.0f);
     }
   }
 }
@@ -203,7 +240,19 @@ component::Transform AppUi::showTransformComponent(const component::Transform &t
   scale = (scale <= 0.1) ? 0.1 : scale;
   // TODO: Fix gimble-lock, instead of using euler angle to store rotation use quat
 
-  showGizmo(transform);
+  static GizmoMode currentMode = GizmoMode::TRANSLATION;
+  if (ImGui::RadioButton("Translate", currentMode == GizmoMode::TRANSLATION)) {
+    currentMode = GizmoMode::TRANSLATION;
+  }
+  ImGui::SameLine();
+  if (ImGui::RadioButton("Rotation", currentMode == GizmoMode::ROTATION)) {
+    currentMode = GizmoMode::ROTATION;
+  }
+  ImGui::SameLine();
+  if (ImGui::RadioButton("Scale", currentMode == GizmoMode::SCALE)) {
+    currentMode = GizmoMode::SCALE;
+  }
+  showGizmo(transform, currentMode);
   return component::Transform(position, rotation, glm::vec3(scale));
 }
 
@@ -522,6 +571,13 @@ AppUi::Texture AppUi::createTexture(uint id, uint target) {
   glGetTexLevelParameteriv(GlTarget, 0, GL_TEXTURE_HEIGHT, &h);
   glBindTexture(GlTarget, 0);
   return {id, w, h, target};
+}
+
+float AppUi::distanceFromSeg(glm::vec2 a, glm::vec2 b, glm::vec2 p) {
+  auto ab = b - a;
+  auto ap = p - a;
+  auto projPa = glm::clamp(glm::dot(ab, ap) / glm::dot(ab, ab), 0.0f, 1.0f) * ab;
+  return abs(glm::length(ap - projPa));
 }
 
 void AppUi::setEnvMap(uint id, uint target) {
