@@ -37,7 +37,9 @@ static uint globalWindowsFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags
 
 namespace app {
 AppUi::AppUi()
-    : io(ImGui::GetIO()), entities(), projectionMat(), editorState{{40.0f, true}},
+    : io(ImGui::GetIO()), entities(),
+      projectionMat(), editorState{{40.0f, true}}, gizmoState{false, false, GizmoMode::TRANSLATION,
+                                                              glm::vec3(0.0f), glm::vec2(0.0f)},
       shouldClose(false) {
   fpsHistory.fill(60);
   ecs::Coordinator::getInstance().eventManager.subscribe<event::EntityChanged>(*this);
@@ -133,7 +135,7 @@ std::optional<glm::vec2> AppUi::worldToScene(glm::vec3 pos) {
     return std::nullopt;
 }
 
-void AppUi::showGizmo(const component::Transform &transform, const GizmoMode mode) {
+void AppUi::showGizmo(const component::Transform &transform) {
   // translation gimzo test
   glm::vec3 pos = transform.position();
   auto scene = worldToScene(pos);
@@ -143,7 +145,10 @@ void AppUi::showGizmo(const component::Transform &transform, const GizmoMode mod
     auto lines = std::array{glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1)};
     auto drawList = ImGui::GetForegroundDrawList();
     glm::vec3 camToObj = glm::normalize(transform.position() - coordinateSpaceState.camPos);
-    float distS = (glm::length(coordinateSpaceState.camPos - pos)) * 0.20f;
+    float distS = (glm::length(coordinateSpaceState.camPos - pos)) * 0.15f;
+
+    std::array<bool, 3> hovered = {false, false, false};
+    uint hoveredIndex = 0;
 
     constexpr float thickness = 4.0f;
     for (uint i = 0; i < 3; ++i) {
@@ -161,17 +166,18 @@ void AppUi::showGizmo(const component::Transform &transform, const GizmoMode mod
 
       /* Color based on hover and view */
       float factor = 1.0f - glm::smoothstep(0.85f, 0.95f, abs(camToObj[i]));
-      if (factor == 0.0f) hover = false;
+      if (factor == 0.0f) hover = false; // no hover on hidden axis
       auto color = IM_COL32(255 * lines[i].x, 255 * lines[i].y, 255 * lines[i].z, 255 * factor);
-      if (hover) {
+      if (hover && !gizmoState.isActive) {
         float x = glm::max(lines[i].x, 0.8f);
         float y = glm::max(lines[i].y, 0.8f);
         float z = glm::max(lines[i].z, 0.8f);
         color = IM_COL32(255 * x, 255 * y, 255 * z, 255 * factor);
-        // TODO: check button pressed and calcuate mousedt
+        hovered[i] = true;
+        hoveredIndex = i;
       }
 
-      switch (mode) {
+      switch (gizmoState.mode) {
       case GizmoMode::TRANSLATION: {
         /**
          * Translation Gizmo
@@ -226,6 +232,12 @@ void AppUi::showGizmo(const component::Transform &transform, const GizmoMode mod
       } break;
       }
     }
+
+    // hover state and axis
+    gizmoState.isHovered = hovered[0] || hovered[1] || hovered[2];
+    if (gizmoState.isHovered && !gizmoState.isActive) {
+      gizmoState.axis = lines[hoveredIndex];
+    }
   }
 }
 
@@ -240,19 +252,47 @@ component::Transform AppUi::showTransformComponent(const component::Transform &t
   scale = (scale <= 0.1) ? 0.1 : scale;
   // TODO: Fix gimble-lock, instead of using euler angle to store rotation use quat
 
-  static GizmoMode currentMode = GizmoMode::TRANSLATION;
-  if (ImGui::RadioButton("Translate", currentMode == GizmoMode::TRANSLATION)) {
-    currentMode = GizmoMode::TRANSLATION;
+  if (ImGui::RadioButton("Translate", gizmoState.mode == GizmoMode::TRANSLATION)) {
+    gizmoState.mode = GizmoMode::TRANSLATION;
   }
   ImGui::SameLine();
-  if (ImGui::RadioButton("Rotation", currentMode == GizmoMode::ROTATION)) {
-    currentMode = GizmoMode::ROTATION;
+  if (ImGui::RadioButton("Rotation", gizmoState.mode == GizmoMode::ROTATION)) {
+    gizmoState.mode = GizmoMode::ROTATION;
   }
   ImGui::SameLine();
-  if (ImGui::RadioButton("Scale", currentMode == GizmoMode::SCALE)) {
-    currentMode = GizmoMode::SCALE;
+  if (ImGui::RadioButton("Scale", gizmoState.mode == GizmoMode::SCALE)) {
+    gizmoState.mode = GizmoMode::SCALE;
   }
-  showGizmo(transform, currentMode);
+  showGizmo(transform);
+  ImVec2 worldMousePos = ImGui::GetMousePos();
+  if (ImGui::IsMouseDragging(ImGuiMouseButton_Left, 0.0f)) {
+    if (gizmoState.isHovered) {
+      gizmoState.isActive = true;
+      auto objScene = worldToScene(position);
+      if (objScene.has_value())
+        gizmoState.dif = objScene.value() - glm::vec2(worldMousePos.x, worldMousePos.y);
+    }
+  } else {
+    gizmoState.isActive = false;
+  }
+
+  if (gizmoState.isActive) {
+    float distS = (glm::length(coordinateSpaceState.camPos - position)) * 0.10f;
+    auto objScene = worldToScene(position);
+    if (objScene.has_value()) {
+      auto dif = objScene.value() - glm::vec2(worldMousePos.x, worldMousePos.y);
+      auto dot = glm::dot(dif, 100.0f * gizmoState.dif);
+      float neg = (dot >= 0.0f) ? 1.0f : -1.0f;
+      auto vec =
+          (dot / (glm::length(100.0f * gizmoState.dif) * glm::length(100.0f * gizmoState.dif))) *
+          (100.0f * gizmoState.dif);
+      position = position + (glm::length(vec) - glm::length(gizmoState.dif)) * gizmoState.axis *
+                                (1 / 30.0f) * neg * distS;
+    }
+
+    ImGui::ResetMouseDragDelta(ImGuiMouseButton_Left);
+  }
+
   return component::Transform(position, rotation, glm::vec3(scale));
 }
 

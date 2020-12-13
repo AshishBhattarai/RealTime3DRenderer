@@ -20,6 +20,7 @@ namespace world_system {
 class WorldSystem;
 }
 namespace app {
+
 /**
  * Represents the renderer application, handels and manages WINDOW(Context), ECS
  * & UI

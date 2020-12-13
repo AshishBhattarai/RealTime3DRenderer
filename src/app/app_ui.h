@@ -75,11 +75,19 @@ private:
   EditorState editorState;
   CoordinateSpaceState coordinateSpaceState;
 
+  struct {
+    bool isHovered;
+    bool isActive;
+    GizmoMode mode;
+    glm::vec3 axis;
+    glm::vec2 dif;
+  } gizmoState;
+
   void childImageView(const char *lable, Texture &texture, int *currentFace, int *currentLod);
   void childSelectableColumn(std::vector<std::vector<std::string>> columns, int &selected);
 
   std::optional<glm::vec2> worldToScene(glm::vec3 pos);
-  void showGizmo(const component::Transform &transform, const GizmoMode mode);
+  void showGizmo(const component::Transform &transform);
 
   /* Component Nodes */
   component::Transform showTransformComponent(const component::Transform &transform);
