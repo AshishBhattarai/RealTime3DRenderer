@@ -279,18 +279,29 @@ component::Transform AppUi::showTransformComponent(const component::Transform &t
   if (gizmoState.isActive) {
     float distS = (glm::length(coordinateSpaceState.camPos - position)) * 0.10f;
     auto objScene = worldToScene(position);
+    auto dif = objScene.value() - glm::vec2(worldMousePos.x, worldMousePos.y);
     if (objScene.has_value()) {
-      auto dif = objScene.value() - glm::vec2(worldMousePos.x, worldMousePos.y);
-      auto dot = glm::dot(dif, 100.0f * gizmoState.dif);
-      float neg = (dot >= 0.0f) ? 1.0f : -1.0f;
-      auto vec =
-          (dot / (glm::length(100.0f * gizmoState.dif) * glm::length(100.0f * gizmoState.dif))) *
-          (100.0f * gizmoState.dif);
-      position = position + (glm::length(vec) - glm::length(gizmoState.dif)) * gizmoState.axis *
-                                (1 / 30.0f) * neg * distS;
+      switch (gizmoState.mode) {
+      case GizmoMode::TRANSLATION: {
+        auto dot = glm::dot(dif, 100.0f * gizmoState.dif);
+        float neg = (dot >= 0.0f) ? 1.0f : -1.0f;
+        auto vec =
+            (dot / (glm::length(100.0f * gizmoState.dif) * glm::length(100.0f * gizmoState.dif))) *
+            (100.0f * gizmoState.dif);
+        position = position + (glm::length(vec) - glm::length(gizmoState.dif)) * gizmoState.axis *
+                                  (1 / 30.0f) * neg * distS;
+        break;
+      }
+      case GizmoMode::ROTATION:
+        break;
+      case GizmoMode::SCALE: {
+        auto ss = glm::length(dif) - glm::length(gizmoState.dif);
+        scale += ss * (1 / 30.0f);
+        gizmoState.dif = dif;
+        break;
+      }
+      };
     }
-
-    ImGui::ResetMouseDragDelta(ImGuiMouseButton_Left);
   }
 
   return component::Transform(position, rotation, glm::vec3(scale));
