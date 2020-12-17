@@ -5,47 +5,46 @@
 #include <glm/gtx/transform.hpp>
 
 namespace component {
-struct Transform {
-  glm::mat4 transformMat;
+class Transform {
+private:
+  glm::vec3 position_;
+  glm::vec3 scale_;
+  glm::quat rotation_;
 
-  Transform(const glm::mat4 &transformMat = glm::mat4(1.0f)) : transformMat(transformMat) {}
-
-  Transform(const glm::vec3 &translate = glm::vec3(0.0f),
-            const glm::vec3 &rotation = glm::vec3(0.0f), const glm::vec3 &scale = glm::vec3(1.0f)) {
-    transformMat = glm::translate(glm::mat4(1.0f), translate) *
-                   glm::eulerAngleYXZ(rotation.y, rotation.x, rotation.z) * glm::scale(scale);
+public:
+  Transform(const glm::vec3 &position = glm::vec3(0.0f),
+            const glm::vec3 &rotation = glm::vec3(0.0f), const glm::vec3 &scale = glm::vec3(1.0f))
+      : position_(position), scale_(scale) {
+    glm::quat quatX = glm::angleAxis(rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::quat quatY = glm::angleAxis(rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::quat quatZ = glm::angleAxis(rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    rotation_ = quatX * quatY * quatZ;
   }
 
-  glm::vec3 position() const { return glm::vec3(transformMat[3]); }
+  Transform(const glm::vec3 &position, const glm::quat &rotation, const glm::vec3 &scale)
+      : position_(position), rotation_(rotation), scale_(scale) {}
 
-  glm::vec3 rotation() const {
-    glm::vec3 eularAngles;
-    glm::extractEulerAngleYXZ(transformMat, eularAngles[1], eularAngles[0], eularAngles[2]);
-    return eularAngles;
+  glm::vec3 position() const { return position_; }
+
+  glm::vec3 rotationEuler() const { return glm::eulerAngles(rotation_); }
+  glm::quat rotation() const { return rotation_; }
+  glm::vec3 scale() const { return scale_; }
+
+  void position(const glm::vec3 &position) { position_ = position; }
+
+  void rotationEuler(const glm::vec3 &rotation) {
+    glm::quat quatX = glm::angleAxis(rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::quat quatY = glm::angleAxis(rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::quat quatZ = glm::angleAxis(rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    rotation_ = quatX * quatY * quatZ;
   }
 
-  glm::vec3 scale() const {
-    // lenght of first three column vectors
-    float x = glm::length(glm::vec3(transformMat[0]));
-    float y = glm::length(glm::vec3(transformMat[1]));
-    float z = glm::length(glm::vec3(transformMat[2]));
-    return glm::vec3(x, y, z);
-  }
+  void scale(const glm::vec3 &scale) { scale_ = scale; }
 
-  void position(const glm::vec3 &value) { transformMat[3] = glm::vec4(value, transformMat[3].w); }
-
-  void rotation(const glm::vec3 &eulerRad) {
-    const glm::vec3 &tv = position();
-    const glm::vec3 &sv = scale();
-    transformMat = glm::translate(glm::mat4(1.0f), tv) *
-                   glm::yawPitchRoll(eulerRad.y, eulerRad.x, eulerRad.z) * glm::scale(sv);
-  }
-
-  void scale(const glm::vec3 &value) {
-    const glm::vec3 &tv = position();
-    const glm::vec3 &tr = rotation();
-    transformMat = glm::translate(glm::mat4(1.0f), tv) * glm::yawPitchRoll(tr.y, tr.x, tr.z) *
-                   glm::scale(value);
+  glm::mat4 transformation() {
+    auto transform = glm::translate(glm::mat4(1.0f), position_);
+    transform *= glm::mat4_cast(rotation_);
+    return glm::scale(transform, scale_);
   }
 };
 } // namespace component

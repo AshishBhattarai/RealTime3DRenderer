@@ -6,16 +6,10 @@ namespace render_system {
 
 struct PointLight {
   const EntityId entityId;
-  const glm::vec4 *position;
-  const glm::vec3 *color;
-  const float *radius;
-  const float *intensity;
-
-  PointLight(const glm::vec4 *position, const glm::vec3 *color,
-             const float *radius, const float *intensity,
-             const EntityId entityId)
-      : entityId(entityId), position(position), color(color), radius(radius),
-        intensity(intensity) {}
+  const glm::vec3 position;
+  const glm::vec3 color;
+  const float radius;
+  const float intensity;
 };
 
 } // namespace render_system

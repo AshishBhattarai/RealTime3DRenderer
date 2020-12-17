@@ -221,6 +221,10 @@ void AppUi::showGizmo(const component::Transform &transform) {
         }
         auto color = IM_COL32(255 * lines[i].x, 255 * lines[i].y, 255 * lines[i].z, 255);
         drawList->AddPolyline(circlePos, actualSize, color, false, thickness);
+
+        /**
+         * TODO: cameraRay to circle plane / rotation plane collision.
+         **/
       } break;
 
       case GizmoMode::SCALE: {
@@ -243,11 +247,11 @@ void AppUi::showGizmo(const component::Transform &transform) {
 
 component::Transform AppUi::showTransformComponent(const component::Transform &transform) {
   glm::vec3 position = transform.position();
-  glm::vec3 rotation = transform.rotation();
+  glm::vec3 rotation = glm::degrees(transform.rotationEuler());
   float scale = transform.scale().x;
   ImGui::Text("Transformation");
   ImGui::DragFloat3("Translate##1T", glm::value_ptr(position), 0.05f, 0.0f, 0.0f, "%.2f");
-  ImGui::DragFloat3("Rotate##1T", glm::value_ptr(rotation), 0.05f, 0.0f, 0.0f, "%.2f");
+  ImGui::DragFloat3("Rotate##1T", glm::value_ptr(rotation), 1.0f, 0.0f, 0.0f, "%.2f");
   ImGui::DragFloat("Scale##1T", &scale, 0.05f, 0.1f, 0.0f, "%.2f");
   scale = (scale <= 0.1) ? 0.1 : scale;
   // TODO: Fix gimble-lock, instead of using euler angle to store rotation use quat
@@ -288,8 +292,8 @@ component::Transform AppUi::showTransformComponent(const component::Transform &t
         auto vec =
             (dot / (glm::length(100.0f * gizmoState.dif) * glm::length(100.0f * gizmoState.dif))) *
             (100.0f * gizmoState.dif);
-        position = position + (glm::length(vec) - glm::length(gizmoState.dif)) * gizmoState.axis *
-                                  (1 / 30.0f) * neg * distS;
+        position += (glm::length(vec) - glm::length(gizmoState.dif)) * gizmoState.axis *
+                    (1 / 30.0f) * neg * distS;
         break;
       }
       case GizmoMode::ROTATION:
@@ -304,7 +308,20 @@ component::Transform AppUi::showTransformComponent(const component::Transform &t
     }
   }
 
-  return component::Transform(position, rotation, glm::vec3(scale));
+  auto oldRot = glm::degrees(transform.rotationEuler());
+  auto difRot = rotation - oldRot;
+  glm::quat quatRot = transform.rotation();
+  if (difRot.x != 0.0f) {
+    quatRot *= glm::angleAxis(glm::radians(difRot.x), glm::vec3(1.0f, 0.0f, 0.0f));
+  }
+  if (difRot.y != 0.0f) {
+    quatRot *= glm::angleAxis(glm::radians(difRot.y), glm::vec3(0.0f, 1.0f, 0.0f));
+  }
+  if (difRot.z != 0.0f) {
+    quatRot *= glm::angleAxis(glm::radians(difRot.z), glm::vec3(0.0f, 0.0f, 1.0f));
+  }
+
+  return component::Transform(position, quatRot, glm::vec3(scale));
 }
 
 component::Light AppUi::showLightComponent(const component::Light &light) {

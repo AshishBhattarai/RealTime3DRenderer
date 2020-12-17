@@ -139,10 +139,9 @@ std::shared_ptr<Image> RenderSystem::update(float dt) {
   uint i = 0;
   for (EntityId entity : lightingSystem->getEntites()) {
     if (i == shader::forward::fragment::PointLight::MAX) break;
-    const auto &transfrom = coordinator.getComponent<component::Transform>(entity);
+    const auto &transform = coordinator.getComponent<component::Transform>(entity);
     const auto &light = coordinator.getComponent<component::Light>(entity);
-    PointLight pointLight(&transfrom.transformMat[3], &light.color, &light.range, &light.intensity,
-                          entity);
+    PointLight pointLight{entity, transform.position(), light.color, light.range, light.intensity};
     renderer.loadPointLight(pointLight, i);
     ++i;
   }
@@ -159,7 +158,7 @@ std::shared_ptr<Image> RenderSystem::update(float dt) {
   // render entites
   renderer.preRenderMesh(*globalDiffuseIBL, *globalSpecularIBL);
   for (EntityId entity : this->getEntites()) {
-    auto transform = coordinator.getComponent<component::Transform>(entity).transformMat;
+    auto transform = coordinator.getComponent<component::Transform>(entity).transformation();
     auto model = coordinator.getComponent<component::Model>(entity);
     renderer.renderMesh(dt, transform, model.meshId, model.primIdToMatId);
   }

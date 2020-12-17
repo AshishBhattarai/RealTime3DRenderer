@@ -17,16 +17,16 @@ void FlatForwardMaterial::loadPointLight(const PointLight &pointLight, uint idx)
   assert(idx < forward::fragment::PointLight::MAX && "Invalid point light index");
   glUniform3fv(forward::fragment::uniform::POINT_LIGHT_LOC[idx] +
                    forward::fragment::PointLight::POSITION,
-               1, glm::value_ptr(*pointLight.position));
+               1, glm::value_ptr(pointLight.position));
   glUniform3fv(forward::fragment::uniform::POINT_LIGHT_LOC[idx] +
                    forward::fragment::PointLight::COLOR,
-               1, glm::value_ptr(*pointLight.color));
+               1, glm::value_ptr(pointLight.color));
   glUniform1f(forward::fragment::uniform::POINT_LIGHT_LOC[idx] +
                   forward::fragment::PointLight::RADIUS,
-              *pointLight.radius);
+              pointLight.radius);
   glUniform1f(forward::fragment::uniform::POINT_LIGHT_LOC[idx] +
                   forward::fragment::PointLight::INTENSITY,
-              *pointLight.intensity);
+              pointLight.intensity);
 }
 
 void FlatForwardMaterial::loadPointLightSize(int size) {
