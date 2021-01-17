@@ -79,7 +79,7 @@ RenderSystem::RenderSystem(const RenderSystemConfig &config)
                                              {{DEFAULT_MATERIAL_ID, ShaderType::FORWARD_SHADER},
                                               std::move(renderDefaults.createCheckerTexture()),
                                               std::move(renderDefaults.createWhiteTexture()),
-                                              std::move(renderDefaults.createWhiteTexture()),
+                                              std::move(renderDefaults.createBlackTexture()),
                                               std::move(renderDefaults.createBlackTexture()),
                                               std::move(renderDefaults.createBlackTexture())})));
   materials.emplace(

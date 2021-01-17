@@ -87,6 +87,7 @@ private:
   void childSelectableColumn(std::vector<std::vector<std::string>> columns, int &selected);
 
   std::optional<glm::vec2> worldToScene(glm::vec3 pos);
+  // glm::vec3 sceneToWorld(glm::vec2 pos);
   void showGizmo(const component::Transform &transform);
 
   /* Component Nodes */

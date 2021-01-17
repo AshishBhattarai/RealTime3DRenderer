@@ -165,9 +165,23 @@
                       </DDependency>
                      </instance>
                     </item>
+                    <item>
+                     <instance type="DBoundary">
+                      <DBoundary>
+                       <base-DElement>
+                        <DElement>
+                         <uid>{f3be3164-e21d-4131-a411-b96651fce86f}</uid>
+                        </DElement>
+                       </base-DElement>
+                       <text>World Systetm</text>
+                       <pos>x:335;y:300</pos>
+                       <rect>x:-315;y:-275;w:630;h:550</rect>
+                      </DBoundary>
+                     </instance>
+                    </item>
                    </qlist>
                   </elements>
-                  <last-modified>1581363476151</last-modified>
+                  <last-modified>1610732906089</last-modified>
                   <toolbarid>General</toolbarid>
                  </MDiagram>
                 </base-MDiagram>
@@ -326,35 +340,35 @@
                  <qlist>
                   <item>
                    <MClassMember>
-                    <uid>{5ed46736-9afa-48df-acdc-2edfe3e103b7}</uid>
+                    <uid>{faeb9817-e36e-4da2-b05b-d2cf1a31d151}</uid>
                     <type>1</type>
                     <declaration>EntityId</declaration>
                    </MClassMember>
                   </item>
                   <item>
                    <MClassMember>
-                    <uid>{49ed327f-f8d4-4a4e-8eac-b2fe51f61465}</uid>
+                    <uid>{74019cf5-057a-41f3-a9ff-9d58965bd42d}</uid>
                     <type>1</type>
                     <declaration>Id</declaration>
                    </MClassMember>
                   </item>
                   <item>
                    <MClassMember>
-                    <uid>{48db7764-d942-440b-94ec-d612ca7fe79d}</uid>
+                    <uid>{b3443ed9-ec86-447b-a467-c80eef8ef0bc}</uid>
                     <type>1</type>
                     <declaration>component::Transform</declaration>
                    </MClassMember>
                   </item>
                   <item>
                    <MClassMember>
-                    <uid>{d438ceef-954f-432a-b151-c0a0b782c45f}</uid>
+                    <uid>{43f28bc2-7d48-4eaa-888e-310642086ed5}</uid>
                     <type>1</type>
                     <declaration>singal&lt;onUpdate&gt;</declaration>
                    </MClassMember>
                   </item>
                   <item>
                    <MClassMember>
-                    <uid>{46771478-8d15-4e25-b98c-bed2ebc40cd6}</uid>
+                    <uid>{910d638f-fbce-447d-9853-752ff0668def}</uid>
                     <type>1</type>
                     <declaration>List&lt;child*&gt;</declaration>
                    </MClassMember>

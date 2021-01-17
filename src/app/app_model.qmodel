@@ -49,7 +49,7 @@
                          </base-DElement>
                          <object>{225f872f-df0e-4de3-838d-aeefe4ff0086}</object>
                          <name>Display</name>
-                         <pos>x:225;y:110</pos>
+                         <pos>x:310;y:65</pos>
                          <rect>x:-105;y:-80;w:210;h:160</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -72,7 +72,7 @@
                          </base-DElement>
                          <object>{a40f5094-0d41-4ff9-969c-b4027fac36eb}</object>
                          <name>App</name>
-                         <pos>x:515;y:110</pos>
+                         <pos>x:600;y:65</pos>
                          <rect>x:-90;y:-80;w:180;h:160</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -120,7 +120,7 @@
                          </base-DElement>
                          <object>{d738d3ef-fa6c-4cef-be4f-cf8a079b292c}</object>
                          <name>Entiy Component System(ECS)</name>
-                         <pos>x:685;y:425</pos>
+                         <pos>x:770;y:380</pos>
                          <rect>x:-100;y:-25;w:200;h:50</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -142,7 +142,7 @@
                          </base-DElement>
                          <object>{fe96eb89-108a-4027-943b-93e079499ef7}</object>
                          <name>GLFW</name>
-                         <pos>x:35;y:220</pos>
+                         <pos>x:120;y:175</pos>
                          <rect>x:-25;y:-20;w:50;h:40</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -163,7 +163,7 @@
                          </base-DElement>
                          <object>{df6c4b72-70e4-4a36-88c3-9ca56872e407}</object>
                          <name>GLAD</name>
-                         <pos>x:30;y:130</pos>
+                         <pos>x:115;y:85</pos>
                          <rect>x:-25;y:-20;w:50;h:40</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -220,7 +220,7 @@
                          </base-DElement>
                          <object>{3f4bd220-7876-4586-9628-0a6ca1859602}</object>
                          <name>RenderSystem</name>
-                         <pos>x:595;y:285</pos>
+                         <pos>x:680;y:240</pos>
                          <rect>x:-50;y:-35;w:100;h:70</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -267,7 +267,7 @@
                          </base-DElement>
                          <object>{59869e7e-a88c-488c-b5e4-90b42363461f}</object>
                          <name>Input</name>
-                         <pos>x:215;y:305</pos>
+                         <pos>x:300;y:260</pos>
                          <rect>x:-60;y:-70;w:120;h:140</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -375,7 +375,7 @@
                          </base-DElement>
                          <object>{17ca312d-cc0a-4137-95cb-d228e6e6e835}</object>
                          <name>WorldSystem</name>
-                         <pos>x:465;y:385</pos>
+                         <pos>x:550;y:340</pos>
                          <rect>x:-45;y:-35;w:90;h:70</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -393,8 +393,8 @@
                         </DElement>
                        </base-DElement>
                        <text>App(Front-End) class diagram</text>
-                       <pos>x:455;y:245</pos>
-                       <rect>x:-530;y:-330;w:1060;h:660</rect>
+                       <pos>x:515;y:190</pos>
+                       <rect>x:-505;y:-340;w:1010;h:680</rect>
                       </DBoundary>
                      </instance>
                     </item>
@@ -453,7 +453,7 @@
                          </base-DElement>
                          <object>{3d127cd8-c3aa-4fa4-ad4d-da8e7add85f0}</object>
                          <name>AppConfig</name>
-                         <pos>x:730;y:70</pos>
+                         <pos>x:850;y:-100</pos>
                          <rect>x:-40;y:-35;w:80;h:70</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -499,7 +499,7 @@
                          </base-DElement>
                          <object>{6f318a96-214e-4c84-824c-4ba617b26bee}</object>
                          <name>GUI</name>
-                         <pos>x:300;y:-35</pos>
+                         <pos>x:385;y:-80</pos>
                          <rect>x:-40;y:-30;w:80;h:60</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -519,7 +519,7 @@
                          </base-DElement>
                          <object>{f278aed4-fd86-42cd-92bc-0237128d44b9}</object>
                          <name>ImGUI</name>
-                         <pos>x:85;y:-35</pos>
+                         <pos>x:170;y:-80</pos>
                          <rect>x:-25;y:-20;w:50;h:40</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -571,9 +571,103 @@
                       </DDependency>
                      </instance>
                     </item>
+                    <item>
+                     <instance type="DClass">
+                      <DClass>
+                       <base-DObject>
+                        <DObject>
+                         <base-DElement>
+                          <DElement>
+                           <uid>{a54c26f4-54ec-4516-8900-0192ff2be751}</uid>
+                          </DElement>
+                         </base-DElement>
+                         <object>{10d3d2c6-1db3-4877-84d0-e1342af38d7a}</object>
+                         <name>GuiManager</name>
+                         <pos>x:815;y:210</pos>
+                         <rect>x:-45;y:-45;w:90;h:90</rect>
+                         <visual-role>0</visual-role>
+                        </DObject>
+                       </base-DObject>
+                       <namespace>app</namespace>
+                       <show-all-members>true</show-all-members>
+                      </DClass>
+                     </instance>
+                    </item>
+                    <item>
+                     <instance type="DAssociation">
+                      <DAssociation>
+                       <base-DRelation>
+                        <DRelation>
+                         <base-DElement>
+                          <DElement>
+                           <uid>{f9ac3ea3-94f7-4070-ad33-7c6eedf55235}</uid>
+                          </DElement>
+                         </base-DElement>
+                         <object>{edd47ef8-2484-45fd-86cc-1dd778a386ef}</object>
+                         <a>{a54c26f4-54ec-4516-8900-0192ff2be751}</a>
+                         <b>{828675d7-e206-4095-b9dc-6ea2d7b8f952}</b>
+                        </DRelation>
+                       </base-DRelation>
+                       <a>
+                        <DAssociationEnd>
+                         <cradinality>1</cradinality>
+                         <navigable>true</navigable>
+                         <kind>2</kind>
+                        </DAssociationEnd>
+                       </a>
+                      </DAssociation>
+                     </instance>
+                    </item>
+                    <item>
+                     <instance type="DClass">
+                      <DClass>
+                       <base-DObject>
+                        <DObject>
+                         <base-DElement>
+                          <DElement>
+                           <uid>{c5fc5cba-7a1f-4f80-8084-72821a92aa11}</uid>
+                          </DElement>
+                         </base-DElement>
+                         <object>{61a97014-4a8d-4678-9102-3aa066c43e7b}</object>
+                         <name>AppUi</name>
+                         <pos>x:870;y:60</pos>
+                         <rect>x:-65;y:-90;w:130;h:180</rect>
+                         <visual-role>0</visual-role>
+                        </DObject>
+                       </base-DObject>
+                       <namespace>app</namespace>
+                       <show-all-members>true</show-all-members>
+                      </DClass>
+                     </instance>
+                    </item>
+                    <item>
+                     <instance type="DAssociation">
+                      <DAssociation>
+                       <base-DRelation>
+                        <DRelation>
+                         <base-DElement>
+                          <DElement>
+                           <uid>{f2e9aedc-e94a-4d30-a7b9-b80e7bb7c72f}</uid>
+                          </DElement>
+                         </base-DElement>
+                         <object>{64cd4245-e256-4970-9903-d8fc0c456b51}</object>
+                         <a>{c5fc5cba-7a1f-4f80-8084-72821a92aa11}</a>
+                         <b>{828675d7-e206-4095-b9dc-6ea2d7b8f952}</b>
+                        </DRelation>
+                       </base-DRelation>
+                       <a>
+                        <DAssociationEnd>
+                         <cradinality>1</cradinality>
+                         <navigable>true</navigable>
+                         <kind>2</kind>
+                        </DAssociationEnd>
+                       </a>
+                      </DAssociation>
+                     </instance>
+                    </item>
                    </qlist>
                   </elements>
-                  <last-modified>1598804372939</last-modified>
+                  <last-modified>1610732475475</last-modified>
                   <toolbarid>General</toolbarid>
                  </MDiagram>
                 </base-MDiagram>
@@ -3079,7 +3173,7 @@
                          <uid>{d1d46798-154d-423f-9b8e-a137a2456d6a}</uid>
                         </DElement>
                        </base-DElement>
-                       <text>Render-Server-Front-End</text>
+                       <text>Renderer-Front-End</text>
                        <pos>x:295;y:365</pos>
                        <rect>x:-210;y:-250;w:420;h:500</rect>
                       </DBoundary>
@@ -3093,7 +3187,7 @@
                          <uid>{bf2c0987-2e9c-4641-916c-4f016a4bfdaf}</uid>
                         </DElement>
                        </base-DElement>
-                       <text>Render-Server-Back-End</text>
+                       <text>Renderer-Back-End</text>
                        <pos>x:820;y:420</pos>
                        <rect>x:-300;y:-305;w:600;h:610</rect>
                       </DBoundary>
@@ -3177,7 +3271,7 @@
                          <uid>{511e96a9-396d-4353-b989-c611d4b15fe7}</uid>
                         </DElement>
                        </base-DElement>
-                       <text>Server Side Real Time Phsyically Based Rendering</text>
+                       <text>Real Time Phsyically Based Rendering</text>
                        <pos>x:615;y:445</pos>
                        <rect>x:-560;y:-410;w:1120;h:820</rect>
                       </DBoundary>
@@ -3203,98 +3297,6 @@
                        <variety>nodeinstance</variety>
                        <shape-editable>false</shape-editable>
                       </DItem>
-                     </instance>
-                    </item>
-                    <item>
-                     <instance type="DItem">
-                      <DItem>
-                       <base-DObject>
-                        <DObject>
-                         <base-DElement>
-                          <DElement>
-                           <uid>{2f748534-66d0-4901-8dd0-59dbc14f493f}</uid>
-                          </DElement>
-                         </base-DElement>
-                         <object>{846eb1de-0f27-4041-89f1-a24c2693b87f}</object>
-                         <name>NodeJS-Server</name>
-                         <pos>x:225;y:685</pos>
-                         <rect>x:-20;y:-40;w:40;h:80</rect>
-                         <visual-role>0</visual-role>
-                        </DObject>
-                       </base-DObject>
-                       <variety>pc</variety>
-                       <shape-editable>false</shape-editable>
-                      </DItem>
-                     </instance>
-                    </item>
-                    <item>
-                     <instance type="DConnection">
-                      <DConnection>
-                       <base-DRelation>
-                        <DRelation>
-                         <base-DElement>
-                          <DElement>
-                           <uid>{e17f30b5-c225-49f8-b672-c5b9d1bc4d9a}</uid>
-                          </DElement>
-                         </base-DElement>
-                         <object>{fb79c7b4-2536-4f32-ad14-f0a278c03c11}</object>
-                         <a>{19a9475d-05ad-4635-97ce-84f0754c6fd6}</a>
-                         <b>{2f748534-66d0-4901-8dd0-59dbc14f493f}</b>
-                        </DRelation>
-                       </base-DRelation>
-                       <custom-relation>NodeAssoziation</custom-relation>
-                       <a>
-                        <DConnectionEnd>
-                         <navigable>true</navigable>
-                        </DConnectionEnd>
-                       </a>
-                      </DConnection>
-                     </instance>
-                    </item>
-                    <item>
-                     <instance type="DItem">
-                      <DItem>
-                       <base-DObject>
-                        <DObject>
-                         <base-DElement>
-                          <DElement>
-                           <uid>{64cd97cb-517e-4815-ac12-ba897ec10559}</uid>
-                          </DElement>
-                         </base-DElement>
-                         <object>{74700635-7298-4b9c-94a5-475a95c9e14b}</object>
-                         <name>JavaScript Application</name>
-                         <pos>x:225;y:815</pos>
-                         <rect>x:-40;y:-30;w:80;h:60</rect>
-                         <visual-role>0</visual-role>
-                        </DObject>
-                       </base-DObject>
-                       <variety>tablet</variety>
-                       <shape-editable>false</shape-editable>
-                      </DItem>
-                     </instance>
-                    </item>
-                    <item>
-                     <instance type="DConnection">
-                      <DConnection>
-                       <base-DRelation>
-                        <DRelation>
-                         <base-DElement>
-                          <DElement>
-                           <uid>{06496b5d-013a-4e8f-869f-087da01bd084}</uid>
-                          </DElement>
-                         </base-DElement>
-                         <object>{ce41daa7-52b7-46f3-b276-c4be1e07cb35}</object>
-                         <a>{2f748534-66d0-4901-8dd0-59dbc14f493f}</a>
-                         <b>{64cd97cb-517e-4815-ac12-ba897ec10559}</b>
-                        </DRelation>
-                       </base-DRelation>
-                       <custom-relation>NodeAssoziation</custom-relation>
-                       <a>
-                        <DConnectionEnd>
-                         <navigable>true</navigable>
-                        </DConnectionEnd>
-                       </a>
-                      </DConnection>
                      </instance>
                     </item>
                     <item>
@@ -3505,33 +3507,9 @@
                       </DConnection>
                      </instance>
                     </item>
-                    <item>
-                     <instance type="DConnection">
-                      <DConnection>
-                       <base-DRelation>
-                        <DRelation>
-                         <base-DElement>
-                          <DElement>
-                           <uid>{1b855240-9e09-413d-82be-360fc2ff5ac7}</uid>
-                          </DElement>
-                         </base-DElement>
-                         <object>{d58b9f85-b8e3-4617-964d-1cd37c1b6a0d}</object>
-                         <a>{13ff733f-4d57-4800-9896-67889ba10eaa}</a>
-                         <b>{2f748534-66d0-4901-8dd0-59dbc14f493f}</b>
-                        </DRelation>
-                       </base-DRelation>
-                       <custom-relation>NodeAssoziation</custom-relation>
-                       <a>
-                        <DConnectionEnd>
-                         <navigable>true</navigable>
-                        </DConnectionEnd>
-                       </a>
-                      </DConnection>
-                     </instance>
-                    </item>
                    </qlist>
                   </elements>
-                  <last-modified>1584292994576</last-modified>
+                  <last-modified>1610727758188</last-modified>
                   <toolbarid>Deployment</toolbarid>
                  </MDiagram>
                 </base-MDiagram>
@@ -4806,128 +4784,10 @@
                    </MElement>
                   </base-MElement>
                   <name>RtspClient</name>
-                  <relations>
-                   <handles>
-                    <handles>
-                     <qlist>
-                      <item>
-                       <handle>
-                        <uid>{fb79c7b4-2536-4f32-ad14-f0a278c03c11}</uid>
-                        <target>
-                         <instance type="MConnection">
-                          <MConnection>
-                           <base-MRelation>
-                            <MRelation>
-                             <base-MElement>
-                              <MElement>
-                               <uid>{fb79c7b4-2536-4f32-ad14-f0a278c03c11}</uid>
-                              </MElement>
-                             </base-MElement>
-                             <a>{f072493c-a3bb-4ff3-a2e4-2d55548d79c7}</a>
-                             <b>{846eb1de-0f27-4041-89f1-a24c2693b87f}</b>
-                            </MRelation>
-                           </base-MRelation>
-                           <custom-relation>NodeAssoziation</custom-relation>
-                           <a>
-                            <MConnectionEnd>
-                             <navigable>true</navigable>
-                            </MConnectionEnd>
-                           </a>
-                          </MConnection>
-                         </instance>
-                        </target>
-                       </handle>
-                      </item>
-                     </qlist>
-                    </handles>
-                   </handles>
-                  </relations>
                  </MObject>
                 </base-MObject>
                 <variety-editable>false</variety-editable>
                 <variety>nodeinstance</variety>
-               </MItem>
-              </instance>
-             </target>
-            </handle>
-           </item>
-           <item>
-            <handle>
-             <uid>{846eb1de-0f27-4041-89f1-a24c2693b87f}</uid>
-             <target>
-              <instance type="MItem">
-               <MItem>
-                <base-MObject>
-                 <MObject>
-                  <base-MElement>
-                   <MElement>
-                    <uid>{846eb1de-0f27-4041-89f1-a24c2693b87f}</uid>
-                   </MElement>
-                  </base-MElement>
-                  <name>NodeJS-Server</name>
-                  <relations>
-                   <handles>
-                    <handles>
-                     <qlist>
-                      <item>
-                       <handle>
-                        <uid>{ce41daa7-52b7-46f3-b276-c4be1e07cb35}</uid>
-                        <target>
-                         <instance type="MConnection">
-                          <MConnection>
-                           <base-MRelation>
-                            <MRelation>
-                             <base-MElement>
-                              <MElement>
-                               <uid>{ce41daa7-52b7-46f3-b276-c4be1e07cb35}</uid>
-                              </MElement>
-                             </base-MElement>
-                             <a>{846eb1de-0f27-4041-89f1-a24c2693b87f}</a>
-                             <b>{74700635-7298-4b9c-94a5-475a95c9e14b}</b>
-                            </MRelation>
-                           </base-MRelation>
-                           <custom-relation>NodeAssoziation</custom-relation>
-                           <a>
-                            <MConnectionEnd>
-                             <navigable>true</navigable>
-                            </MConnectionEnd>
-                           </a>
-                          </MConnection>
-                         </instance>
-                        </target>
-                       </handle>
-                      </item>
-                     </qlist>
-                    </handles>
-                   </handles>
-                  </relations>
-                 </MObject>
-                </base-MObject>
-                <variety-editable>false</variety-editable>
-                <variety>pc</variety>
-               </MItem>
-              </instance>
-             </target>
-            </handle>
-           </item>
-           <item>
-            <handle>
-             <uid>{74700635-7298-4b9c-94a5-475a95c9e14b}</uid>
-             <target>
-              <instance type="MItem">
-               <MItem>
-                <base-MObject>
-                 <MObject>
-                  <base-MElement>
-                   <MElement>
-                    <uid>{74700635-7298-4b9c-94a5-475a95c9e14b}</uid>
-                   </MElement>
-                  </base-MElement>
-                  <name>JavaScript Application</name>
-                 </MObject>
-                </base-MObject>
-                <variety-editable>false</variety-editable>
-                <variety>tablet</variety>
                </MItem>
               </instance>
              </target>
@@ -5529,42 +5389,6 @@
                    </MElement>
                   </base-MElement>
                   <name>CommandConnection</name>
-                  <relations>
-                   <handles>
-                    <handles>
-                     <qlist>
-                      <item>
-                       <handle>
-                        <uid>{d58b9f85-b8e3-4617-964d-1cd37c1b6a0d}</uid>
-                        <target>
-                         <instance type="MConnection">
-                          <MConnection>
-                           <base-MRelation>
-                            <MRelation>
-                             <base-MElement>
-                              <MElement>
-                               <uid>{d58b9f85-b8e3-4617-964d-1cd37c1b6a0d}</uid>
-                              </MElement>
-                             </base-MElement>
-                             <a>{5d454926-c918-405f-9033-645a6451f757}</a>
-                             <b>{846eb1de-0f27-4041-89f1-a24c2693b87f}</b>
-                            </MRelation>
-                           </base-MRelation>
-                           <custom-relation>NodeAssoziation</custom-relation>
-                           <a>
-                            <MConnectionEnd>
-                             <navigable>true</navigable>
-                            </MConnectionEnd>
-                           </a>
-                          </MConnection>
-                         </instance>
-                        </target>
-                       </handle>
-                      </item>
-                     </qlist>
-                    </handles>
-                   </handles>
-                  </relations>
                  </MObject>
                 </base-MObject>
                 <variety-editable>false</variety-editable>
@@ -5642,6 +5466,188 @@
                  </MObject>
                 </base-MObject>
                </MItem>
+              </instance>
+             </target>
+            </handle>
+           </item>
+           <item>
+            <handle>
+             <uid>{10d3d2c6-1db3-4877-84d0-e1342af38d7a}</uid>
+             <target>
+              <instance type="MClass">
+               <MClass>
+                <base-MObject>
+                 <MObject>
+                  <base-MElement>
+                   <MElement>
+                    <uid>{10d3d2c6-1db3-4877-84d0-e1342af38d7a}</uid>
+                   </MElement>
+                  </base-MElement>
+                  <name>GuiManager</name>
+                  <relations>
+                   <handles>
+                    <handles>
+                     <qlist>
+                      <item>
+                       <handle>
+                        <uid>{edd47ef8-2484-45fd-86cc-1dd778a386ef}</uid>
+                        <target>
+                         <instance type="MAssociation">
+                          <MAssociation>
+                           <base-MRelation>
+                            <MRelation>
+                             <base-MElement>
+                              <MElement>
+                               <uid>{edd47ef8-2484-45fd-86cc-1dd778a386ef}</uid>
+                              </MElement>
+                             </base-MElement>
+                             <a>{10d3d2c6-1db3-4877-84d0-e1342af38d7a}</a>
+                             <b>{a40f5094-0d41-4ff9-969c-b4027fac36eb}</b>
+                            </MRelation>
+                           </base-MRelation>
+                           <a>
+                            <MAssociationEnd>
+                             <cardinality>1</cardinality>
+                             <navigable>true</navigable>
+                             <kind>2</kind>
+                            </MAssociationEnd>
+                           </a>
+                          </MAssociation>
+                         </instance>
+                        </target>
+                       </handle>
+                      </item>
+                     </qlist>
+                    </handles>
+                   </handles>
+                  </relations>
+                 </MObject>
+                </base-MObject>
+                <namespace>app</namespace>
+                <members>
+                 <qlist>
+                  <item>
+                   <MClassMember>
+                    <uid>{539e67e1-c830-4ec6-aaa0-869ecdb62fe1}</uid>
+                    <type>1</type>
+                    <declaration>io</declaration>
+                   </MClassMember>
+                  </item>
+                 </qlist>
+                </members>
+               </MClass>
+              </instance>
+             </target>
+            </handle>
+           </item>
+           <item>
+            <handle>
+             <uid>{61a97014-4a8d-4678-9102-3aa066c43e7b}</uid>
+             <target>
+              <instance type="MClass">
+               <MClass>
+                <base-MObject>
+                 <MObject>
+                  <base-MElement>
+                   <MElement>
+                    <uid>{61a97014-4a8d-4678-9102-3aa066c43e7b}</uid>
+                   </MElement>
+                  </base-MElement>
+                  <name>AppUi</name>
+                  <relations>
+                   <handles>
+                    <handles>
+                     <qlist>
+                      <item>
+                       <handle>
+                        <uid>{64cd4245-e256-4970-9903-d8fc0c456b51}</uid>
+                        <target>
+                         <instance type="MAssociation">
+                          <MAssociation>
+                           <base-MRelation>
+                            <MRelation>
+                             <base-MElement>
+                              <MElement>
+                               <uid>{64cd4245-e256-4970-9903-d8fc0c456b51}</uid>
+                              </MElement>
+                             </base-MElement>
+                             <a>{61a97014-4a8d-4678-9102-3aa066c43e7b}</a>
+                             <b>{a40f5094-0d41-4ff9-969c-b4027fac36eb}</b>
+                            </MRelation>
+                           </base-MRelation>
+                           <a>
+                            <MAssociationEnd>
+                             <cardinality>1</cardinality>
+                             <navigable>true</navigable>
+                             <kind>2</kind>
+                            </MAssociationEnd>
+                           </a>
+                          </MAssociation>
+                         </instance>
+                        </target>
+                       </handle>
+                      </item>
+                     </qlist>
+                    </handles>
+                   </handles>
+                  </relations>
+                 </MObject>
+                </base-MObject>
+                <namespace>app</namespace>
+                <members>
+                 <qlist>
+                  <item>
+                   <MClassMember>
+                    <uid>{a7750681-587b-46c6-99c9-9754f304cb29}</uid>
+                    <type>1</type>
+                    <declaration>dtHistory</declaration>
+                   </MClassMember>
+                  </item>
+                  <item>
+                   <MClassMember>
+                    <uid>{26456878-b551-40aa-bfb1-92f6086f88e1}</uid>
+                    <type>1</type>
+                    <declaration>fpsHisttory</declaration>
+                   </MClassMember>
+                  </item>
+                  <item>
+                   <MClassMember>
+                    <uid>{63d580d5-57e3-4079-ab83-f2fc15027f2b}</uid>
+                    <type>1</type>
+                    <declaration>pbrTextures</declaration>
+                   </MClassMember>
+                  </item>
+                  <item>
+                   <MClassMember>
+                    <uid>{44b59680-4b8c-45c8-9cba-5a57a68b6fb9}</uid>
+                    <type>1</type>
+                    <declaration>entities</declaration>
+                   </MClassMember>
+                  </item>
+                  <item>
+                   <MClassMember>
+                    <uid>{284c1675-4bfc-448d-8345-b4787fb5d397}</uid>
+                    <type>1</type>
+                    <declaration>editorstate</declaration>
+                   </MClassMember>
+                  </item>
+                  <item>
+                   <MClassMember>
+                    <uid>{00f2cdd3-a86d-4777-9edf-fd1e65ecff85}</uid>
+                    <type>1</type>
+                    <declaration>coordinateSapceState</declaration>
+                   </MClassMember>
+                  </item>
+                  <item>
+                   <MClassMember>
+                    <uid>{f231d4ed-2435-4c1a-8880-9648d7e7da0c}</uid>
+                    <type>1</type>
+                    <declaration>gizmoState</declaration>
+                   </MClassMember>
+                  </item>
+                 </qlist>
+                </members>
+               </MClass>
               </instance>
              </target>
             </handle>

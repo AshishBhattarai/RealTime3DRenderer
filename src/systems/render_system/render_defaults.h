@@ -14,8 +14,8 @@ namespace render_system {
  */
 class RenderDefaults : NonCopyable {
 private:
-  static constexpr uchar black[] = {255, 255, 255, 255};
-  static constexpr uchar white[] = {0, 0, 0, 0};
+  static constexpr uchar white[] = {255, 255, 255, 255};
+  static constexpr uchar black[] = {0, 0, 0, 0};
 
   Image gridImage;
   Image checkerImage;

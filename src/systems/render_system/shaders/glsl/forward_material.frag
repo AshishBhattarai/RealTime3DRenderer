@@ -37,7 +37,8 @@ struct Material {
 #ifdef TEXTURE_MATERIAL
 // Opaque types such as sampler cannot be inside struct
 layout(binding = FRAG_U_MATERIAL_ALBEDO_BND) uniform sampler2D material_albedo;
-layout(binding = FRAG_U_MATERIAL_METALLIC_ROUGHNESS_BND) uniform sampler2D material_metallicRoughness;
+layout(binding = FRAG_U_MATERIAL_METALLIC_ROUGHNESS_BND) uniform sampler2D
+    material_metallicRoughness;
 layout(binding = FRAG_U_MATERIAL_AO_BND) uniform sampler2D material_ao;
 layout(binding = FRAG_U_MATERIAL_NORMAL_BND) uniform sampler2D material_normal;
 layout(binding = FRAG_U_MATERIAL_EMISSION_BND) uniform sampler2D material_emission;
@@ -61,19 +62,19 @@ float invSqureAttenuation(float distance, float radius) {
 #ifdef TEXTURE_MATERIAL
 // tangent-normals hax, bad performance
 vec3 getNormalFromMap() {
-    vec3 tangentNormal = texture(material_normal, fs_in.texCoord).xyz * 2.0 - 1.0;
+  vec3 tangentNormal = texture(material_normal, fs_in.texCoord).xyz * 2.0 - 1.0;
 
-    vec3 Q1  = dFdx(fs_in.worldPos);
-    vec3 Q2  = dFdy(fs_in.worldPos);
-    vec2 st1 = dFdx(fs_in.texCoord);
-    vec2 st2 = dFdy(fs_in.texCoord);
+  vec3 Q1 = dFdx(fs_in.worldPos);
+  vec3 Q2 = dFdy(fs_in.worldPos);
+  vec2 st1 = dFdx(fs_in.texCoord);
+  vec2 st2 = dFdy(fs_in.texCoord);
 
-    vec3 N   = normalize(fs_in.normal);
-    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
-    vec3 B  = -normalize(cross(N, T));
-    mat3 TBN = mat3(T, B, N);
+  vec3 N = normalize(fs_in.normal);
+  vec3 T = normalize(Q1 * st2.t - Q2 * st1.t);
+  vec3 B = -normalize(cross(N, T));
+  mat3 TBN = mat3(T, B, N);
 
-    return normalize(TBN * tangentNormal);
+  return normalize(TBN * tangentNormal);
 }
 #endif
 
@@ -156,12 +157,11 @@ void main() {
   vec3 irradiance = texture(irradianceMap, N).rgb;
   vec3 diffuse = kD * (irradiance * albedo);
   const float MAX_REFLECTION_LOD = 4.0f; // max mipLevel for prefilteredMap
-  vec3 prefilteredColor =
-      textureLod(prefilteredMap, R, roughness * MAX_REFLECTION_LOD).rgb;
+  vec3 prefilteredColor = textureLod(prefilteredMap, R, roughness * MAX_REFLECTION_LOD).rgb;
   vec2 envBRDF = texture(brdfIntegrationMap, vec2(NoV, roughness)).rg;
   vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
   vec3 ambient = (diffuse + specular) * ao;
   // combine direct and indirect language
-  vec3 color = ambient + emission + Lo;
+  vec3 color = ambient + Lo + emission;
   fragColor = vec4(color, 1.0f);
 }

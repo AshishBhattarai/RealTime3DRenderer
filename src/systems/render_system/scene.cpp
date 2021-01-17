@@ -267,13 +267,13 @@ SceneLoader::ProcessMaterialRet SceneLoader::processMaterial(const tinygltf::Mat
     /* Packed metallicRoughness, R - Metallic G - Roughness*/
     metallicRoughness = Texture(processTexture(metallicRoughnessImage), GL_TEXTURE_2D);
   } else
-    metallicRoughness = renderDefault.createBlackTexture();
+    metallicRoughness = renderDefault.createWhiteTexture();
   if (occlusionTextureIndex != -1) {
     const tinygltf::Image &occlusionImage =
         modelData.images[modelData.textures[occlusionTextureIndex].source];
     ao = Texture(processTexture(occlusionImage), GL_TEXTURE_2D);
   } else
-    ao = renderDefault.createBlackTexture();
+    ao = renderDefault.createWhiteTexture();
 
   if (!hasTexCoord)
     return {materialData.name, std::unique_ptr<BaseMaterial>(flatMaterial.release())};
@@ -314,7 +314,7 @@ GLuint SceneLoader::processTexture(const tinygltf::Image &image) {
   else if (image.bits == 16)
     type = GL_UNSIGNED_SHORT;
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0, format, type,
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, image.width, image.height, 0, format, type,
                &image.image.at(0));
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);

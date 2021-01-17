@@ -45,6 +45,7 @@ App::App(int, char **)
   // load skybox
   Image skybox;
   Loaders::loadImage(skybox, "resources/skybox/14-Hamarikyu_Bridge_B.hdr", true);
+
   renderSystem->setSkyBox(&skybox);
 
   // load model
@@ -56,7 +57,7 @@ App::App(int, char **)
   input.addKeyCallback(Input::Key::ESCAPE, [&display = display](const Input::KeyEvent &event) {
     if (event.action == Input::Action::PRESS) {
       DEBUG_SLOG("KEY PRESSED: ", toUnderlying<Input::Key>(event.key));
-      display.setShouldClose(true);
+      // display.setShouldClose(true);
     }
   });
   input.addKeyCallback(Input::Key::Q, [&input = input](const Input::KeyEvent &event) {
@@ -222,11 +223,11 @@ void App::runRenderLoop(std::string_view renderOutput) {
     appUi.show();
 
     // rotate light
-    lightPositions[0] = glm::vec3(10 * cos(display.getTime()), 10, 10 * sin(display.getTime()));
-    lightPositions[1] =
-        glm::vec3(16 * sin(display.getTime()), 10, 16 * cos(display.getTime()) - 10);
-    testLight1.getTransform().position(lightPositions[0]);
-    testLight2.getTransform().position(lightPositions[1]);
+    // lightPositions[0] = glm::vec3(10 * cos(display.getTime()), 10, 10 * sin(display.getTime()));
+    // lightPositions[1] =
+    //    glm::vec3(16 * sin(display.getTime()), 10, 16 * cos(display.getTime()) - 10);
+    // testLight1.getTransform().position(lightPositions[0]);
+    // testLight2.getTransform().position(lightPositions[1]);
 
     // calculate FPS
     if (ct - ltf >= 1) {

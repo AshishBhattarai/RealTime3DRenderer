@@ -168,7 +168,7 @@ void GuiManager::newFrame(float dt, Input &input, Display &display) {
   io.DeltaTime = dt;
   ImGui::NewFrame();
   showDockSpace();
-  ImGui::ShowDemoWindow();
+  // ImGui::ShowDemoWindow();
 }
 }; // namespace app
 
