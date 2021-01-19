@@ -5,6 +5,7 @@
 #include "components/transform.h"
 #include "ecs/default_events.h"
 #include "ecs/event_manager.h"
+#include "systems/render_system/render_system.h"
 #include "types.h"
 #include <array>
 #include <map>
@@ -15,6 +16,16 @@
 // TODO: Split this into multiple class ??
 struct ImGuiIO;
 namespace app {
+
+struct GPUMeshMetaData {
+  const MeshId meshId;
+  const std::string meshName;
+  const uint numPrimitive;
+  const bool hasTexCoords;
+  const std::map<PrimitiveId, MaterialId> primIdToMatId;
+  const std::map<MaterialId, std::string> matIdToNameMap;
+};
+
 class AppUi : public ecs::Receiver<event::EntityChanged> {
 public:
   struct Texture {
@@ -44,6 +55,7 @@ private:
   ImGuiIO &io;
   std::array<float, HISTORY_SIZE> dtHistory;
   std::array<float, HISTORY_SIZE> fpsHistory;
+  std::map<MeshId, GPUMeshMetaData> loadedModels;
 
   /* Gizmo mode */
   enum class GizmoMode { TRANSLATION, ROTATION, SCALE };
@@ -127,6 +139,7 @@ public:
   void setSpecularConvMap(uint id, uint target);
   void setBrdfLUT(uint id, uint target);
   void setCoordinateSpaceState(const CoordinateSpaceState &state);
+  void addLoadedMeshes(const render_system::ModelRegisterReturn &data);
 
   /* Receive Events */
   void receive(const event::EntityChanged &event);

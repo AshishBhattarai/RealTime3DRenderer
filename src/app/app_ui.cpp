@@ -634,10 +634,11 @@ AppUi::EditorState AppUi::getEditorState() const { return editorState; }
 AppUi::Texture AppUi::createTexture(uint id, uint target) {
   int w, h;
   GLenum GlTarget = (GLenum)target;
-  glBindTexture(GlTarget, id);
+  if (target == (uint)GL_TEXTURE_CUBE_MAP) GlTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+  glBindTexture(target, id);
   glGetTexLevelParameteriv(GlTarget, 0, GL_TEXTURE_WIDTH, &w);
   glGetTexLevelParameteriv(GlTarget, 0, GL_TEXTURE_HEIGHT, &h);
-  glBindTexture(GlTarget, 0);
+  glBindTexture(target, 0);
   return {id, w, h, target};
 }
 
@@ -664,6 +665,15 @@ void AppUi::setBrdfLUT(uint id, uint target) { pbrTextures.brdfLUT = createTextu
 
 void AppUi::setCoordinateSpaceState(const CoordinateSpaceState &state) {
   coordinateSpaceState = state;
+}
+
+void AppUi::addLoadedMeshes(const render_system::ModelRegisterReturn &data) {
+  for (int i = 0; i < data.meshIds.size(); ++i) {
+    loadedModels.emplace(data.meshIds[i],
+                         GPUMeshMetaData{data.meshIds[i], data.meshNames[i], data.numPrimitives[i],
+                                         data.hasTexCoords[i], data.primIdToMatId[i],
+                                         data.matIdToNameMap[i]});
+  }
 }
 
 /* Receive Events */

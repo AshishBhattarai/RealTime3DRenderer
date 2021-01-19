@@ -53,6 +53,19 @@ App::App(int, char **)
   Loaders::loadModel(model, "resources/meshes/sphere.gltf");
   tinygltf::Model helmet;
   Loaders::loadModel(helmet, "resources/meshes/DamagedHelmet.gltf");
+  tinygltf::Model lantern;
+  Loaders::loadModel(lantern, "resources/meshes/lantern.gltf");
+  tinygltf::Model flightHelmet;
+  Loaders::loadModel(flightHelmet, "resources/meshes/FlightHelmet.gltf");
+
+  ModelRegisterReturn helmetModel = renderSystem->registerGltfModel(helmet);
+  ModelRegisterReturn flightHelmetModel = renderSystem->registerGltfModel(flightHelmet);
+  ModelRegisterReturn lanternModel = renderSystem->registerGltfModel(lantern);
+
+  appUi.addLoadedMeshes(helmetModel);
+  appUi.addLoadedMeshes(helmetModel);
+  appUi.addLoadedMeshes(lanternModel);
+  appUi.addLoadedMeshes(flightHelmetModel);
 
   input.addKeyCallback(Input::Key::ESCAPE, [&display = display](const Input::KeyEvent &event) {
     if (event.action == Input::Action::PRESS) {
@@ -97,7 +110,6 @@ App::App(int, char **)
       worldObject.addComponent<component::Model>(model);
     }
   }
-  ModelRegisterReturn helmetModel = renderSystem->registerGltfModel(helmet);
   world_system::WorldObject &helmetObject = worldSystem->createWorldObject(
       component::Transform(glm::vec3(0.0f, height, -8.0f), glm::vec3(90.0f, 0.0f, 0.0f)));
   helmetObject.addComponent<component::Model>(
