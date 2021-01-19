@@ -232,7 +232,7 @@ SceneLoader::ProcessMaterialRet SceneLoader::processMaterial(const tinygltf::Mat
   if (baseColorTextureIndex != -1) {
     const tinygltf::Image &baseColorImage =
         modelData.images[modelData.textures[baseColorTextureIndex].source];
-    albedo = Texture(processTexture(baseColorImage), GL_TEXTURE_2D);
+    albedo = Texture(processTexture(baseColorImage, true), GL_TEXTURE_2D);
   } else {
     const auto albedoF = glm::vec4(pbrInfo.baseColorFactor[0], pbrInfo.baseColorFactor[1],
                                    pbrInfo.baseColorFactor[2], pbrInfo.baseColorFactor[3]);
@@ -290,7 +290,7 @@ SceneLoader::ProcessMaterialRet SceneLoader::processMaterial(const tinygltf::Mat
 /**
  * Using separate texture loader (not using Texture class) for model loader makes things simple??
  */
-GLuint SceneLoader::processTexture(const tinygltf::Image &image) {
+GLuint SceneLoader::processTexture(const tinygltf::Image &image, bool srgb) {
   GLuint texId;
   glGenTextures(1, &texId);
   glBindTexture(GL_TEXTURE_2D, texId);
@@ -308,13 +308,16 @@ GLuint SceneLoader::processTexture(const tinygltf::Image &image) {
   else if (image.component == 3)
     format = GL_RGB;
 
+  GLenum internalFormat = GL_RGBA;
+  if (srgb) internalFormat = GL_SRGB_ALPHA;
+
   GLenum type = GL_UNSIGNED_BYTE;
   if (image.bits == 9)
     type = GL_RGB9_E5;
   else if (image.bits == 16)
     type = GL_UNSIGNED_SHORT;
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, image.width, image.height, 0, format, type,
+  glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.width, image.height, 0, format, type,
                &image.image.at(0));
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);

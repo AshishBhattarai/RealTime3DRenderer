@@ -151,15 +151,15 @@ void main() {
    * Indirect lighting with IBL.
    * Using an EnvMap has a source of surrounding light (diffuse + specular).
    */
-  vec3 kS = fresnelSchlickRoughness(clamp(dot(V, N), 0.0f, 1.0f), F0, roughness);
-  vec3 kD = 1.0f - kS;
+  vec3 F = fresnelSchlickRoughness(NoV, F0, roughness);
+  vec3 kD = 1.0f - F;
   kD *= 1.0f - metallic;
   vec3 irradiance = texture(irradianceMap, N).rgb;
-  vec3 diffuse = kD * (irradiance * albedo);
+  vec3 diffuse = kD * irradiance * albedo;
   const float MAX_REFLECTION_LOD = 4.0f; // max mipLevel for prefilteredMap
   vec3 prefilteredColor = textureLod(prefilteredMap, R, roughness * MAX_REFLECTION_LOD).rgb;
   vec2 envBRDF = texture(brdfIntegrationMap, vec2(NoV, roughness)).rg;
-  vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
+  vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
   vec3 ambient = (diffuse + specular) * ao;
   // combine direct and indirect language
   vec3 color = ambient + Lo + emission;

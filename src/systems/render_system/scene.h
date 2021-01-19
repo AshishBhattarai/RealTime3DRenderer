@@ -64,13 +64,12 @@ private:
   static MeshId loadedMeshCount;
   static MaterialId loadedMaterialCount;
 
-  ProcessMeshRet processMesh(const std::map<int, GLuint> &vbos,
-                             const tinygltf::Mesh &meshData,
+  ProcessMeshRet processMesh(const std::map<int, GLuint> &vbos, const tinygltf::Mesh &meshData,
                              const tinygltf::Model &modelData);
 
   ProcessMaterialRet processMaterial(const tinygltf::Material &materialData,
                                      const tinygltf::Model &modelData, bool hasTexCoords);
-  GLuint processTexture(const tinygltf::Image &image);
+  GLuint processTexture(const tinygltf::Image &image, bool srgb = false);
 
 public:
   Scene loadScene(tinygltf::Model &modelData);
