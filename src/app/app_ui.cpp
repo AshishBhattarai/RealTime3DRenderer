@@ -352,33 +352,133 @@ void AppUi::showGridPlaneSettings() {
   ImGui::Checkbox("ShowPlane##1GPC", &editorState.gridPlaneState.showPlane);
 }
 
+void AppUi::showLoadedMeshList() {
+  // current width
+  ImVec2 size = ImGui::GetWindowSize();
+  // begin entity list window
+  static int selected = 1;
+  if (ImGui::BeginChild("Meshes", ImVec2(0, size.y / 2), true,
+                        ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar)) {
+    if (ImGui::BeginMenuBar()) {
+      ImGui::Text("Meshes");
+      ImGui::EndMenuBar();
+    }
+    ImGui::Columns(2, "Meshes");
+    ImGui::Separator();
+    ImGui::Text("ID");
+    ImGui::NextColumn();
+    ImGui::Text("Name");
+    ImGui::NextColumn();
+    ImGui::Separator();
+    std::vector<std::vector<std::string>> data;
+    for (const auto &mesh : loadedMeshes) {
+      data.emplace_back(std::vector<std::string>{std::to_string(mesh.meshId), mesh.meshName});
+    }
+    childSelectableColumn(data, selected);
+    ImGui::Columns(1);
+    ImGui::Separator();
+  }
+  ImGui::EndChild();
+  if (selected > -1) {
+    if (ImGui::BeginChild("MeshProperties", ImVec2(0, size.y / 2), true,
+                          ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar)) {
+      if (ImGui::BeginMenuBar()) {
+        ImGui::Text("Properties");
+        ImGui::EndMenuBar();
+      }
+      const auto &mesh = loadedMeshes[selected];
+      ImGui::Text("Name:       ");
+      ImGui::SameLine();
+      ImGui::Text(mesh.meshName.c_str());
+      ImGui::Text("Textured:   ");
+      ImGui::SameLine();
+      ImGui::Text(std::to_string(mesh.hasTexCoords).c_str());
+      ImGui::Text("Primitives: ");
+      ImGui::SameLine();
+      ImGui::Text(std::to_string(mesh.numPrimitive).c_str());
+
+      // materialId to name table
+      int selectedM = -1;
+      ImGui::NewLine();
+      ImGui::Text("Materials: ");
+      ImGui::Columns(2, "Materials");
+      ImGui::Separator();
+      ImGui::Text("ID");
+      ImGui::NextColumn();
+      ImGui::Text("Name");
+      ImGui::NextColumn();
+      ImGui::Separator();
+      {
+        std::vector<std::vector<std::string>> data;
+        for (const auto &mat : mesh.matIdToNameMap) {
+          data.emplace_back(std::vector<std::string>{std::to_string(mat.first), mat.second});
+        }
+        childSelectableColumn(data, selectedM);
+      }
+      ImGui::Columns(1);
+      ImGui::Separator();
+
+      // primitiveId to matId
+      ImGui::NewLine();
+      ImGui::Text("Primitives: ");
+      ImGui::Columns(2, "Primitives");
+      ImGui::Separator();
+      ImGui::Text("ID");
+      ImGui::NextColumn();
+      ImGui::Text("Material");
+      ImGui::NextColumn();
+      ImGui::Separator();
+      {
+        std::vector<std::vector<std::string>> data;
+        for (const auto &prim : mesh.primIdToMatId) {
+          data.emplace_back(
+              std::vector<std::string>{std::to_string(prim.first), std::to_string(prim.second)});
+        }
+        childSelectableColumn(data, selectedM);
+      }
+      ImGui::Columns(1);
+      ImGui::Separator();
+    }
+    ImGui::EndChild();
+  }
+}
+
 void AppUi::showRenderSystemWindow(bool *pclose) {
   if (ImGui::Begin("Render System", pclose, globalWindowsFlags)) {
-    ImGui::AlignTextToFramePadding();
-    ImGui::Text("Renderer");
-    if (ImGui::CollapsingHeader("PBR")) {
-      if (ImGui::TreeNode("PBR Indirect Lighting Maps")) {
-        static int envMapFace = 0;
-        static int envMapLod = 0;
-        childImageView("Environment Map", pbrTextures.envMap, &envMapFace, &envMapLod);
-        static int diffuseConvFace = 0;
-        static int diffuseConvLod = 0;
-        childImageView("Diffuse Convolution Map", pbrTextures.diffuseConvMap, &diffuseConvFace,
-                       &diffuseConvLod);
-        static int specularConvFace = 0;
-        static int specularConvLod = 0;
-        childImageView("Specular Convolution Map", pbrTextures.specularConvMap, &specularConvFace,
-                       &specularConvLod);
-        childImageView("BRDF LUT Map", pbrTextures.brdfLUT, nullptr, nullptr);
-        ImGui::TreePop();
+    ImGuiTabBarFlags tabBarFlags = ImGuiTabBarFlags_None;
+    if (ImGui::BeginTabBar("RenderSystemTabBar", tabBarFlags)) {
+      if (ImGui::BeginTabItem("Renderer")) {
+        if (ImGui::CollapsingHeader("PBR")) {
+          if (ImGui::TreeNode("PBR Indirect Lighting Maps")) {
+            static int envMapFace = 0;
+            static int envMapLod = 0;
+            childImageView("Environment Map", pbrTextures.envMap, &envMapFace, &envMapLod);
+            static int diffuseConvFace = 0;
+            static int diffuseConvLod = 0;
+            childImageView("Diffuse Convolution Map", pbrTextures.diffuseConvMap, &diffuseConvFace,
+                           &diffuseConvLod);
+            static int specularConvFace = 0;
+            static int specularConvLod = 0;
+            childImageView("Specular Convolution Map", pbrTextures.specularConvMap,
+                           &specularConvFace, &specularConvLod);
+            childImageView("BRDF LUT Map", pbrTextures.brdfLUT, nullptr, nullptr);
+            ImGui::TreePop();
+          }
+        }
+        if (ImGui::CollapsingHeader("PostProcess")) {
+          static bool check = false;
+          if (ImGui::TreeNode("Placeholder")) {
+            ImGui::Checkbox("Enable", &check);
+            ImGui::TreePop();
+          }
+        }
+        ImGui::EndTabItem();
       }
-    }
-    if (ImGui::CollapsingHeader("PostProcess")) {
-      static bool check = false;
-      if (ImGui::TreeNode("Placeholder")) {
-        ImGui::Checkbox("Enable", &check);
-        ImGui::TreePop();
+      if (ImGui::BeginTabItem("GPU Data")) {
+        showLoadedMeshList();
+        ImGui::EndTabItem();
       }
+      ImGui::EndTabBar();
     }
   }
   ImGui::End();
@@ -669,10 +769,9 @@ void AppUi::setCoordinateSpaceState(const CoordinateSpaceState &state) {
 
 void AppUi::addLoadedMeshes(const render_system::ModelRegisterReturn &data) {
   for (int i = 0; i < data.meshIds.size(); ++i) {
-    loadedModels.emplace(data.meshIds[i],
-                         GPUMeshMetaData{data.meshIds[i], data.meshNames[i], data.numPrimitives[i],
-                                         data.hasTexCoords[i], data.primIdToMatId[i],
-                                         data.matIdToNameMap[i]});
+    loadedMeshes.emplace_back(GPUMeshMetaData{data.meshIds[i], data.meshNames[i],
+                                              data.numPrimitives[i], data.hasTexCoords[i],
+                                              data.primIdToMatId[i], data.matIdToNameMap[i]});
   }
 }
 

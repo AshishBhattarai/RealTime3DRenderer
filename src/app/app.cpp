@@ -63,7 +63,6 @@ App::App(int, char **)
   ModelRegisterReturn lanternModel = renderSystem->registerGltfModel(lantern);
 
   appUi.addLoadedMeshes(helmetModel);
-  appUi.addLoadedMeshes(helmetModel);
   appUi.addLoadedMeshes(lanternModel);
   appUi.addLoadedMeshes(flightHelmetModel);
 

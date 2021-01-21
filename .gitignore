@@ -76,3 +76,4 @@ build.sh
 *.exe
 bin/*
 build/*
+.vimspector.json

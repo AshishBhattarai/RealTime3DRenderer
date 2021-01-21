@@ -55,7 +55,7 @@ private:
   ImGuiIO &io;
   std::array<float, HISTORY_SIZE> dtHistory;
   std::array<float, HISTORY_SIZE> fpsHistory;
-  std::map<MeshId, GPUMeshMetaData> loadedModels;
+  std::vector<GPUMeshMetaData> loadedMeshes;
 
   /* Gizmo mode */
   enum class GizmoMode { TRANSLATION, ROTATION, SCALE };
@@ -109,6 +109,8 @@ private:
 
   /* Editor Settings */
   void showGridPlaneSettings();
+
+  void showLoadedMeshList();
 
   /* dockable Windows */
   void showRenderSystemWindow(bool *pclose);

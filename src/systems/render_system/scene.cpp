@@ -153,13 +153,17 @@ SceneLoader::ProcessMeshRet SceneLoader::processMesh(const std::map<int, GLuint>
       materials.emplace_back(std::unique_ptr<BaseMaterial>(processMatRet.material.release()));
       materialNames.emplace_back(processMatRet.name);
       // primitive to material map
-      primIdToMatId[vao] = materials.back()->id;
+      auto matId = materials.back()->id;
+      primIdToMatId[vao] = matId;
+      matIdToName[matId] = processMatRet.name;
     } else {
       // if material for a primitive doesn't exists set default mat
       if (hasTexCoords) {
         primIdToMatId[vao] = DEFAULT_MATERIAL_ID;
+        matIdToName[DEFAULT_MATERIAL_ID] = "Default Material Textured";
       } else {
         primIdToMatId[vao] = DEFAULT_FLAT_MATERIAL_ID;
+        matIdToName[DEFAULT_FLAT_MATERIAL_ID] = "Default Material";
       }
     }
 
