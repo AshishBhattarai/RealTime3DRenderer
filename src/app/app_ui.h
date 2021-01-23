@@ -18,12 +18,12 @@ struct ImGuiIO;
 namespace app {
 
 struct GPUMeshMetaData {
-  const MeshId meshId;
-  const std::string meshName;
-  const uint numPrimitive;
-  const bool hasTexCoords;
-  const std::map<PrimitiveId, MaterialId> primIdToMatId;
-  const std::map<MaterialId, std::string> matIdToNameMap;
+  MeshId meshId{};
+  std::string meshName{};
+  uint numPrimitive{};
+  bool hasTexCoords{};
+  std::map<PrimitiveId, MaterialId> primIdToMatId{};
+  std::map<MaterialId, std::string> matIdToNameMap{};
 };
 
 class AppUi : public ecs::Receiver<event::EntityChanged> {
@@ -141,7 +141,7 @@ public:
   void setSpecularConvMap(uint id, uint target);
   void setBrdfLUT(uint id, uint target);
   void setCoordinateSpaceState(const CoordinateSpaceState &state);
-  void addLoadedMeshes(const render_system::ModelRegisterReturn &data);
+  std::vector<GPUMeshMetaData> addLoadedMeshes(const render_system::ModelRegisterReturn &data);
 
   /* Receive Events */
   void receive(const event::EntityChanged &event);

@@ -9,16 +9,21 @@ bool WorldSystem::deleteWorldObject(WorldObjectId id) {
   int objectId = id - 1;
   if (isWorldObject(id)) {
     nullIndices.insert(objectId);
-    ecs::Coordinator::getInstance().destoryEntity(
-        worldObjects[objectId]->entityId);
+    ecs::Coordinator::getInstance().destoryEntity(worldObjects[objectId]->entityId);
     worldObjects[objectId].reset(nullptr);
     return true;
   }
   return false;
 }
 
+void WorldSystem::clearWorld() {
+  for (auto &worldObject : worldObjects) {
+    if (worldObject != nullptr) deleteWorldObject(worldObject->getId());
+  }
+}
+
 WorldSystem::~WorldSystem() {
-  worldObjects.clear();
+  clearWorld();
   nullIndices.clear();
 }
 } // namespace world_system

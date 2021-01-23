@@ -33,23 +33,18 @@ public:
   WorldObject();
   virtual ~WorldObject();
 
-  component::Transform &getTransform() {
-    return getComponent<component::Transform>();
-  }
+  component::Transform &getTransform() { return getComponent<component::Transform>(); }
   WorldObjectId getId() const { return id; }
   EntityId getEntityId() const { return entityId; }
 
   template <typename T> void addComponent(const T &component) {
-    assert(id && entityId &&
-           "Must be constructed with WorldSystem before use.");
+    assert(id && entityId && "Must be constructed with WorldSystem before use.");
     ecs::Coordinator::getInstance().addComponent<T>(entityId, component);
   }
 
-  template <typename T, typename... Args> void addComponent(Args &&... args) {
-    assert(id && entityId &&
-           "Must be constructed with WorldSystem before use.");
-    ecs::Coordinator::getInstance().addComponent<T>(
-        entityId, std::forward<Args>(args)...);
+  template <typename T, typename... Args> void addComponent(Args &&...args) {
+    assert(id && entityId && "Must be constructed with WorldSystem before use.");
+    ecs::Coordinator::getInstance().addComponent<T>(entityId, std::forward<Args>(args)...);
   }
 
   // Might not need this
@@ -58,8 +53,7 @@ public:
   //  }
 
   template <typename T> T &getComponent() {
-    assert(id && entityId &&
-           "Must be constructed with WorldSystem before use.");
+    assert(id && entityId && "Must be constructed with WorldSystem before use.");
     return ecs::Coordinator::getInstance().getComponent<T>(entityId);
   }
 };

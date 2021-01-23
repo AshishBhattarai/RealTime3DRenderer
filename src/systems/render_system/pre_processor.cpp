@@ -87,7 +87,7 @@ Texture PreProcessor::renderToCubeMap(int width, int height, uint maxMipLevels, 
 }
 
 Texture PreProcessor::equirectangularToCubemap(const Texture &equirectangular) {
-  return renderToCubeMap(512, 512, 1, true, &equirectangularShader,
+  return renderToCubeMap(1024, 1024, 1, true, &equirectangularShader,
                          [&shader = equirectangularShader, &texture = equirectangular](uint) {
                            /* pre draw call */
                            shader.loadTexture(texture);
@@ -95,7 +95,7 @@ Texture PreProcessor::equirectangularToCubemap(const Texture &equirectangular) {
 }
 
 Texture PreProcessor::generateIrradianceMap(const Texture &envmap) {
-  return renderToCubeMap(32, 32, 1, false, &iblDiffuseConvolutionShader,
+  return renderToCubeMap(64, 64, 1, false, &iblDiffuseConvolutionShader,
                          [&shader = iblDiffuseConvolutionShader, &texture = envmap](uint) {
                            /* pre draw call */
                            shader.loadTexture(texture);
@@ -106,7 +106,7 @@ Texture PreProcessor::generatePreFilteredMap(const Texture &envmap) {
   uint prevMipLevel = std::numeric_limits<uint>::max();
   constexpr uint maxMipLevels = 5;
   return renderToCubeMap(
-      128, 128, maxMipLevels, false, &iblSpecularConvolutionShader,
+      256, 256, maxMipLevels, false, &iblSpecularConvolutionShader,
       [&shader = iblSpecularConvolutionShader, &texture = envmap, &prevMipLevel](uint mipLevel) {
         /* pre draw call */
         shader.loadTexture(texture);

@@ -14,8 +14,7 @@ namespace world_system {
  */
 class WorldSystem {
 private:
-  std::unordered_set<size_t>
-      nullIndices; // indices with null data on worldObjects;
+  std::unordered_set<size_t> nullIndices; // indices with null data on worldObjects;
   std::vector<std::unique_ptr<WorldObject>> worldObjects;
 
 public:
@@ -28,9 +27,8 @@ public:
    * id - 1, since id starts from 1 and array index from 0
    */
   template <typename T = WorldObject, typename... Args>
-  T &createWorldObject(const component::Transform &transform, Args &&... args) {
-    std::unique_ptr<WorldObject> worldObject =
-        std::make_unique<T>(std::forward<Args>(args)...);
+  T &createWorldObject(const component::Transform &transform, Args &&...args) {
+    std::unique_ptr<WorldObject> worldObject = std::make_unique<T>(std::forward<Args>(args)...);
     size_t worldId = worldObjects.size();
     if (!nullIndices.empty()) {
       auto it = nullIndices.begin();
@@ -67,8 +65,7 @@ public:
    * @param id
    * @return returns reference to the worldObject.
    */
-  template <typename T = WorldObject>
-  T &getWorldObject(WorldObjectId id) const {
+  template <typename T = WorldObject> T &getWorldObject(WorldObjectId id) const {
     assert(id > 0 && id <= worldObjects.size());
     return static_cast<T &>(*worldObjects[id - 1]);
   }
@@ -88,14 +85,13 @@ public:
    */
   void update(float dt) {
     for (const auto &worldObject : worldObjects) {
-      if (worldObject)
-        worldObject->onUpdate->emit(dt);
+      if (worldObject) worldObject->onUpdate->emit(dt);
     }
   }
 
-  uint numValidWorldObjects() const {
-    return worldObjects.size() - nullIndices.size();
-  }
+  uint numValidWorldObjects() const { return worldObjects.size() - nullIndices.size(); }
+
+  void clearWorld();
 };
 
 } // namespace world_system

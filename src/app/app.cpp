@@ -35,7 +35,7 @@ App::App(int, char **)
       appUi(), coordinator(ecs::Coordinator::getInstance()),
       worldSystem(new world_system::WorldSystem()),
       renderSystem(createRenderSystem(renderWidth, renderHeight)),
-      camera(new Camera(glm::vec3(0.0f, 10.0f, 0.0f))) {
+      camera(new Camera(glm::vec3(0.0f, 10.0f, 0.0f))), testLight1(nullptr), testLight2(nullptr) {
   DEBUG_SLOG("App constructed.");
   //  input.setCursorStatus(INPUT_CURSOR_DISABLED);
 
@@ -44,7 +44,7 @@ App::App(int, char **)
 
   // load skybox
   Image skybox;
-  Loaders::loadImage(skybox, "resources/skybox/14-Hamarikyu_Bridge_B.hdr", true);
+  Loaders::loadImage(skybox, "resources/skybox/indoor.hdr", true);
 
   renderSystem->setSkyBox(&skybox);
 
@@ -57,19 +57,43 @@ App::App(int, char **)
   Loaders::loadModel(lantern, "resources/meshes/lantern.gltf");
   tinygltf::Model flightHelmet;
   Loaders::loadModel(flightHelmet, "resources/meshes/FlightHelmet.gltf");
+  tinygltf::Model gun;
+  Loaders::loadModel(gun, "resources/meshes/gun.gltf");
+  tinygltf::Model sniper;
+  Loaders::loadModel(sniper, "resources/meshes/sniper.gltf");
 
   ModelRegisterReturn helmetModel = renderSystem->registerGltfModel(helmet);
   ModelRegisterReturn flightHelmetModel = renderSystem->registerGltfModel(flightHelmet);
   ModelRegisterReturn lanternModel = renderSystem->registerGltfModel(lantern);
+  ModelRegisterReturn gunModel = renderSystem->registerGltfModel(gun);
+  ModelRegisterReturn sniperModel = renderSystem->registerGltfModel(sniper);
 
-  appUi.addLoadedMeshes(helmetModel);
-  appUi.addLoadedMeshes(lanternModel);
-  appUi.addLoadedMeshes(flightHelmetModel);
+  nameToMeshes.emplace("damaged_helmet", appUi.addLoadedMeshes(helmetModel).front());
+  nameToMeshes.emplace("lantern_model", appUi.addLoadedMeshes(lanternModel).front());
+  nameToMeshes.emplace("flight_helment", appUi.addLoadedMeshes(flightHelmetModel).front());
+  nameToMeshes.emplace("gun_model", appUi.addLoadedMeshes(gunModel).front());
+  nameToMeshes.emplace("sniper_model", appUi.addLoadedMeshes(sniperModel).front());
 
-  input.addKeyCallback(Input::Key::ESCAPE, [&display = display](const Input::KeyEvent &event) {
+  input.addKeyCallback(Input::Key::ESCAPE, [this, state = 0](const Input::KeyEvent &event) mutable {
     if (event.action == Input::Action::PRESS) {
       DEBUG_SLOG("KEY PRESSED: ", toUnderlying<Input::Key>(event.key));
-      // display.setShouldClose(true);
+      switch (state) {
+      case 0:
+        renderSphere();
+        ++state;
+        break;
+      case 1:
+        renderHelments();
+        ++state;
+        break;
+      case 2:
+        renderLantern();
+        ++state;
+        break;
+      default:
+        worldSystem->clearWorld();
+        state = 0;
+      }
     }
   });
   input.addKeyCallback(Input::Key::Q, [&input = input](const Input::KeyEvent &event) {
@@ -83,10 +107,39 @@ App::App(int, char **)
     if (input.getCursorMode() == Input::CursorMode::DISABLED) camera->processRotation(dt.x, dt.y);
   });
 
+  GLint size;
+  glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &size);
+  std::cout << "UBO MB: " << size / 1024 << std::endl;
+  glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &size);
+  std::cout << "SSBO MB: " << size / 1024 << std::endl;
+
+  std::pair brdfLUT = renderSystem->getBrdfLUT();
+  std::pair specularConv = renderSystem->getSpecularConvMap();
+  std::pair diffuseConv = renderSystem->getDiffuseConvMap();
+  std::pair envMap = renderSystem->getEnvMap();
+
+  appUi.setBrdfLUT(brdfLUT.first, brdfLUT.second);
+  appUi.setDiffuseConvMap(diffuseConv.first, diffuseConv.second);
+  appUi.setSpecularConvMap(specularConv.first, specularConv.second);
+  appUi.setEnvMap(envMap.first, envMap.second);
+  // https://stackoverflow.com/questions/38543155/opengl-render-face-of-cube-map-to-a-quad
+
+  auto err = glGetError();
+  if (err != GL_NO_ERROR) CSLOG("OpenGL ERROR:", err);
+} // namespace app
+
+void App::renderSphere() {
+  worldSystem->clearWorld();
+  testLight1 = nullptr;
+  testLight2 = nullptr;
+
   int nrRow = 7;
   int nrCOl = 7;
   float height = 10.0f;
   float spacing = 2.5f;
+
+  tinygltf::Model model;
+  Loaders::loadModel(model, "resources/meshes/sphere.gltf");
 
   for (int i = 0; i < nrRow; ++i) {
     float metallic = i / (float)nrRow;
@@ -109,31 +162,69 @@ App::App(int, char **)
       worldObject.addComponent<component::Model>(model);
     }
   }
-  world_system::WorldObject &helmetObject = worldSystem->createWorldObject(
-      component::Transform(glm::vec3(0.0f, height, -8.0f), glm::vec3(90.0f, 0.0f, 0.0f)));
-  helmetObject.addComponent<component::Model>(
-      {helmetModel.meshIds.front(), helmetModel.primIdToMatId.front()});
+  glm::vec3 lightPositions[] = {glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(0.0f, 10.0f, 0.0f)};
+  testLight1 = &worldSystem->createWorldObject(component::Transform(lightPositions[0]));
+  testLight1->addComponent<component::Light>(
+      component::Light(glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
+  testLight2 = &worldSystem->createWorldObject(component::Transform(lightPositions[0]));
+  testLight2->addComponent<component::Light>(
+      component::Light(glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
+}
 
-  GLint size;
-  glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &size);
-  std::cout << "UBO MB: " << size / 1024 << std::endl;
-  glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &size);
-  std::cout << "SSBO MB: " << size / 1024 << std::endl;
+void App::renderHelments() {
+  worldSystem->clearWorld();
+  testLight1 = nullptr;
+  testLight2 = nullptr;
+  {
+    const auto &flightHelmetModel = nameToMeshes["flight_helment"];
+    world_system::WorldObject &helmetObject = worldSystem->createWorldObject(component::Transform(
+        glm::vec3(0.0f, 4.0f, -8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(3.0f)));
+    helmetObject.addComponent<component::Model>(
+        {flightHelmetModel.meshId, flightHelmetModel.primIdToMatId});
+  }
+  {
+    const auto &helmetModel = nameToMeshes["damaged_helmet"];
+    world_system::WorldObject &helmetObject = worldSystem->createWorldObject(
+        component::Transform(glm::vec3(4.0f, 5.0f, -8.0f), glm::vec3(90.0f, 0.0f, 0.0f)));
+    helmetObject.addComponent<component::Model>({helmetModel.meshId, helmetModel.primIdToMatId});
+  }
+  {
+    const auto &gunModel = nameToMeshes["gun_model"];
+    world_system::WorldObject &gunObject = worldSystem->createWorldObject(
+        component::Transform(glm::vec3(-4.0f, 5.0f, -8.0f), glm::vec3(94.0f, -1.0f, -90.07f)));
+    gunObject.addComponent<component::Model>({gunModel.meshId, gunModel.primIdToMatId});
+  }
+  {
+    const auto &sniperModel = nameToMeshes["sniper_model"];
+    world_system::WorldObject &sniperObject = worldSystem->createWorldObject(
+        component::Transform(glm::vec3(12.0f, 5.0f, -8.0f), glm::vec3(0.0f)));
+    sniperObject.addComponent<component::Model>({sniperModel.meshId, sniperModel.primIdToMatId});
+  }
 
-  std::pair brdfLUT = renderSystem->getBrdfLUT();
-  std::pair specularConv = renderSystem->getSpecularConvMap();
-  std::pair diffuseConv = renderSystem->getDiffuseConvMap();
-  std::pair envMap = renderSystem->getEnvMap();
+  glm::vec3 lightPositions[] = {glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f, 5.0f, 0.0f)};
+  testLight1 = &worldSystem->createWorldObject(component::Transform(lightPositions[0]));
+  testLight1->addComponent<component::Light>(
+      component::Light(glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
+  testLight2 = &worldSystem->createWorldObject(component::Transform(lightPositions[0]));
+  testLight2->addComponent<component::Light>(
+      component::Light(glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
+}
 
-  appUi.setBrdfLUT(brdfLUT.first, brdfLUT.second);
-  appUi.setDiffuseConvMap(diffuseConv.first, diffuseConv.second);
-  appUi.setSpecularConvMap(specularConv.first, specularConv.second);
-  appUi.setEnvMap(envMap.first, envMap.second);
-  // https://stackoverflow.com/questions/38543155/opengl-render-face-of-cube-map-to-a-quad
+void App::renderLantern() {
+  worldSystem->clearWorld();
+  testLight1 = nullptr;
+  testLight2 = nullptr;
 
-  auto err = glGetError();
-  if (err != GL_NO_ERROR) CSLOG("OpenGL ERROR:", err);
-} // namespace app
+  const auto &lanternModel = nameToMeshes["lantern_model"];
+  world_system::WorldObject &lanternObject = worldSystem->createWorldObject(component::Transform(
+      glm::vec3(0.0f, 6.42f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.50f)));
+  lanternObject.addComponent<component::Model>({lanternModel.meshId, lanternModel.primIdToMatId});
+
+  auto &lanternLight =
+      worldSystem->createWorldObject(component::Transform(glm::vec3(-2.94f, 8.42f, -0.07f)));
+  lanternLight.addComponent<component::Light>(
+      component::Light(glm::vec3(0.737f, 0.341f, 0.125f), 300.0f, 300.0f, LightType::POINT_LIGHT));
+}
 
 void App::processInput(float dt) {
   bool keyW = input.getKey(Input::Key::W);
@@ -178,16 +269,6 @@ void App::runRenderLoop(std::string_view renderOutput) {
   //                        renderOutput, true);
   //  assert(rtspClient.start());
 
-  glm::vec3 lightPositions[] = {glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(0.0f, 10.0f, 0.0f)};
-  world_system::WorldObject &testLight1 =
-      worldSystem->createWorldObject(component::Transform(lightPositions[0]));
-  testLight1.addComponent<component::Light>(
-      component::Light(glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
-  world_system::WorldObject &testLight2 =
-      worldSystem->createWorldObject(component::Transform(lightPositions[0]));
-  testLight2.addComponent<component::Light>(
-      component::Light(glm::vec3(1.0f, 1.0f, 1.0f), 300.0f, 100.0f, LightType::POINT_LIGHT));
-
   int envMap = 0;
   input.addKeyCallback(Input::Key::H, [&envMap, &renderSystem = renderSystem,
                                        &appUi = appUi](const Input::KeyEvent &keyEvent) {
@@ -196,18 +277,18 @@ void App::runRenderLoop(std::string_view renderOutput) {
       Image skybox;
       switch (envMap) {
       case 0:
-        Loaders::loadImage(skybox, "resources/skybox/HDR_111_Parking_Lot_2.hdr", true);
+        Loaders::loadImage(skybox, "resources/skybox/outdoor.hdr", true);
         break;
       case 1:
-        Loaders::loadImage(skybox, "resources/skybox/Factory_Catwalk_2k.hdr", true);
+        Loaders::loadImage(skybox, "resources/skybox/night.hdr", true);
         break;
 
       case 2:
-        Loaders::loadImage(skybox, "resources/skybox/kloppenheim_02_2k.hdr", true);
+        Loaders::loadImage(skybox, "resources/skybox/urban.hdr", true);
         break;
 
       default:
-        Loaders::loadImage(skybox, "resources/skybox/14-Hamarikyu_Bridge_B.hdr", true);
+        Loaders::loadImage(skybox, "resources/skybox/indoor.hdr", true);
         envMap = -1;
       }
       envMap++;
@@ -234,11 +315,18 @@ void App::runRenderLoop(std::string_view renderOutput) {
     appUi.show();
 
     // rotate light
-    // lightPositions[0] = glm::vec3(10 * cos(display.getTime()), 10, 10 * sin(display.getTime()));
-    // lightPositions[1] =
-    //    glm::vec3(16 * sin(display.getTime()), 10, 16 * cos(display.getTime()) - 10);
-    // testLight1.getTransform().position(lightPositions[0]);
-    // testLight2.getTransform().position(lightPositions[1]);
+
+    if (testLight1 != nullptr) {
+      glm::vec3 lightPosition =
+          glm::vec3(10 * cos(display.getTime()), 10, 10 * sin(display.getTime()));
+      testLight1->getTransform().position(lightPosition);
+    }
+
+    if (testLight2 != nullptr) {
+      glm::vec3 lightPosition =
+          glm::vec3(16 * sin(display.getTime()), 10, 16 * cos(display.getTime()) - 10);
+      testLight2->getTransform().position(lightPosition);
+    }
 
     // calculate FPS
     if (ct - ltf >= 1) {

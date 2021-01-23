@@ -13,6 +13,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <imgui/imgui.h>
+#include <iterator>
 #include <numeric>
 #include <string>
 #include <utility>
@@ -537,7 +538,16 @@ void AppUi::showEntityWinow(bool *pclose) {
       ImGui::Text("Components");
       ImGui::EndMenuBar();
     }
-    if (auto it = entities.find(selected + 1); it != entities.end()) {
+    EntityId selectedEntity = -1;
+    auto entityIter = entities.begin();
+    for (auto i = 0; i < entities.size(); ++i) {
+      if (i == selected) {
+        selectedEntity = entityIter->first;
+      } else {
+        ++entityIter;
+      }
+    }
+    if (auto it = entities.find(selectedEntity); it != entities.end()) {
       EntityId id = it->first;
       auto &coordinator = ecs::Coordinator::getInstance();
       if (coordinator.hasComponent<component::Transform>(id)) {
@@ -767,12 +777,16 @@ void AppUi::setCoordinateSpaceState(const CoordinateSpaceState &state) {
   coordinateSpaceState = state;
 }
 
-void AppUi::addLoadedMeshes(const render_system::ModelRegisterReturn &data) {
+std::vector<GPUMeshMetaData>
+AppUi::addLoadedMeshes(const render_system::ModelRegisterReturn &data) {
+  std::vector<GPUMeshMetaData> newMeshes{};
   for (int i = 0; i < data.meshIds.size(); ++i) {
-    loadedMeshes.emplace_back(GPUMeshMetaData{data.meshIds[i], data.meshNames[i],
-                                              data.numPrimitives[i], data.hasTexCoords[i],
-                                              data.primIdToMatId[i], data.matIdToNameMap[i]});
+    newMeshes.emplace_back(GPUMeshMetaData{data.meshIds[i], data.meshNames[i],
+                                           data.numPrimitives[i], data.hasTexCoords[i],
+                                           data.primIdToMatId[i], data.matIdToNameMap[i]});
   }
+  loadedMeshes.insert(loadedMeshes.end(), newMeshes.begin(), newMeshes.end());
+  return newMeshes;
 }
 
 /* Receive Events */

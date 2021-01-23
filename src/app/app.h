@@ -8,6 +8,7 @@
 #include "input.h"
 #include "types.h"
 #include <asio/thread_pool.hpp>
+#include <map>
 
 namespace ecs {
 class Coordinator;
@@ -18,7 +19,8 @@ class RenderSystem;
 } // namespace render_system
 namespace world_system {
 class WorldSystem;
-}
+class WorldObject;
+} // namespace world_system
 namespace app {
 
 /**
@@ -35,6 +37,11 @@ public:
   void run();
   void runRenderLoop(std::string_view renderOutpu);
 
+  void renderSphere();
+  void renderHelments();
+  void renderLantern();
+  void renderTank();
+
 private:
   asio::thread_pool threadPool;
   CommandServer commandServer;
@@ -46,6 +53,9 @@ private:
   world_system::WorldSystem *worldSystem;
   render_system::RenderSystem *renderSystem;
   render_system::Camera *camera;
+  std::map<std::string, GPUMeshMetaData> nameToMeshes;
+  world_system::WorldObject *testLight1;
+  world_system::WorldObject *testLight2;
 
   void processInput(float dt);
   render_system::RenderSystem *createRenderSystem(int width, int height);
